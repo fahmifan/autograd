@@ -11,12 +11,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
 func init() {
-	logrus.SetReportCaller(true)
+	log.SetReportCaller(true)
 }
 
 func compile(filePath string) (outPath string, err error) {
