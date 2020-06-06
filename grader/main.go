@@ -16,6 +16,7 @@ import (
 
 func init() {
 	log.SetReportCaller(true)
+	log.SetLevel(log.DebugLevel)
 }
 
 func compile(filePath string) (outPath string, err error) {
@@ -24,9 +25,9 @@ func compile(filePath string) (outPath string, err error) {
 	cmd := exec.Command("g++", args...)
 	bt, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("compile error: ", string(bt))
-		return "", err
+		log.WithField("output", string(bt)).Error(err)
 	}
+
 	return
 }
 
@@ -53,21 +54,21 @@ func run(source, input string) (out string) {
 
 func remove(source string) {
 	if err := os.Remove(source); err != nil {
-		fmt.Println("error : ", err)
+		log.Println("error : ", err)
 	}
 }
 
 func grade(source, input, expected string) (result string) {
 	outPath, err := compile(source)
 	if err != nil {
-		fmt.Printf("grade error : %s", err.Error())
+		log.Error(err)
 		return ""
 	}
 
 	defer remove(outPath)
 	out := run(outPath, input)
 	if expected != out {
-		fmt.Printf("debug : out=%s expected=%s\n", out, expected)
+		log.Debugf("out=%s expected=%s\n", out, expected)
 		result = "NAY"
 		return
 	}
@@ -80,7 +81,7 @@ func grade(source, input, expected string) (result string) {
 func findFilesInDir(dir string) (map[string]string, error) {
 	dirs, err := ioutil.ReadDir(dir)
 	if err != nil {
-		fmt.Printf("findFilesInDir error: %s", err.Error())
+		log.Error(err)
 		return nil, err
 	}
 
@@ -133,7 +134,7 @@ func main() {
 	submissionDir := path.Join(cwd, "submission")
 	submissions, err := findFilesInDir(submissionDir)
 	if err != nil {
-		fmt.Printf("main error : %s", err.Error())
+		log.Error(err)
 		return
 	}
 
@@ -141,7 +142,7 @@ func main() {
 	inputDir := path.Join(cwd, "input")
 	inputs, err := findFilesInDir(inputDir)
 	if err != nil {
-		fmt.Printf("main error : %s", err.Error())
+		log.Error(err)
 		return
 	}
 
@@ -149,7 +150,7 @@ func main() {
 	outputDir := path.Join(cwd, "output")
 	outputs, err := findFilesInDir(outputDir)
 	if err != nil {
-		fmt.Printf("main error : %s", err.Error())
+		log.Error(err)
 		return
 	}
 
@@ -166,7 +167,7 @@ func main() {
 			}
 
 			if len(outs) != len(ins) {
-				fmt.Printf("error : unmatch input %d & ouput file %d\n", len(ins), len(outs))
+				log.Error("error : unmatch input %d & ouput file %d\n", len(ins), len(outs))
 				return
 			}
 
