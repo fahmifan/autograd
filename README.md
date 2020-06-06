@@ -1,7 +1,7 @@
 # Autograde
 
 This WIP is a autograd backend
-Autograd is a CLI that run a c++ source code and test it againts the input & ouput
+Autograd is a CLI that run a c++ source code from `submission` and test it againts the `input` & `ouput`
 
 ## How to
 
