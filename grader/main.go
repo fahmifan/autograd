@@ -69,11 +69,11 @@ func grade(source, input, expected string) (result string) {
 	out := run(outPath, input)
 	if expected != out {
 		fmt.Printf("debug : out=%s expected=%s\n", out, expected)
-		result = "WA"
+		result = "NAY"
 		return
 	}
 
-	result = "AC"
+	result = "AYE"
 
 	return
 }
