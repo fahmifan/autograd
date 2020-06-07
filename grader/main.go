@@ -21,11 +21,15 @@ func init() {
 
 func compile(filePath string) (outPath string, err error) {
 	outPath = path.Join(fmt.Sprintf("%s.bin", filePath))
-	args := strings.Split(fmt.Sprintf("-o %s %s", outPath, filePath), " ")
+	args := strings.Split(fmt.Sprintf("%s -o %s", filePath, outPath), " ")
 	cmd := exec.Command("g++", args...)
 	bt, err := cmd.CombinedOutput()
 	if err != nil {
-		log.WithField("output", string(bt)).Error(err)
+		log.WithFields(log.Fields{
+			"output":  string(bt),
+			"args":    args,
+			"outPath": outPath,
+		}).Error(err)
 	}
 
 	return
@@ -61,14 +65,13 @@ func remove(source string) {
 func grade(source, input, expected string) (result string) {
 	outPath, err := compile(source)
 	if err != nil {
-		log.Error(err)
+		log.WithField("source", source).Error(err)
 		return ""
 	}
 
 	defer remove(outPath)
 	out := run(outPath, input)
 	if expected != out {
-		log.Debugf("out=%s expected=%s\n", out, expected)
 		result = "NAY"
 		return
 	}
@@ -78,23 +81,24 @@ func grade(source, input, expected string) (result string) {
 	return
 }
 
+// findFilesInDir return map[fileName]filePath
 func findFilesInDir(dir string) (map[string]string, error) {
-	dirs, err := ioutil.ReadDir(dir)
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
-	files := make(map[string]string)
-	for _, d := range dirs {
-		if d.IsDir() {
+	mapFiles := make(map[string]string)
+	for _, f := range files {
+		if f.IsDir() {
 			continue
 		}
 
-		files[d.Name()] = path.Join(dir, d.Name())
+		mapFiles[f.Name()] = path.Join(dir, f.Name())
 	}
 
-	return files, nil
+	return mapFiles, nil
 }
 
 // read file and append each line in slices of string
@@ -108,7 +112,6 @@ func readFile(filePath string) ([]string, error) {
 	reader := bufio.NewReader(file)
 	lines := make([]string, 0)
 	for {
-		// lines
 		line, err := reader.ReadString(byte('\n'))
 		if err != nil && err != io.EOF {
 			return nil, err
@@ -124,15 +127,53 @@ func readFile(filePath string) ([]string, error) {
 	return lines, err
 }
 
+type subm struct {
+	Name   string
+	Path   string
+	Code   string
+	UserID string
+}
+
+// parse code from fileName
+func (s *subm) parseCode() {
+	if s == nil {
+		return
+	}
+
+	ss := strings.Split(s.Name, "-")
+	if len(ss) != 3 {
+		return
+	}
+
+	s.Code = ss[1]
+	s.UserID = ss[0]
+}
+
+func findSubmissionsInDir(dir string) (subs map[string][]subm, err error) {
+	var submissions map[string]string
+	submissions, err = findFilesInDir(dir)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	subs = make(map[string][]subm)
+	for fname, fpath := range submissions {
+		sub := subm{Name: fname, Path: fpath}
+		sub.parseCode()
+		subs[sub.Code] = append(subs[sub.Code], sub)
+	}
+
+	return subs, nil
+}
+
 func main() {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// read submission
-	submissionDir := path.Join(cwd, "submission")
-	submissions, err := findFilesInDir(submissionDir)
+	subs, err := findSubmissionsInDir(path.Join(cwd, "submission"))
 	if err != nil {
 		log.Error(err)
 		return
@@ -154,27 +195,37 @@ func main() {
 		return
 	}
 
-	for _, sourcePath := range submissions {
-		for k2 := range outputs {
-			outs, err := readFile(outputs[k2])
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ins, err := readFile(inputs[k2])
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if len(outs) != len(ins) {
-				log.Error("error : unmatch input %d & ouput file %d\n", len(ins), len(outs))
-				return
-			}
-
-			for i := 0; i < len(outs); i++ {
-				g := grade(sourcePath, ins[i], outs[i])
-				fmt.Println(g)
-			}
+	for testCode := range inputs {
+		outs, err := readFile(outputs[testCode])
+		if err != nil {
+			log.Fatal(err)
 		}
+
+		ins, err := readFile(inputs[testCode])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if len(outs) != len(ins) {
+			log.Error("error : unmatch input %d & ouput file %d\n", len(ins), len(outs))
+			return
+		}
+
+		if _, ok := subs[testCode]; !ok {
+			log.Debug("not found >>> ", testCode, " >>> ", subs)
+			continue
+		}
+
+		source := subs[testCode]
+		fmt.Printf("%s:\n---\n", testCode)
+		for _, src := range source {
+			fmt.Printf("%s:\n", src.UserID)
+			for i := 0; i < len(outs); i++ {
+				g := grade(src.Path, ins[i], outs[i])
+				fmt.Printf("- case %d %s\n", i+1, g)
+			}
+			fmt.Println()
+		}
+		fmt.Println()
 	}
 }
