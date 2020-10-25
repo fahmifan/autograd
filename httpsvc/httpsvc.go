@@ -28,14 +28,14 @@ func NewServer(port string, opts ...Option) *Server {
 	return s
 }
 
-func (s *Server) routes() {
-	s.echo.GET("/ping", s.handlePing)
-}
-
 // Run server
 func (s *Server) Run() {
 	s.routes()
 	s.echo.Start(":" + s.port)
+}
+
+func (s *Server) routes() {
+	s.echo.GET("/ping", s.handlePing)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
