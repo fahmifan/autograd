@@ -1,2 +1,3 @@
 .vscode
 submission/*.bin
+.env
