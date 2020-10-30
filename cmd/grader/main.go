@@ -1,6 +1,7 @@
 package main
 
 import (
+	"autograd/grader"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -168,6 +170,9 @@ func findSubmissionsInDir(dir string) (subs map[string][]subm, err error) {
 }
 
 func main() {
+	compiler := grader.NewCompiler(grader.CPPCompiler)
+	grad := grader.NewGrader(compiler)
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -181,7 +186,7 @@ func main() {
 
 	// read input
 	inputDir := path.Join(cwd, "input")
-	inputs, err := findFilesInDir(inputDir)
+	mapInputs, err := findFilesInDir(inputDir)
 	if err != nil {
 		log.Error(err)
 		return
@@ -195,19 +200,19 @@ func main() {
 		return
 	}
 
-	for testCode := range inputs {
-		outs, err := readFile(outputs[testCode])
+	for testCode := range mapInputs {
+		expecteds, err := readFile(outputs[testCode])
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		ins, err := readFile(inputs[testCode])
+		inputs, err := readFile(mapInputs[testCode])
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if len(outs) != len(ins) {
-			log.Error("error : unmatch input %d & ouput file %d\n", len(ins), len(outs))
+		if len(expecteds) != len(inputs) {
+			log.Error("error : unmatch input %d & ouput file %d\n", len(inputs), len(expecteds))
 			return
 		}
 
@@ -220,12 +225,13 @@ func main() {
 		fmt.Printf("%s:\n---\n", testCode)
 		for _, src := range source {
 			fmt.Printf("%s:\n", src.UserID)
-			for i := 0; i < len(outs); i++ {
-				g := grade(src.Path, ins[i], outs[i])
-				fmt.Printf("- case %d %s\n", i+1, g)
+			outputs, correct, err := grad.Grade(src.Path, inputs, expecteds)
+			if err != nil {
+				logrus.Error(err)
+				return
 			}
-			fmt.Println()
+
+			fmt.Printf("outputs: %v | corrects: %v\n\n", outputs, correct)
 		}
-		fmt.Println()
 	}
 }
