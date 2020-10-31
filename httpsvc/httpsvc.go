@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/usecase"
 )
 
@@ -41,6 +42,10 @@ func (s *Server) routes() {
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/users", s.handleCreateUser)
 	apiV1.POST("/users/login", s.handleLogin)
+
+	// example using auth middleware
+	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
+	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
 }
 
 func (s *Server) handlePing(c echo.Context) error {
