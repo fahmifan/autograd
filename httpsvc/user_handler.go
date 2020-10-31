@@ -7,11 +7,23 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
+	"github.com/sirupsen/logrus"
 )
 
-type createUserReq struct {
+const userInfoCtx = "userInfoCtx"
+
+type userRequest struct {
+	Name     string
 	Email    string
 	Password string
+}
+
+func (u *userRequest) toModel() *model.User {
+	return &model.User{
+		Email:    u.Email,
+		Password: u.Password,
+		Name:     u.Name,
+	}
 }
 
 type userRes struct {
@@ -42,13 +54,42 @@ func responseError(c echo.Context, err error) error {
 }
 
 func (s *Server) handleCreateUser(c echo.Context) error {
-	user := &model.User{}
-
-	c.Bind(user)
-	err := s.userUsecase.Create(c.Request().Context(), user)
+	userReq := &userRequest{}
+	err := c.Bind(userReq)
 	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	user := userReq.toModel()
+	err = s.userUsecase.Create(c.Request().Context(), user)
+	if err != nil {
+		logrus.Error(err)
 		return responseError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, userResFromModel(user))
+}
+
+func (s *Server) handleLogin(c echo.Context) error {
+	userReq := &userRequest{}
+	err := c.Bind(userReq)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	user, err := s.userUsecase.FindByEmailAndPassword(c.Request().Context(), userReq.Email, userReq.Password)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	token, err := generateToken(*user, createTokenExpiry())
+	if err != nil {
+		logrus.WithField("email", userReq.Email).Error(err)
+		return err
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"token": token})
 }

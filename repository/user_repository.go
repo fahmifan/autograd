@@ -13,6 +13,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, user *model.User) error
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	FindByID(ctx context.Context, id int64) (*model.User, error)
 }
 
 type userRepo struct {
@@ -51,6 +52,25 @@ func (u *userRepo) FindByEmail(ctx context.Context, email string) (*model.User, 
 		logrus.WithFields(logrus.Fields{
 			"ctx":   utils.Dump(ctx),
 			"email": email,
+		}).Error(err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// FindByID return nil, nil upon not found
+func (u *userRepo) FindByID(ctx context.Context, id int64) (*model.User, error) {
+	user := &model.User{}
+	err := u.db.Where("id = ?", id).Take(user).Error
+	switch err {
+	case nil: // ignore
+	case gorm.ErrRecordNotFound:
+		return nil, nil
+	default:
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
 		}).Error(err)
 		return nil, err
 	}

@@ -30,3 +30,12 @@ func Env() string {
 
 	return "development"
 }
+
+// JWTSecret ..
+func JWTSecret() string {
+	val, ok := os.LookupEnv("JWT_SECRET")
+	if !ok {
+		logrus.Fatal("JWT_SECRET not provided")
+	}
+	return val
+}

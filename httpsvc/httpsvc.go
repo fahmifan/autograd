@@ -40,6 +40,7 @@ func (s *Server) routes() {
 
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/users", s.handleCreateUser)
+	apiV1.POST("/users/login", s.handleLogin)
 }
 
 func (s *Server) handlePing(c echo.Context) error {

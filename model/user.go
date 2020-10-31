@@ -4,21 +4,21 @@ import (
 	"time"
 )
 
-// UserRole :nodoc:
-type UserRole int
+// Role :nodoc:
+type Role int
 
 // user roles
 const (
-	UserRoleAdmin   = UserRole(1)
-	UserRoleStudent = UserRole(2)
+	RoleAdmin   = Role(1)
+	RoleStudent = Role(2)
 )
 
 // ToString :nodoc:
-func (u UserRole) ToString() string {
+func (u Role) ToString() string {
 	switch u {
-	case UserRoleAdmin:
+	case RoleAdmin:
 		return "ADMIN"
-	case UserRoleStudent:
+	case RoleStudent:
 		return "STUDENT"
 	default:
 		return ""
@@ -28,9 +28,10 @@ func (u UserRole) ToString() string {
 // User :nodoc:
 type User struct {
 	ID        int64
+	Name      string
 	Email     string
 	Password  string
-	Role      UserRole
+	Role      Role
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time
