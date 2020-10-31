@@ -1,7 +1,6 @@
 package main
 
 import (
-	"autograd/grader"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -11,9 +10,11 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-
+	
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
+	
+	"github.com/miun173/autograd/grader"
 )
 
 func init() {
