@@ -10,6 +10,7 @@ import (
 // Server ..
 type Server struct {
 	exampleUsecase usecase.ExampleUsecase
+	userUsecase    usecase.UserUsecase
 	echo           *echo.Echo
 	port           string
 }
@@ -36,6 +37,9 @@ func (s *Server) Run() {
 
 func (s *Server) routes() {
 	s.echo.GET("/ping", s.handlePing)
+
+	apiV1 := s.echo.Group("/api/v1")
+	apiV1.POST("/users", s.handleCreateUser)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
