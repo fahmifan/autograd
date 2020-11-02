@@ -20,12 +20,6 @@ func NewGrader(c Compiler) Grader {
 	}
 }
 
-func (g *graderImpl) removeCompiled(path string) {
-	if err := g.compiler.Remove(path); err != nil {
-		logrus.WithField("path", path).Error(err)
-	}
-}
-
 func (g *graderImpl) Grade(source string, inputs, expecteds []string) (outputs []string, corrects []bool, err error) {
 	outPath, err := g.compiler.Compile(source)
 	if err != nil {
@@ -59,4 +53,10 @@ func (g *graderImpl) Grade(source string, inputs, expecteds []string) (outputs [
 	}
 
 	return
+}
+
+func (g *graderImpl) removeCompiled(path string) {
+	if err := g.compiler.Remove(path); err != nil {
+		logrus.WithField("path", path).Error(err)
+	}
 }
