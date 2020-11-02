@@ -74,7 +74,7 @@ func (c *cppCompiler) Run(source, input string) (out string, err error) {
 		return
 	}
 
-	out = strings.TrimSpace(string(buffOut.Bytes()))
+	out = strings.TrimSpace(buffOut.String())
 	return
 }
 

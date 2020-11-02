@@ -2,7 +2,6 @@ package httpsvc
 
 import (
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -100,10 +99,6 @@ func auth(token string) (*model.User, bool) {
 	}
 
 	return user, true
-}
-
-func parseTokenFormHeader(header string) string {
-	return strings.Split(header, " ")[0]
 }
 
 func getUserFromCtx(c echo.Context) *model.User {

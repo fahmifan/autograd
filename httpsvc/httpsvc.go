@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/usecase"
+	"github.com/sirupsen/logrus"
 )
 
 // Server ..
@@ -33,7 +34,7 @@ func NewServer(port string, opts ...Option) *Server {
 // Run server
 func (s *Server) Run() {
 	s.routes()
-	s.echo.Start(":" + s.port)
+	logrus.Fatal(s.echo.Start(":" + s.port))
 }
 
 func (s *Server) routes() {
