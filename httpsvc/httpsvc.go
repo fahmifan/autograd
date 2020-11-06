@@ -11,10 +11,11 @@ import (
 
 // Server ..
 type Server struct {
-	exampleUsecase usecase.ExampleUsecase
-	userUsecase    usecase.UserUsecase
-	echo           *echo.Echo
-	port           string
+	exampleUsecase    usecase.ExampleUsecase
+	userUsecase       usecase.UserUsecase
+	submissionUsecase usecase.SubmissionUsecase
+	echo              *echo.Echo
+	port              string
 }
 
 // NewServer ..
@@ -47,6 +48,8 @@ func (s *Server) routes() {
 	// example using auth middleware
 	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
+
+	apiV1.POST("/submission", s.handleSubmission)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
