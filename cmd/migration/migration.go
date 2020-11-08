@@ -8,6 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/miun173/autograd/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,22 +18,9 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	dbname := "autograd"
-	port := "5432"
-	host := "postgres"
-	user := "postgres"
-	password := "root"
-	dsn := fmt.Sprintf(
-		"%s://%s:%s@localhost:%s/%s?sslmode=disable",
-		host,
-		user,
-		password,
-		port,
-		dbname)
-
 	m, err := migrate.New(
 		fmt.Sprintf("file://%s/db/migrations", cwd),
-		dsn)
+		config.PostgresDSN())
 	if err != nil {
 		log.Fatal(err)
 	}
