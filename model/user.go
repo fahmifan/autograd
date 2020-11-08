@@ -25,6 +25,18 @@ func (u Role) ToString() string {
 	}
 }
 
+// ParseRole :nodoc:
+func ParseRole(s string) Role {
+	switch s {
+	case "ADMIN":
+		return RoleAdmin
+	case "STUDENT":
+		return RoleStudent
+	default:
+		return RoleStudent
+	}
+}
+
 // User :nodoc:
 type User struct {
 	ID        int64

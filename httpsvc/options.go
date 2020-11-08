@@ -11,3 +11,10 @@ func WithExampleUsecase(ex usecase.ExampleUsecase) Option {
 		s.exampleUsecase = ex
 	}
 }
+
+// WithUserUsecase ..
+func WithUserUsecase(u usecase.UserUsecase) Option {
+	return func(s *Server) {
+		s.userUsecase = u
+	}
+}

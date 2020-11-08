@@ -16,6 +16,7 @@ type userRequest struct {
 	Name     string
 	Email    string
 	Password string
+	Role     string
 }
 
 func (u *userRequest) toModel() *model.User {
@@ -23,15 +24,16 @@ func (u *userRequest) toModel() *model.User {
 		Email:    u.Email,
 		Password: u.Password,
 		Name:     u.Name,
+		Role:     model.ParseRole(u.Role),
 	}
 }
 
 type userRes struct {
-	ID        string
-	Email     string
-	Role      string
-	CreatedAt string
-	UpdatedAt string
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func userResFromModel(m *model.User) *userRes {
