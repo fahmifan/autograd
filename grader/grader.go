@@ -27,7 +27,7 @@ func (g *graderImpl) Grade(source string, inputs, expecteds []string) (outputs [
 		return
 	}
 
-	defer g.compiler.Remove(outPath)
+	defer g.removeCompiled(outPath)
 
 	if len(inputs) != len(expecteds) {
 		return
@@ -40,17 +40,18 @@ func (g *graderImpl) Grade(source string, inputs, expecteds []string) (outputs [
 		out, err := g.compiler.Run(outPath, input)
 		if err != nil {
 			logrus.Error(err)
-			return nil, nil, err
+			return outputs, corrects, err
 		}
 
 		outputs = append(outputs, out)
-		correct := false
-		if out == expected {
-			correct = true
-		}
-
-		corrects = append(corrects, correct)
+		corrects = append(corrects, out == expected)
 	}
 
 	return
+}
+
+func (g *graderImpl) removeCompiled(path string) {
+	if err := g.compiler.Remove(path); err != nil {
+		logrus.WithField("path", path).Error(err)
+	}
 }

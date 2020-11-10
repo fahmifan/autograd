@@ -1,86 +1,23 @@
 package main
 
 import (
-	"autograd/grader"
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/miun173/autograd/grader"
 )
 
 func init() {
 	log.SetReportCaller(true)
 	log.SetLevel(log.DebugLevel)
-}
-
-func compile(filePath string) (outPath string, err error) {
-	outPath = path.Join(fmt.Sprintf("%s.bin", filePath))
-	args := strings.Split(fmt.Sprintf("%s -o %s", filePath, outPath), " ")
-	cmd := exec.Command("g++", args...)
-	bt, err := cmd.CombinedOutput()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"output":  string(bt),
-			"args":    args,
-			"outPath": outPath,
-		}).Error(err)
-	}
-
-	return
-}
-
-func run(source, input string) (out string) {
-	inputs := strings.Split(input, " ")
-	input = strings.Join(inputs, "\n")
-	cmd := exec.Command(source, inputs...)
-
-	var buffOut bytes.Buffer
-	var buffErr bytes.Buffer
-
-	cmd.Stdin = bytes.NewBuffer([]byte(input))
-	cmd.Stdout = &buffOut
-	cmd.Stderr = &buffErr
-
-	err := cmd.Run()
-	if err != nil {
-		return
-	}
-
-	out = strings.TrimSpace(string(buffOut.Bytes()))
-	return
-}
-
-func remove(source string) {
-	if err := os.Remove(source); err != nil {
-		log.Println("error : ", err)
-	}
-}
-
-func grade(source, input, expected string) (result string) {
-	outPath, err := compile(source)
-	if err != nil {
-		log.WithField("source", source).Error(err)
-		return ""
-	}
-
-	defer remove(outPath)
-	out := run(outPath, input)
-	if expected != out {
-		result = "NAY"
-		return
-	}
-
-	result = "AYE"
-
-	return
 }
 
 // findFilesInDir return map[fileName]filePath
@@ -212,7 +149,7 @@ func main() {
 		}
 
 		if len(expecteds) != len(inputs) {
-			log.Error("error : unmatch input %d & ouput file %d\n", len(inputs), len(expecteds))
+			log.Errorf("error : unmatch input %d & ouput file %d\n", len(inputs), len(expecteds))
 			return
 		}
 

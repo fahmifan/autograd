@@ -7,3 +7,6 @@ build-win:
 
 run-server:
 	@modd -f ./.modd/server.modd.conf
+
+db-migrate-up:
+	@go run cmd/migration/migration.go
