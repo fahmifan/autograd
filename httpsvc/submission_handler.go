@@ -7,15 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func responseError(c echo.Context, err error) error {
-	switch err {
-	case nil:
-		return c.JSON(http.StatusOK, nil)
-	default:
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-}
-
 func (s *Server) handleSubmission(c echo.Context) error {
 
 	form, err := c.MultipartForm()
@@ -26,17 +17,19 @@ func (s *Server) handleSubmission(c echo.Context) error {
 	}
 
 	files := form.File["files"]
+	fileURLs := []string{}
 
 	for _, file := range files {
 
-		err := s.submissionUsecase.Upload(file)
+		fileURL, err := s.submissionUsecase.Upload(file)
 
 		if err != nil {
 			logrus.Error(err)
 			return responseError(c, err)
 		}
 
+		fileURLs = append(fileURLs, fileURL)
 	}
 
-	return c.JSON(http.StatusOK, "success")
+	return c.JSON(http.StatusOK, map[string][]string{"file_urls": fileURLs})
 }
