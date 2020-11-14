@@ -30,12 +30,10 @@ func (p *Worker) Stop() {
 }
 
 func (p *Worker) registerJobs() {
-	p.pool = work.NewWorkerPool(
-		jobHandler{},
-		config.WorkerConcurrency(),
-		config.WorkerNamespace(),
-		p.redisPool,
-	)
+	conc := config.WorkerConcurrency()
+	nameSpace := config.WorkerNamespace()
+
+	p.pool = work.NewWorkerPool(jobHandler{}, conc, nameSpace, p.redisPool)
 	p.pool.Middleware(p.registerJobConfig)
 	p.pool.JobWithOptions(jobRunCode, defaultJobOpt, (*jobHandler).handleRunCode)
 }
