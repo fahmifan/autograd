@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/gomodule/redigo/redis"
 	"github.com/miun173/autograd/config"
 	"github.com/miun173/autograd/worker"
 	"github.com/sirupsen/logrus"
@@ -12,14 +11,7 @@ import (
 
 func main() {
 	logrus.Info("starting worker")
-	var redisPool = &redis.Pool{
-		MaxActive: 5,
-		MaxIdle:   5,
-		Wait:      true,
-		Dial: func() (redis.Conn, error) {
-			return redis.DialURL(config.RedisWorkerHost())
-		},
-	}
+	redisPool := config.NewRedisPool(config.RedisWorkerHost())
 	cfg := worker.NewConfig(worker.WithWorkerPool(redisPool))
 	wrk := worker.NewWorker(cfg)
 	wrk.Start()

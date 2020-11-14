@@ -15,7 +15,7 @@ type jobHandler struct {
 	*Config
 }
 
-func (*jobHandler) handleRunCode(job *work.Job) error {
+func (h *jobHandler) handleRunCode(job *work.Job) error {
 	logrus.Warn("handleRunCode >>>", utils.Dump(job))
 	return nil
 }

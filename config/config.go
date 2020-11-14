@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
@@ -50,7 +51,7 @@ func BaseURL() string {
 	return "localhost:" + os.Getenv("PORT")
 }
 
-// PostgresDSN :nodoc:
+// PostgresDSN ..
 func PostgresDSN() string {
 	port := os.Getenv("DB_PORT")
 	dbname := os.Getenv("DB_NAME")
@@ -74,12 +75,24 @@ func WorkerNamespace() string {
 	return "autograd_worker"
 }
 
-// WorkerConcurrency :nodoc:
+// WorkerConcurrency ..
 func WorkerConcurrency() uint {
 	return 5
 }
 
-// RedisWorkerHost :nodoc:
+// RedisWorkerHost ..
 func RedisWorkerHost() string {
 	return os.Getenv("REDIS_WORKER_HOST")
+}
+
+// NewRedisPool ..
+func NewRedisPool(host string) *redis.Pool {
+	return &redis.Pool{
+		MaxActive: 5,
+		MaxIdle:   5,
+		Wait:      true,
+		Dial: func() (redis.Conn, error) {
+			return redis.DialURL(host)
+		},
+	}
 }
