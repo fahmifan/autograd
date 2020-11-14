@@ -20,10 +20,10 @@ func NewGrader(c Compiler) Grader {
 	}
 }
 
-func (g *graderImpl) Grade(source string, inputs, expecteds []string) (outputs []string, corrects []bool, err error) {
-	outPath, err := g.compiler.Compile(source)
+func (g *graderImpl) Grade(sourceCode string, inputs, expecteds []string) (outputs []string, corrects []bool, err error) {
+	outPath, err := g.compiler.Compile(sourceCode)
 	if err != nil {
-		logrus.WithField("source", source).Error(err)
+		logrus.WithField("source", sourceCode).Error(err)
 		return
 	}
 
