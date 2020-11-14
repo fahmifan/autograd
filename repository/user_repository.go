@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRepository :nodoc:
+// UserRepository ..
 type UserRepository interface {
 	Create(ctx context.Context, user *model.User) error
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
@@ -20,14 +20,14 @@ type userRepo struct {
 	db *gorm.DB
 }
 
-// NewUserRepository :nodoc:
+// NewUserRepository ..
 func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepo{
 		db: db,
 	}
 }
 
-// Create :nodoc:
+// Create ..
 func (u *userRepo) Create(ctx context.Context, user *model.User) (err error) {
 	err = u.db.Create(user).Error
 	if err != nil {

@@ -46,7 +46,7 @@ func authorizeByRole(userRole model.Role, authorizedRole []model.Role) bool {
 	return false
 }
 
-// AuthMiddleware :nodoc:
+// AuthMiddleware ..
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token, err := parseTokenFromHeader(&c.Request().Header)

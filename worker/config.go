@@ -5,7 +5,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-// Config :nodoc:
+// Config ..
 type Config struct {
 	pool      *work.WorkerPool
 	redisPool *redis.Pool
@@ -25,7 +25,7 @@ func NewConfig(opts ...Option) *Config {
 // Option ..
 type Option func(*Config)
 
-// WithWorkerPool :nodoc:
+// WithWorkerPool ..
 func WithWorkerPool(rd *redis.Pool) Option {
 	return func(c *Config) {
 		c.redisPool = rd

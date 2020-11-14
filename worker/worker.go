@@ -7,12 +7,12 @@ import (
 
 var defaultJobOpt = work.JobOptions{MaxConcurrency: 3, MaxFails: 3}
 
-// Worker :nodoc:
+// Worker ..
 type Worker struct {
 	*Config
 }
 
-// NewWorker :nodoc:
+// NewWorker ..
 func NewWorker(cfg *Config) *Worker {
 	wrk := &Worker{cfg}
 	return wrk
