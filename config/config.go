@@ -68,3 +68,18 @@ func PostgresDSN() string {
 		dbname,
 		sslmode)
 }
+
+// WorkerNamespace ..
+func WorkerNamespace() string {
+	return "autograd_worker"
+}
+
+// WorkerConcurrency :nodoc:
+func WorkerConcurrency() uint {
+	return 5
+}
+
+// RedisWorkerHost :nodoc:
+func RedisWorkerHost() string {
+	return os.Getenv("REDIS_WORKER_HOST")
+}
