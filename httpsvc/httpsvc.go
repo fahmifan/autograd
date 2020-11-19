@@ -50,7 +50,7 @@ func (s *Server) routes() {
 	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
 
-	apiV1.POST("/submission", s.handleSubmission)
+	apiV1.POST("/submissions", s.handleCreateSubmission)
 }
 
 func (s *Server) handlePing(c echo.Context) error {

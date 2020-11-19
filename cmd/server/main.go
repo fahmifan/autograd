@@ -43,7 +43,7 @@ func main() {
 
 	userRepo := repository.NewUserRepository(postgres)
 	userUsecase := usecase.NewUserUsecase(userRepo)
-	submissionRepo := repository.NewSubmissionRepo()
+	submissionRepo := repository.NewSubmissionRepo(postgres)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo)
 
 	server := httpsvc.NewServer(
