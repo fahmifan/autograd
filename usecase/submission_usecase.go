@@ -1,8 +1,10 @@
 package usecase
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -12,12 +14,16 @@ import (
 	"time"
 
 	"github.com/miun173/autograd/config"
+	"github.com/miun173/autograd/model"
+	"github.com/miun173/autograd/utils"
+	"github.com/sirupsen/logrus"
 
 	"github.com/miun173/autograd/repository"
 )
 
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
+	Create(ctx context.Context, submission *model.Submission, fileURLs []string) error
 	Upload(fh *multipart.FileHeader) (string, error)
 }
 
@@ -32,7 +38,36 @@ func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository) Submis
 	}
 }
 
-func (e *submissionUsecase) Upload(fh *multipart.FileHeader) (string, error) {
+func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission, fileURLs []string) error {
+	if submission == nil {
+		return errors.New("invalid arguments")
+	}
+
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":        utils.Dump(ctx),
+		"submission": utils.Dump(submission),
+	})
+
+	var err error
+
+	for _, fileURL := range fileURLs {
+		submission.ID = utils.GenerateID()
+		submission.FileURL = fileURL
+		submission.Feedback = ""
+		submission.Grade = 0
+
+		err = s.submissionRepo.Create(ctx, submission)
+
+		if err != nil {
+			logger.Error(err)
+			return err
+		}
+	}
+
+	return err
+}
+
+func (s *submissionUsecase) Upload(fh *multipart.FileHeader) (string, error) {
 	src, err := fh.Open()
 
 	if err != nil {
