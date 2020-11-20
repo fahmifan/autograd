@@ -12,8 +12,8 @@ import (
 )
 
 type submissionRequest struct {
-	AssignmentID int64
-	SubmittedBy  int64
+	AssignmentID int64 `json:"assignmentID"`
+	SubmittedBy  int64 `json:"submittedBy"`
 }
 
 func (s *submissionRequest) toModel() *model.Submission {
@@ -25,13 +25,13 @@ func (s *submissionRequest) toModel() *model.Submission {
 
 type submissionRes struct {
 	ID           string  `json:"id"`
-	AssignmentID string  `json:"assignment_id"`
-	SubmittedBy  string  `json:"submitted_by"`
-	FileURL      string  `json:"file_url"`
+	AssignmentID string  `json:"assignmentID"`
+	SubmittedBy  string  `json:"submittedBy"`
+	FileURL      string  `json:"fileURL"`
 	Grade        float64 `json:"grade"`
 	Feedback     string  `json:"feedback"`
-	CreatedAt    string  `json:"created_at"`
-	UpdatedAt    string  `json:"updated_at"`
+	CreatedAt    string  `json:"createdAt"`
+	UpdatedAt    string  `json:"updatedAt"`
 }
 
 func submissionResFromModel(m *model.Submission, fileURL string) *submissionRes {
