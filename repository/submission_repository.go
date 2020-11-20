@@ -28,7 +28,6 @@ func NewSubmissionRepo(db *gorm.DB) SubmissionRepository {
 
 func (s *submissionRepo) Create(ctx context.Context, submission *model.Submission) error {
 	err := s.db.Create(submission).Error
-
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":        utils.Dump(ctx),

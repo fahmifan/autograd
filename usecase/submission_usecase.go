@@ -48,7 +48,7 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		"submission": utils.Dump(submission),
 	})
 
-	var err error
+	var err error = nil
 
 	for _, fileURL := range fileURLs {
 		submission.ID = utils.GenerateID()
@@ -57,7 +57,6 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		submission.Grade = 0
 
 		err = s.submissionRepo.Create(ctx, submission)
-
 		if err != nil {
 			logger.Error(err)
 			return err
@@ -69,7 +68,6 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 
 func (s *submissionUsecase) Upload(fh *multipart.FileHeader) (string, error) {
 	src, err := fh.Open()
-
 	if err != nil {
 		return "", err
 	}
@@ -77,7 +75,6 @@ func (s *submissionUsecase) Upload(fh *multipart.FileHeader) (string, error) {
 	defer src.Close()
 
 	cwd, err := os.Getwd()
-
 	if err != nil {
 		return "", err
 	}
@@ -86,7 +83,6 @@ func (s *submissionUsecase) Upload(fh *multipart.FileHeader) (string, error) {
 	fileName := generateFileName(fh.Filename) + fileExt
 	filePath := path.Join(cwd, "submission", fileName)
 	dst, err := os.Create(filePath)
-
 	if err != nil {
 		return "", err
 	}

@@ -48,9 +48,7 @@ func submissionResFromModel(m *model.Submission, fileURL string) *submissionRes 
 }
 
 func (s *Server) handleCreateSubmission(c echo.Context) error {
-
 	form, err := c.MultipartForm()
-
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
@@ -62,7 +60,6 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 	for _, file := range files {
 
 		fileURL, err := s.submissionUsecase.Upload(file)
-
 		if err != nil {
 			logrus.Error(err)
 			return responseError(c, err)
@@ -73,7 +70,6 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 
 	submissionReq := &submissionRequest{}
 	err = c.Bind(submissionReq)
-
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
@@ -81,17 +77,16 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 
 	submission := submissionReq.toModel()
 	err = s.submissionUsecase.Create(c.Request().Context(), submission, fileURLs)
-
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	submissionResArr := []*submissionRes{}
+	submissionResponse := []*submissionRes{}
 
 	for _, fileURL := range fileURLs {
-		submissionResArr = append(submissionResArr, submissionResFromModel(submission, fileURL))
+		submissionResponse = append(submissionResponse, submissionResFromModel(submission, fileURL))
 	}
 
-	return c.JSON(http.StatusOK, map[string][]*submissionRes{"submissions": submissionResArr})
+	return c.JSON(http.StatusOK, map[string][]*submissionRes{"submissions": submissionResponse})
 }
