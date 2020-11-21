@@ -6,7 +6,7 @@ import (
 
 // Grader ..
 type Grader interface {
-	Grade(source string, inputs, expecteds []string) (outputs []string, corrects []bool, err error)
+	Grade(srcCodePath string, inputs, expecteds []string) (outputs []string, corrects []bool, err error)
 }
 
 type graderImpl struct {
@@ -20,10 +20,10 @@ func NewGrader(c Compiler) Grader {
 	}
 }
 
-func (g *graderImpl) Grade(sourceCode string, inputs, expecteds []string) (outputs []string, corrects []bool, err error) {
-	outPath, err := g.compiler.Compile(sourceCode)
+func (g *graderImpl) Grade(srcCodePath string, inputs, expecteds []string) (outputs []string, corrects []bool, err error) {
+	outPath, err := g.compiler.Compile(srcCodePath)
 	if err != nil {
-		logrus.WithField("source", sourceCode).Error(err)
+		logrus.WithField("source", srcCodePath).Error(err)
 		return
 	}
 

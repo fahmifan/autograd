@@ -8,6 +8,5 @@ import (
 // for testing wokrer & broker
 func main() {
 	redisPool := config.NewRedisPool(config.RedisWorkerHost())
-	broker := worker.NewBroker(redisPool)
-	broker.EnqueueJobRunCode(1)
+	_ = worker.NewBroker(redisPool)
 }

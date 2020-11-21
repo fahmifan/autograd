@@ -7,38 +7,49 @@ import (
 
 var defaultJobOpt = work.JobOptions{MaxConcurrency: 3, MaxFails: 3}
 
+const cronEvery10Minute = "*/10 * * * *"
+
 // Worker ..
 type Worker struct {
-	*Config
+	*cfg
 }
 
 // NewWorker ..
-func NewWorker(cfg *Config) *Worker {
-	wrk := &Worker{cfg}
+func NewWorker(opts ...Option) *Worker {
+	wrkCfg := &cfg{}
+	for _, opt := range opts {
+		opt(wrkCfg)
+	}
+
+	wrk := &Worker{wrkCfg}
 	return wrk
 }
 
 // Start starts worker
-func (p *Worker) Start() {
-	p.registerJobs()
-	p.pool.Start()
+func (w *Worker) Start() {
+	w.registerJobs()
+	w.pool.Start()
 }
 
 // Stop stops worker
-func (p *Worker) Stop() {
-	p.pool.Stop()
+func (w *Worker) Stop() {
+	w.pool.Stop()
 }
 
-func (p *Worker) registerJobs() {
+func (w *Worker) registerJobs() {
 	conc := config.WorkerConcurrency()
 	nameSpace := config.WorkerNamespace()
 
-	p.pool = work.NewWorkerPool(jobHandler{}, conc, nameSpace, p.redisPool)
-	p.pool.Middleware(p.registerJobConfig)
-	p.pool.JobWithOptions(jobRunCode, defaultJobOpt, (*jobHandler).handleRunCode)
+	w.pool = work.NewWorkerPool(jobHandler{}, conc, nameSpace, w.redisPool)
+	w.pool.Middleware(w.registerJobConfig)
+
+	w.pool.JobWithOptions(jobGradeAssignment, defaultJobOpt, (*jobHandler).handleGradeAssignment)
+	w.pool.JobWithOptions(jobCheckAllDueAssignments, defaultJobOpt, (*jobHandler).handleCheckAllDueAssignments)
+
+	w.pool.PeriodicallyEnqueue(cronEvery10Minute, jobCheckAllDueAssignments)
 }
 
-func (p *Worker) registerJobConfig(jb *jobHandler, job *work.Job, next work.NextMiddlewareFunc) error {
-	jb.Config = p.Config
+func (w *Worker) registerJobConfig(handler *jobHandler, job *work.Job, next work.NextMiddlewareFunc) error {
+	handler.cfg = w.cfg
 	return next()
 }

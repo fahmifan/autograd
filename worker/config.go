@@ -5,29 +5,27 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-// Config ..
-type Config struct {
+// config
+type cfg struct {
 	pool      *work.WorkerPool
 	redisPool *redis.Pool
 	enqueuer  *work.Enqueuer
-}
-
-// NewConfig ..
-func NewConfig(opts ...Option) *Config {
-	cfg := &Config{}
-	for _, opt := range opts {
-		opt(cfg)
-	}
-
-	return cfg
+	grader    Grader
 }
 
 // Option ..
-type Option func(*Config)
+type Option func(*cfg)
 
 // WithWorkerPool ..
 func WithWorkerPool(rd *redis.Pool) Option {
-	return func(c *Config) {
+	return func(c *cfg) {
 		c.redisPool = rd
+	}
+}
+
+// WithGrader ..
+func WithGrader(gr Grader) Option {
+	return func(c *cfg) {
+		c.grader = gr
 	}
 }
