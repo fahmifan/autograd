@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gocraft/work"
+	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,7 +26,11 @@ type Submission interface {
 }
 
 type jobHandler struct {
-	*cfg
+	pool       *work.WorkerPool
+	redisPool  *redis.Pool
+	enqueuer   *work.Enqueuer
+	grader     Grader
+	submission Submission
 }
 
 func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {

@@ -1,7 +1,10 @@
 package worker
 
 import (
+	"errors"
+
 	"github.com/gocraft/work"
+	"github.com/gomodule/redigo/redis"
 	"github.com/miun173/autograd/config"
 )
 
@@ -11,17 +14,20 @@ const cronEvery10Minute = "*/10 * * * *"
 
 // Worker ..
 type Worker struct {
-	*cfg
+	pool       *work.WorkerPool
+	redisPool  *redis.Pool
+	enqueuer   *work.Enqueuer
+	grader     Grader
+	submission Submission
 }
 
 // NewWorker ..
 func NewWorker(opts ...Option) *Worker {
-	wrkCfg := &cfg{}
+	wrk := &Worker{}
 	for _, opt := range opts {
-		opt(wrkCfg)
+		opt(wrk)
 	}
 
-	wrk := &Worker{wrkCfg}
 	return wrk
 }
 
@@ -51,6 +57,15 @@ func (w *Worker) registerJobs() {
 }
 
 func (w *Worker) registerJobConfig(handler *jobHandler, job *work.Job, next work.NextMiddlewareFunc) error {
-	handler.cfg = w.cfg
+	if handler == nil {
+		return errors.New("unexpected nil handler")
+	}
+
+	handler.pool = w.pool
+	handler.redisPool = w.redisPool
+	handler.enqueuer = w.enqueuer
+	handler.grader = w.grader
+	handler.submission = w.submission
+
 	return next()
 }
