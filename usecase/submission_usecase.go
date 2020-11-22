@@ -23,7 +23,7 @@ import (
 
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
-	Create(ctx context.Context, submission *model.Submission, fileURLs []string) error
+	Create(ctx context.Context, submission *model.Submission) error
 	Upload(fh *multipart.FileHeader) (string, error)
 }
 
@@ -38,7 +38,7 @@ func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository) Submis
 	}
 }
 
-func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission, fileURLs []string) error {
+func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
 	if submission == nil {
 		return errors.New("invalid arguments")
 	}
@@ -48,19 +48,14 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		"submission": utils.Dump(submission),
 	})
 
-	var err error = nil
+	submission.ID = utils.GenerateID()
+	submission.Feedback = ""
+	submission.Grade = 0
 
-	for _, fileURL := range fileURLs {
-		submission.ID = utils.GenerateID()
-		submission.FileURL = fileURL
-		submission.Feedback = ""
-		submission.Grade = 0
-
-		err = s.submissionRepo.Create(ctx, submission)
-		if err != nil {
-			logger.Error(err)
-			return err
-		}
+	err := s.submissionRepo.Create(ctx, submission)
+	if err != nil {
+		logger.Error(err)
+		return err
 	}
 
 	return err

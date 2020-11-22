@@ -51,6 +51,7 @@ func (s *Server) routes() {
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
+	apiV1.POST("/submissions/upload", s.handleUpload)
 }
 
 func (s *Server) handlePing(c echo.Context) error {

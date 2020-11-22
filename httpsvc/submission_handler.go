@@ -12,14 +12,16 @@ import (
 )
 
 type submissionRequest struct {
-	AssignmentID int64 `json:"assignmentID"`
-	SubmittedBy  int64 `json:"submittedBy"`
+	AssignmentID int64  `json:"assignmentID"`
+	SubmittedBy  int64  `json:"submittedBy"`
+	FileURL      string `json:"fileURL"`
 }
 
 func (s *submissionRequest) toModel() *model.Submission {
 	return &model.Submission{
 		AssignmentID: s.AssignmentID,
 		SubmittedBy:  s.SubmittedBy,
+		FileURL:      s.FileURL,
 	}
 }
 
@@ -34,12 +36,12 @@ type submissionRes struct {
 	UpdatedAt    string  `json:"updatedAt"`
 }
 
-func submissionResFromModel(m *model.Submission, fileURL string) *submissionRes {
+func submissionResFromModel(m *model.Submission) *submissionRes {
 	return &submissionRes{
 		ID:           utils.Int64ToString(m.ID),
 		AssignmentID: utils.Int64ToString(m.AssignmentID),
 		SubmittedBy:  utils.Int64ToString(m.SubmittedBy),
-		FileURL:      fileURL,
+		FileURL:      m.FileURL,
 		Grade:        m.Grade,
 		Feedback:     m.Feedback,
 		CreatedAt:    m.CreatedAt.Format(time.RFC3339Nano),
@@ -48,45 +50,35 @@ func submissionResFromModel(m *model.Submission, fileURL string) *submissionRes 
 }
 
 func (s *Server) handleCreateSubmission(c echo.Context) error {
-	form, err := c.MultipartForm()
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	files := form.File["files"]
-	fileURLs := []string{}
-
-	for _, file := range files {
-
-		fileURL, err := s.submissionUsecase.Upload(file)
-		if err != nil {
-			logrus.Error(err)
-			return responseError(c, err)
-		}
-
-		fileURLs = append(fileURLs, fileURL)
-	}
-
 	submissionReq := &submissionRequest{}
-	err = c.Bind(submissionReq)
+	err := c.Bind(submissionReq)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
 	submission := submissionReq.toModel()
-	err = s.submissionUsecase.Create(c.Request().Context(), submission, fileURLs)
+	err = s.submissionUsecase.Create(c.Request().Context(), submission)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	submissionResponse := []*submissionRes{}
+	return c.JSON(http.StatusOK, submissionResFromModel(submission))
+}
 
-	for _, fileURL := range fileURLs {
-		submissionResponse = append(submissionResponse, submissionResFromModel(submission, fileURL))
+func (s *Server) handleUpload(c echo.Context) error {
+	file, err := c.FormFile("file")
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, map[string][]*submissionRes{"submissions": submissionResponse})
+	fileURL, err := s.submissionUsecase.Upload(file)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"fileURL": fileURL})
 }
