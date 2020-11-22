@@ -1,9 +1,12 @@
 package worker
 
 import (
+	"fmt"
+
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
 	"github.com/miun173/autograd/config"
+	"github.com/miun173/autograd/utils"
 )
 
 // newEnqueuer ..
@@ -19,4 +22,11 @@ type Broker struct {
 // NewBroker ..
 func NewBroker(redisPool *redis.Pool) *Broker {
 	return &Broker{enqueuer: newEnqueuer(redisPool)}
+}
+
+// EnqueueJobGradeSubmission ..
+func (b *Broker) EnqueueJobGradeSubmission(submissionID int64) error {
+	arg := work.Q{"submissionID": utils.Int64ToString(submissionID)}
+	_, err := b.enqueuer.EnqueueUnique(jobGradeSubmission, arg)
+	return fmt.Errorf("failed to enqueue %s: %w", jobGradeSubmission, err)
 }

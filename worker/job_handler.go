@@ -11,11 +11,17 @@ import (
 const (
 	jobCheckAllDueAssignments string = "check_due_assignment"
 	jobGradeAssignment        string = "grade_assignment"
+	jobGradeSubmission        string = "grade_submission"
 )
 
 // Grader ..
 type Grader interface {
-	GradeAssignment(assignmentID int64) error
+	GradeSubmission(submissionID int64) error
+}
+
+// Submission ..
+type Submission interface {
+	FindAllUncheckByAssignmentID(assignmentID int64) (count int64, ids []int64, err error)
 }
 
 type jobHandler struct {
@@ -41,8 +47,25 @@ func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
 
 func (h *jobHandler) handleGradeAssignment(job *work.Job) error {
 	assignmentID := job.ArgInt64("assignmentID")
-	h.grader.GradeAssignment(assignmentID)
+	_, ids, err := h.submission.FindAllUncheckByAssignmentID(assignmentID)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range ids {
+		arg := work.Q{"submissionID": id}
+		if _, err := h.enqueuer.EnqueueUnique(jobGradeSubmission, arg); err != nil {
+			logrus.Error(err)
+			return err
+		}
+	}
+
 	return nil
+}
+
+func (h *jobHandler) handleGradeSubmission(job *work.Job) error {
+	submissionID := job.ArgInt64("submissionID")
+	return h.grader.GradeSubmission(submissionID)
 }
 
 func getAllDueAssignments() (ids []int64, err error) {

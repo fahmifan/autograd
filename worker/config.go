@@ -7,10 +7,11 @@ import (
 
 // config
 type cfg struct {
-	pool      *work.WorkerPool
-	redisPool *redis.Pool
-	enqueuer  *work.Enqueuer
-	grader    Grader
+	pool       *work.WorkerPool
+	redisPool  *redis.Pool
+	enqueuer   *work.Enqueuer
+	grader     Grader
+	submission Submission
 }
 
 // Option ..

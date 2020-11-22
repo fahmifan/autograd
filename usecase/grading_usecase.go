@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/miun173/autograd/grader"
+	"github.com/sirupsen/logrus"
 )
 
 // GradingUsecase ...
@@ -24,40 +25,35 @@ func NewGradingUsecase() *GradingUsecase {
 }
 
 type assignment struct {
-	id            int64
-	input         []string
-	output        []string
-	submissionIDs []int64
+	id        int64
+	inputURL  string
+	outputURL string
+	input     []string
+	output    []string
 }
 
-// GradeAssignment grade all submission on the given assignment
-func (g *GradingUsecase) GradeAssignment(assignmentID int64) error {
-	// logger := logrus.WithField("submissionID", submissionID)
-	asg, err := g.getAssignment(assignmentID)
-	if err != nil {
-		err = fmt.Errorf("unable to get submission %d: %w", assignmentID, err)
-	}
-
-	// grade all submissions
-	for _, subID := range asg.submissionIDs {
-		g.gradeAssignment(&asg, subID)
-	}
-
-	// TODO: remove resources after grades the assignment
-	return nil
-}
-
-func (g *GradingUsecase) gradeAssignment(asg *assignment, submissionID int64) error {
+// GradeSubmission ..
+func (g *GradingUsecase) GradeSubmission(submissionID int64) (err error) {
 	srcCodePath, err := g.getSubmissionSrcCodeByID(submissionID)
 	if err != nil {
 		err = fmt.Errorf("unable to get submission %d: %w", submissionID, err)
+		logrus.Error(err)
+		return
 	}
 
-	g.grader.Grade(srcCodePath, asg.input, asg.output)
+	asg, err := g.getAssignmentBySubmissionID(submissionID)
 	if err != nil {
-		err = fmt.Errorf("unable to grade submission %d: %w", submissionID, err)
+		err = fmt.Errorf("unable to get assignment for submission %d: %w", submissionID, err)
+		logrus.Error(err)
+		return
 	}
-	return nil
+
+	_, _, err = g.grader.Grade(srcCodePath, asg.input, asg.output)
+	return
+}
+
+func (g *GradingUsecase) getAssignmentBySubmissionID(submissionID int64) (assignment, error) {
+	return g.getAssignment(0)
 }
 
 func (g *GradingUsecase) getSubmissionSrcCodeByID(id int64) (srcCodePath string, err error) {
@@ -66,23 +62,25 @@ func (g *GradingUsecase) getSubmissionSrcCodeByID(id int64) (srcCodePath string,
 
 func (g *GradingUsecase) getAssignment(assignmentID int64) (asg assignment, err error) {
 	// download source code to local filepath
-	inputURL := ""
-	asg.input, err = g.downloadAndParse(inputURL)
+	inputPath := ""
+	inputPath, asg.input, err = g.downloadAndParse(asg.inputURL)
 	if err != nil {
 		return
 	}
+	defer removeFile(inputPath)
 
-	outputURL := ""
-	asg.output, err = g.downloadAndParse(outputURL)
+	outputPath := ""
+	outputPath, asg.output, err = g.downloadAndParse(asg.outputURL)
 	if err != nil {
 		return
 	}
+	defer removeFile(outputPath)
 
 	return
 }
 
-func (g *GradingUsecase) downloadAndParse(srcURL string) (results []string, err error) {
-	filePath, err := download(srcURL, nil)
+func (g *GradingUsecase) downloadAndParse(srcURL string) (filePath string, results []string, err error) {
+	filePath, err = download(srcURL, nil)
 	if err != nil {
 		err = fmt.Errorf("unable to download from %s: %w", srcURL, err)
 		return
@@ -95,6 +93,32 @@ func (g *GradingUsecase) downloadAndParse(srcURL string) (results []string, err 
 	}
 
 	return
+}
+
+// read file and append each line in slices of string
+func (g *GradingUsecase) parseFilePerLine(filePath string) ([]string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+	lines := make([]string, 0)
+	for {
+		line, err := reader.ReadString(byte('\n'))
+		if err != nil && err != io.EOF {
+			return nil, err
+		}
+
+		if err == io.EOF {
+			break
+		}
+
+		lines = append(lines, strings.TrimSpace(line))
+	}
+
+	return lines, err
 }
 
 // if dest is nil, the file will be download
@@ -129,28 +153,9 @@ func download(srcURL string, dest *string) (outputPath string, err error) {
 	return
 }
 
-// read file and append each line in slices of string
-func (g *GradingUsecase) parseFilePerLine(filePath string) ([]string, error) {
-	file, err := os.Open(filePath)
+func removeFile(path string) {
+	err := os.Remove(path)
 	if err != nil {
-		return nil, err
+		logrus.Error(err)
 	}
-	defer file.Close()
-
-	reader := bufio.NewReader(file)
-	lines := make([]string, 0)
-	for {
-		line, err := reader.ReadString(byte('\n'))
-		if err != nil && err != io.EOF {
-			return nil, err
-		}
-
-		if err == io.EOF {
-			break
-		}
-
-		lines = append(lines, strings.TrimSpace(line))
-	}
-
-	return lines, err
 }
