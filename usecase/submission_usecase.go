@@ -6,11 +6,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
-	"mime/multipart"
+	"math/rand"
 	"os"
 	"path"
-	"path/filepath"
 	"time"
 
 	"github.com/miun173/autograd/config"
@@ -24,7 +22,7 @@ import (
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	Upload(fh *multipart.FileHeader) (string, error)
+	Upload(ctx context.Context, upload *model.Upload) error
 }
 
 type submissionUsecase struct {
@@ -49,55 +47,53 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	})
 
 	submission.ID = utils.GenerateID()
-	submission.Feedback = ""
-	submission.Grade = 0
-
 	err := s.submissionRepo.Create(ctx, submission)
 	if err != nil {
 		logger.Error(err)
 		return err
 	}
 
-	return err
+	return nil
 }
 
-func (s *submissionUsecase) Upload(fh *multipart.FileHeader) (string, error) {
-	src, err := fh.Open()
-	if err != nil {
-		return "", err
+func (s *submissionUsecase) Upload(ctx context.Context, upload *model.Upload) error {
+	if upload == nil {
+		return errors.New("invalid arguments")
 	}
 
-	defer src.Close()
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":    utils.Dump(ctx),
+		"upload": utils.Dump(upload),
+	})
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		return "", err
+		logger.Error(err)
+		return err
 	}
 
-	fileExt := filepath.Ext(fh.Filename)
-	fileName := generateFileName(fh.Filename) + fileExt
+	fileName := generateFileName() + ".cpp"
 	filePath := path.Join(cwd, "submission", fileName)
-	dst, err := os.Create(filePath)
+	file, err := os.Create(filePath)
 	if err != nil {
-		return "", err
+		logger.Error(err)
+		return err
 	}
 
-	defer dst.Close()
+	file.WriteString(upload.SourceCode)
+	defer file.Close()
 
-	if _, err = io.Copy(dst, src); err != nil {
-		return "", err
-	}
+	upload.FileURL = config.BaseURL() + "/storage/" + fileName
 
-	fileURL := config.BaseURL() + "/storage/" + fileName
-
-	return fileURL, nil
+	return nil
 }
 
-func generateFileName(text string) string {
+func generateFileName() string {
 	h := md5.New()
+	randomNumber := fmt.Sprint(rand.Intn(10))
 	timestamp := fmt.Sprint(time.Now().Unix())
 
-	h.Write([]byte(text + timestamp))
+	h.Write([]byte(randomNumber + timestamp))
 
 	return hex.EncodeToString(h.Sum(nil))
 }

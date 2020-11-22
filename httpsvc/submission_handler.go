@@ -67,18 +67,40 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 	return c.JSON(http.StatusOK, submissionResFromModel(submission))
 }
 
+type uploadRequest struct {
+	SourceCode string `json:"sourceCode"`
+}
+
+func (u *uploadRequest) toModel() *model.Upload {
+	return &model.Upload{
+		SourceCode: u.SourceCode,
+	}
+}
+
+type uploadRes struct {
+	FileURL string `json:"fileURL"`
+}
+
+func uploadResFromModel(u *model.Upload) *uploadRes {
+	return &uploadRes{
+		FileURL: u.FileURL,
+	}
+}
+
 func (s *Server) handleUpload(c echo.Context) error {
-	file, err := c.FormFile("file")
+	uploadReq := &uploadRequest{}
+	err := c.Bind(uploadReq)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	fileURL, err := s.submissionUsecase.Upload(file)
+	upload := uploadReq.toModel()
+	err = s.submissionUsecase.Upload(c.Request().Context(), upload)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"fileURL": fileURL})
+	return c.JSON(http.StatusOK, uploadResFromModel(upload))
 }
