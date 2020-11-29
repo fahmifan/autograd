@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/miun173/autograd/dto"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 
@@ -71,8 +72,8 @@ type uploadRequest struct {
 	SourceCode string `json:"sourceCode"`
 }
 
-func (u *uploadRequest) toModel() *model.Upload {
-	return &model.Upload{
+func (u *uploadRequest) toDTO() *dto.Upload {
+	return &dto.Upload{
 		SourceCode: u.SourceCode,
 	}
 }
@@ -81,7 +82,7 @@ type uploadRes struct {
 	FileURL string `json:"fileURL"`
 }
 
-func uploadResFromModel(u *model.Upload) *uploadRes {
+func uploadResFromDTO(u *dto.Upload) *uploadRes {
 	return &uploadRes{
 		FileURL: u.FileURL,
 	}
@@ -95,14 +96,14 @@ func (s *Server) handleUpload(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	upload := uploadReq.toModel()
+	upload := uploadReq.toDTO()
 	err = s.submissionUsecase.Upload(c.Request().Context(), upload)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, uploadResFromModel(upload))
+	return c.JSON(http.StatusOK, uploadResFromDTO(upload))
 }
 
 func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
