@@ -52,6 +52,7 @@ func (s *Server) routes() {
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
 	apiV1.POST("/submissions/upload", s.handleUpload)
+	apiV1.GET("/submissions/:assignmentID", s.handleGetAssignmentSubmission)
 }
 
 func (s *Server) handlePing(c echo.Context) error {

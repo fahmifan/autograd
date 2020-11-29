@@ -104,3 +104,14 @@ func (s *Server) handleUpload(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, uploadResFromModel(upload))
 }
+
+func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
+	assignmentID := utils.StringToInt64(c.Param("assignmentID"))
+	submissions, err := s.submissionUsecase.FindByAssignmentID(c.Request().Context(), assignmentID)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, submissions)
+}
