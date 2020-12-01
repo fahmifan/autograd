@@ -3,6 +3,9 @@ package utils
 import (
 	"sync"
 
+	"github.com/labstack/echo/v4"
+	"github.com/miun173/autograd/dto"
+
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
 )
@@ -24,4 +27,28 @@ func GenerateID() int64 {
 	}
 
 	return int64(id)
+}
+
+// GeneratePaginationDTO generate a request for pagination
+func GeneratePaginationDTO(ctx echo.Context) *dto.Pagination {
+	limit, page, sort := int64(10), int64(1), "created_at desc"
+	query := ctx.QueryParams()
+
+	for key, values := range query {
+		value := values[0]
+
+		switch key {
+		case "limit":
+			limit = StringToInt64(value)
+			break
+		case "page":
+			page = StringToInt64(value)
+			break
+		case "sort":
+			sort = value
+			break
+		}
+	}
+
+	return &dto.Pagination{Limit: limit, Page: page, Sort: sort}
 }

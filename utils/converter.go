@@ -19,3 +19,8 @@ func StringToInt64(s string) int64 {
 
 	return i
 }
+
+// Int64ToInt ..
+func Int64ToInt(i int64) int {
+	return int(i)
+}

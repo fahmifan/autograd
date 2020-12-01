@@ -24,7 +24,7 @@ import (
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Upload(ctx context.Context, upload *dto.Upload) error
-	FindByAssignmentID(ctx context.Context, id int64) ([]*model.Submission, error)
+	FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *dto.Pagination) ([]*model.Submission, error)
 }
 
 type submissionUsecase struct {
@@ -100,12 +100,13 @@ func generateFileName() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, id int64) ([]*model.Submission, error) {
-	submissions, err := s.submissionRepo.FindByAssignmentID(ctx, id)
+func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *dto.Pagination) ([]*model.Submission, error) {
+	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+	submissions, err := s.submissionRepo.FindByAssignmentID(ctx, assignmentID, pagination)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
+			"ctx":          utils.Dump(ctx),
+			"assignmentID": assignmentID,
 		}).Error(err)
 		return nil, err
 	}
