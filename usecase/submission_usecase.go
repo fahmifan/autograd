@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"path"
 	"time"
@@ -24,7 +25,7 @@ import (
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Upload(ctx context.Context, upload *dto.Upload) error
-	FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *dto.Pagination) ([]*model.Submission, error)
+	FindByAssignmentID(ctx context.Context, query url.Values, assignmentID int64) (*dto.Pagination, error)
 }
 
 type submissionUsecase struct {
@@ -100,7 +101,8 @@ func generateFileName() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *dto.Pagination) ([]*model.Submission, error) {
+func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, query url.Values, assignmentID int64) (pagination *dto.Pagination, err error) {
+	pagination = utils.GeneratePaginationDTO(query)
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit
 	submissions, err := s.submissionRepo.FindByAssignmentID(ctx, assignmentID, pagination)
 	if err != nil {
@@ -111,5 +113,7 @@ func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, assignmentID
 		return nil, err
 	}
 
-	return submissions, nil
+	pagination.Rows = submissions
+
+	return
 }

@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"net/url"
 	"sync"
 
-	"github.com/labstack/echo/v4"
 	"github.com/miun173/autograd/dto"
 
 	"github.com/sirupsen/logrus"
@@ -30,9 +30,8 @@ func GenerateID() int64 {
 }
 
 // GeneratePaginationDTO generate a request for pagination
-func GeneratePaginationDTO(ctx echo.Context) *dto.Pagination {
+func GeneratePaginationDTO(query url.Values) *dto.Pagination {
 	limit, page, sort := int64(10), int64(1), "created_at desc"
-	query := ctx.QueryParams()
 
 	for key, values := range query {
 		value := values[0]
