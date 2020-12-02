@@ -5,6 +5,7 @@ import (
 
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
+	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -69,7 +70,7 @@ func (h *jobHandler) handleGradeAssignment(job *work.Job) error {
 }
 
 func (h *jobHandler) handleGradeSubmission(job *work.Job) error {
-	submissionID := job.ArgInt64("submissionID")
+	submissionID := utils.StringToInt64(job.ArgString("submissionID"))
 	return h.grader.GradeSubmission(submissionID)
 }
 
