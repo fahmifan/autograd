@@ -59,8 +59,7 @@ func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID in
 		return nil, errors.New("page " + utils.Int64ToString(pagination.Page) + " is out of bounds for limit " + utils.Int64ToString(pagination.Limit))
 	}
 
-	limit, offset := utils.Int64ToInt(pagination.Limit), utils.Int64ToInt(pagination.Offset)
-	query = s.db.Where("assignment_id = ?", assignmentID).Limit(limit).Offset(offset).Order(pagination.Sort).Find(&submissions)
+	query = s.db.Where("assignment_id = ?", assignmentID).Limit(int(pagination.Limit)).Offset(int(pagination.Offset)).Order(pagination.Sort).Find(&submissions)
 	err = query.Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
