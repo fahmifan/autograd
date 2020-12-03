@@ -1,4 +1,4 @@
-package dto
+package model
 
 // Upload ..
 type Upload struct {

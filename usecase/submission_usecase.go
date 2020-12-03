@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/miun173/autograd/config"
-	"github.com/miun173/autograd/dto"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
@@ -23,8 +22,8 @@ import (
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	Upload(ctx context.Context, upload *dto.Upload) error
-	FindByAssignmentID(ctx context.Context, pagination *dto.Pagination, assignmentID int64) ([]*model.Submission, error)
+	Upload(ctx context.Context, upload *model.Upload) error
+	FindByAssignmentID(ctx context.Context, pagination *model.Pagination, assignmentID int64) ([]*model.Submission, error)
 }
 
 type submissionUsecase struct {
@@ -58,7 +57,7 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	return nil
 }
 
-func (s *submissionUsecase) Upload(ctx context.Context, upload *dto.Upload) error {
+func (s *submissionUsecase) Upload(ctx context.Context, upload *model.Upload) error {
 	if upload == nil {
 		return errors.New("invalid arguments")
 	}
@@ -100,7 +99,7 @@ func generateFileName() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, pagination *dto.Pagination, assignmentID int64) (submissions []*model.Submission, err error) {
+func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, pagination *model.Pagination, assignmentID int64) (submissions []*model.Submission, err error) {
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit
 	submissions, err = s.submissionRepo.FindByAssignmentID(ctx, assignmentID, pagination)
 	if err != nil {

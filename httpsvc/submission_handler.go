@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/miun173/autograd/dto"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 
@@ -72,8 +71,8 @@ type uploadRequest struct {
 	SourceCode string `json:"sourceCode"`
 }
 
-func (u *uploadRequest) toDTO() *dto.Upload {
-	return &dto.Upload{
+func (u *uploadRequest) toModel() *model.Upload {
+	return &model.Upload{
 		SourceCode: u.SourceCode,
 	}
 }
@@ -82,7 +81,7 @@ type uploadRes struct {
 	FileURL string `json:"fileURL"`
 }
 
-func uploadResFromDTO(u *dto.Upload) *uploadRes {
+func uploadResFromModel(u *model.Upload) *uploadRes {
 	return &uploadRes{
 		FileURL: u.FileURL,
 	}
@@ -96,19 +95,19 @@ func (s *Server) handleUpload(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	upload := uploadReq.toDTO()
+	upload := uploadReq.toModel()
 	err = s.submissionUsecase.Upload(c.Request().Context(), upload)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, uploadResFromDTO(upload))
+	return c.JSON(http.StatusOK, uploadResFromModel(upload))
 }
 
 func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 	assignmentID := utils.StringToInt64(c.Param("assignmentID"))
-	pagination := utils.GeneratePaginationDTO(c.QueryParams())
+	pagination := utils.GeneratePaginationModel(c.QueryParams())
 	submissions, err := s.submissionUsecase.FindByAssignmentID(c.Request().Context(), pagination, assignmentID)
 	if err != nil {
 		logrus.Error(err)

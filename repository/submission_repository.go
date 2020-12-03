@@ -6,7 +6,6 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/miun173/autograd/dto"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
@@ -15,7 +14,7 @@ import (
 // SubmissionRepository ..
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *dto.Pagination) ([]*model.Submission, error)
+	FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *model.Pagination) ([]*model.Submission, error)
 }
 
 type submissionRepo struct {
@@ -41,7 +40,7 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 	return err
 }
 
-func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *dto.Pagination) ([]*model.Submission, error) {
+func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *model.Pagination) ([]*model.Submission, error) {
 	submissions := []*model.Submission{}
 	query := s.db.Find(&submissions)
 	err := query.Error

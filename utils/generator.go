@@ -4,8 +4,7 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/miun173/autograd/dto"
-
+	"github.com/miun173/autograd/model"
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
 )
@@ -29,8 +28,8 @@ func GenerateID() int64 {
 	return int64(id)
 }
 
-// GeneratePaginationDTO generate a request for pagination
-func GeneratePaginationDTO(query url.Values) *dto.Pagination {
+// GeneratePaginationModel generate a request for pagination
+func GeneratePaginationModel(query url.Values) *model.Pagination {
 	limit, page, sort := int64(10), int64(1), "created_at desc"
 
 	for key, values := range query {
@@ -49,5 +48,5 @@ func GeneratePaginationDTO(query url.Values) *dto.Pagination {
 		}
 	}
 
-	return &dto.Pagination{Limit: limit, Page: page, Sort: sort}
+	return &model.Pagination{Limit: limit, Page: page, Sort: sort}
 }

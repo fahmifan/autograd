@@ -1,4 +1,4 @@
-package dto
+package model
 
 // Pagination ..
 type Pagination struct {
