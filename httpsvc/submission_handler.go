@@ -107,14 +107,14 @@ func (s *Server) handleUpload(c echo.Context) error {
 
 func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 	assignmentID := utils.StringToInt64(c.Param("assignmentID"))
-	pagination := utils.GeneratePaginationModel(c.QueryParams())
-	submissions, err := s.submissionUsecase.FindByAssignmentID(c.Request().Context(), pagination, assignmentID)
+	cursor := utils.GenerateCursorModel(c.QueryParams())
+	submissions, err := s.submissionUsecase.FindByAssignmentID(c.Request().Context(), cursor, assignmentID)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	pagination.Rows = submissions
+	cursor.Rows = submissions
 
-	return c.JSON(http.StatusOK, pagination)
+	return c.JSON(http.StatusOK, cursor)
 }

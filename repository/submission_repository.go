@@ -14,7 +14,7 @@ import (
 // SubmissionRepository ..
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *model.Pagination) ([]*model.Submission, error)
+	FindByAssignmentID(ctx context.Context, assignmentID int64, cursor *model.Cursor) ([]*model.Submission, error)
 }
 
 type submissionRepo struct {
@@ -40,7 +40,7 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 	return err
 }
 
-func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID int64, pagination *model.Pagination) ([]*model.Submission, error) {
+func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID int64, cursor *model.Cursor) ([]*model.Submission, error) {
 	submissions := []*model.Submission{}
 	query := s.db.Find(&submissions)
 	err := query.Error
@@ -48,23 +48,23 @@ func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID in
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
 			"assignmentID": assignmentID,
-			"pagination":   pagination,
+			"cursor":       cursor,
 		}).Error(err)
 		return nil, err
 	}
 
 	rows := query.RowsAffected
-	if rows < pagination.Offset {
-		return nil, errors.New("page " + utils.Int64ToString(pagination.Page) + " is out of bounds for limit " + utils.Int64ToString(pagination.Limit))
+	if rows < cursor.Offset {
+		return nil, errors.New("page " + utils.Int64ToString(cursor.Page) + " is out of bounds for limit " + utils.Int64ToString(cursor.Limit))
 	}
 
-	query = s.db.Where("assignment_id = ?", assignmentID).Limit(int(pagination.Limit)).Offset(int(pagination.Offset)).Order(pagination.Sort).Find(&submissions)
+	query = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.Limit)).Offset(int(cursor.Offset)).Order(cursor.Sort).Find(&submissions)
 	err = query.Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
 			"assignmentID": assignmentID,
-			"pagination":   pagination,
+			"cursor":       cursor,
 		}).Error(err)
 		return nil, err
 	}

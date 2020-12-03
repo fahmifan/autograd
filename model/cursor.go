@@ -1,7 +1,7 @@
 package model
 
-// Pagination ..
-type Pagination struct {
+// Cursor ..
+type Cursor struct {
 	Limit  int64       `json:"limit"`
 	Page   int64       `json:"page"`
 	Offset int64       `json:"offset"`

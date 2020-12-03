@@ -28,8 +28,8 @@ func GenerateID() int64 {
 	return int64(id)
 }
 
-// GeneratePaginationModel generate a request for pagination
-func GeneratePaginationModel(query url.Values) *model.Pagination {
+// GenerateCursorModel generate a request for cursor
+func GenerateCursorModel(query url.Values) *model.Cursor {
 	limit, page, sort := int64(10), int64(1), "created_at desc"
 
 	for key, values := range query {
@@ -48,5 +48,5 @@ func GeneratePaginationModel(query url.Values) *model.Pagination {
 		}
 	}
 
-	return &model.Pagination{Limit: limit, Page: page, Sort: sort}
+	return &model.Cursor{Limit: limit, Page: page, Sort: sort}
 }
