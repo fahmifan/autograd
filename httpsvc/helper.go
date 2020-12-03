@@ -2,6 +2,7 @@ package httpsvc
 
 import (
 	"errors"
+	"net/url"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -114,4 +115,26 @@ func getUserFromCtx(c echo.Context) *model.User {
 func setUserToCtx(c echo.Context, user *model.User) {
 	logrus.WithField("user", user).Warn("setUserToCtx")
 	c.Set(userInfoCtx, *user)
+}
+
+func generateCursorRequest(query url.Values) *model.CursorRequest {
+	limit, page, sort := int64(10), int64(1), "created_at desc"
+
+	for key, values := range query {
+		value := values[0]
+
+		switch key {
+		case "limit":
+			limit = utils.StringToInt64(value)
+			break
+		case "page":
+			page = utils.StringToInt64(value)
+			break
+		case "sort":
+			sort = value
+			break
+		}
+	}
+
+	return &model.CursorRequest{Limit: limit, Page: page, Sort: sort}
 }

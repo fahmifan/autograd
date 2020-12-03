@@ -124,7 +124,7 @@ func cursorModelToResponse(c *model.Cursor) *model.CursorResponse {
 
 func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 	assignmentID := utils.StringToInt64(c.Param("assignmentID"))
-	cursorRequest := utils.GenerateCursorRequest(c.QueryParams())
+	cursorRequest := generateCursorRequest(c.QueryParams())
 	cursor := cursorRequestToModel(cursorRequest)
 	submissions, err := s.submissionUsecase.FindByAssignmentID(c.Request().Context(), cursor, assignmentID)
 	if err != nil {
