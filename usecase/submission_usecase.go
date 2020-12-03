@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"net/url"
 	"os"
 	"path"
 	"time"
@@ -25,7 +24,7 @@ import (
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Upload(ctx context.Context, upload *dto.Upload) error
-	FindByAssignmentID(ctx context.Context, query url.Values, assignmentID int64) (*dto.Pagination, error)
+	FindByAssignmentID(ctx context.Context, pagination *dto.Pagination, assignmentID int64) ([]*model.Submission, error)
 }
 
 type submissionUsecase struct {
@@ -101,10 +100,9 @@ func generateFileName() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, query url.Values, assignmentID int64) (pagination *dto.Pagination, err error) {
-	pagination = utils.GeneratePaginationDTO(query)
+func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, pagination *dto.Pagination, assignmentID int64) (submissions []*model.Submission, err error) {
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit
-	submissions, err := s.submissionRepo.FindByAssignmentID(ctx, assignmentID, pagination)
+	submissions, err = s.submissionRepo.FindByAssignmentID(ctx, assignmentID, pagination)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
@@ -112,8 +110,6 @@ func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, query url.Va
 		}).Error(err)
 		return nil, err
 	}
-
-	pagination.Rows = submissions
 
 	return
 }
