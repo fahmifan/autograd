@@ -23,7 +23,8 @@ import (
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Upload(ctx context.Context, upload *model.Upload) error
-	FindByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) ([]*model.Submission, error)
+	FindAllByAssignmentID(ctx context.Context, assignmentID int64) ([]*model.Submission, error)
+	FindCursorByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) ([]*model.Submission, error)
 }
 
 type submissionUsecase struct {
@@ -99,12 +100,25 @@ func generateFileName() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) (submissions []*model.Submission, err error) {
-	cursor.Offset = (cursor.Page - 1) * cursor.Size
-	submissions, err = s.submissionRepo.FindByAssignmentID(ctx, assignmentID, cursor)
+func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, assignmentID int64) (submissions []*model.Submission, err error) {
+	submissions, err = s.submissionRepo.FindAllByAssignmentID(ctx, assignmentID)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
+			"assignmentID": assignmentID,
+		}).Error(err)
+		return nil, err
+	}
+
+	return
+}
+
+func (s *submissionUsecase) FindCursorByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) (submissions []*model.Submission, err error) {
+	submissions, err = s.submissionRepo.FindCursorByAssignmentID(ctx, cursor, assignmentID)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":          utils.Dump(ctx),
+			"cursor":       cursor,
 			"assignmentID": assignmentID,
 		}).Error(err)
 		return nil, err

@@ -115,10 +115,12 @@ func cursorRequestToModel(cr *model.CursorRequest) *model.Cursor {
 
 func cursorModelToResponse(c *model.Cursor) *model.CursorResponse {
 	return &model.CursorResponse{
-		Size: c.Size,
-		Page: c.Page,
-		Sort: c.Sort,
-		Data: c.Data,
+		Size:      c.Size,
+		Page:      c.Page,
+		Sort:      c.Sort,
+		Data:      c.Data,
+		TotalPage: c.TotalPage,
+		TotalData: c.TotalData,
 	}
 }
 
@@ -126,7 +128,17 @@ func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 	assignmentID := utils.StringToInt64(c.Param("assignmentID"))
 	cursorRequest := generateCursorRequest(c.QueryParams())
 	cursor := cursorRequestToModel(cursorRequest)
-	submissions, err := s.submissionUsecase.FindByAssignmentID(c.Request().Context(), cursor, assignmentID)
+	cursor.Offset = calculateCursorOffsetValue(cursor)
+	submissions, err := s.submissionUsecase.FindAllByAssignmentID(c.Request().Context(), assignmentID)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	cursor.TotalData = int64(len(submissions))
+	cursor.TotalPage = calculateCursorTotalPageValue(cursor)
+
+	submissions, err = s.submissionUsecase.FindCursorByAssignmentID(c.Request().Context(), cursor, assignmentID)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
