@@ -57,7 +57,7 @@ func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, assignmentID
 
 func (s *submissionRepo) FindCursorByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) ([]*model.Submission, error) {
 	submissions := []*model.Submission{}
-	query := s.db.Find(&submissions)
+	query := s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.Size)).Offset(int(cursor.Offset)).Order(cursor.Sort).Find(&submissions)
 	err := query.Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -69,22 +69,6 @@ func (s *submissionRepo) FindCursorByAssignmentID(ctx context.Context, cursor *m
 	}
 
 	rows := query.RowsAffected
-	if rows < cursor.Offset {
-		return nil, errors.New("page " + utils.Int64ToString(cursor.Page) + " is out of bounds for size " + utils.Int64ToString(cursor.Size))
-	}
-
-	query = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.Size)).Offset(int(cursor.Offset)).Order(cursor.Sort).Find(&submissions)
-	err = query.Error
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":          utils.Dump(ctx),
-			"assignmentID": assignmentID,
-			"cursor":       cursor,
-		}).Error(err)
-		return nil, err
-	}
-
-	rows = query.RowsAffected
 	if rows == 0 {
 		return nil, errors.New("submission with assignmentID " + utils.Int64ToString(assignmentID) + " doesn't exist")
 	}
