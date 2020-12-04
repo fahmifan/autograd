@@ -2,24 +2,24 @@ package model
 
 // Cursor ..
 type Cursor struct {
-	Limit  int64       `json:"limit"`
+	Size   int64       `json:"size"`
 	Page   int64       `json:"page"`
 	Offset int64       `json:"offset"`
 	Sort   string      `json:"sort"`
-	Rows   interface{} `json:"rows"`
+	Data   interface{} `json:"data"`
 }
 
 // CursorRequest ..
 type CursorRequest struct {
-	Limit int64
-	Page  int64
-	Sort  string
+	Size int64
+	Page int64
+	Sort string
 }
 
 // CursorResponse ..
 type CursorResponse struct {
-	Limit int64       `json:"limit"`
-	Page  int64       `json:"page"`
-	Sort  string      `json:"sort"`
-	Rows  interface{} `json:"rows"`
+	Size int64       `json:"size"`
+	Page int64       `json:"page"`
+	Sort string      `json:"sort"`
+	Data interface{} `json:"data"`
 }

@@ -118,14 +118,14 @@ func setUserToCtx(c echo.Context, user *model.User) {
 }
 
 func generateCursorRequest(query url.Values) *model.CursorRequest {
-	limit, page, sort := int64(10), int64(1), "created_at desc"
+	size, page, sort := int64(10), int64(1), "created_at desc"
 
 	for key, values := range query {
 		value := values[0]
 
 		switch key {
-		case "limit":
-			limit = utils.StringToInt64(value)
+		case "size":
+			size = utils.StringToInt64(value)
 			break
 		case "page":
 			page = utils.StringToInt64(value)
@@ -136,5 +136,5 @@ func generateCursorRequest(query url.Values) *model.CursorRequest {
 		}
 	}
 
-	return &model.CursorRequest{Limit: limit, Page: page, Sort: sort}
+	return &model.CursorRequest{Size: size, Page: page, Sort: sort}
 }

@@ -55,10 +55,10 @@ func (s *submissionRepo) FindByAssignmentID(ctx context.Context, assignmentID in
 
 	rows := query.RowsAffected
 	if rows < cursor.Offset {
-		return nil, errors.New("page " + utils.Int64ToString(cursor.Page) + " is out of bounds for limit " + utils.Int64ToString(cursor.Limit))
+		return nil, errors.New("page " + utils.Int64ToString(cursor.Page) + " is out of bounds for size " + utils.Int64ToString(cursor.Size))
 	}
 
-	query = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.Limit)).Offset(int(cursor.Offset)).Order(cursor.Sort).Find(&submissions)
+	query = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.Size)).Offset(int(cursor.Offset)).Order(cursor.Sort).Find(&submissions)
 	err = query.Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{

@@ -107,18 +107,18 @@ func (s *Server) handleUpload(c echo.Context) error {
 
 func cursorRequestToModel(cr *model.CursorRequest) *model.Cursor {
 	return &model.Cursor{
-		Limit: cr.Limit,
-		Page:  cr.Page,
-		Sort:  cr.Sort,
+		Size: cr.Size,
+		Page: cr.Page,
+		Sort: cr.Sort,
 	}
 }
 
 func cursorModelToResponse(c *model.Cursor) *model.CursorResponse {
 	return &model.CursorResponse{
-		Limit: c.Limit,
-		Page:  c.Page,
-		Sort:  c.Sort,
-		Rows:  c.Rows,
+		Size: c.Size,
+		Page: c.Page,
+		Sort: c.Sort,
+		Data: c.Data,
 	}
 }
 
@@ -132,7 +132,7 @@ func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	cursor.Rows = submissions
+	cursor.Data = submissions
 
 	return c.JSON(http.StatusOK, cursorModelToResponse(cursor))
 }

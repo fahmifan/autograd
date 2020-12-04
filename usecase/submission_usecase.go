@@ -100,7 +100,7 @@ func generateFileName() string {
 }
 
 func (s *submissionUsecase) FindByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) (submissions []*model.Submission, err error) {
-	cursor.Offset = (cursor.Page - 1) * cursor.Limit
+	cursor.Offset = (cursor.Page - 1) * cursor.Size
 	submissions, err = s.submissionRepo.FindByAssignmentID(ctx, assignmentID, cursor)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
