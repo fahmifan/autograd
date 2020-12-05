@@ -11,10 +11,11 @@ import (
 
 // Server ..
 type Server struct {
-	exampleUsecase usecase.ExampleUsecase
-	userUsecase    usecase.UserUsecase
-	echo           *echo.Echo
-	port           string
+	exampleUsecase    usecase.ExampleUsecase
+	userUsecase       usecase.UserUsecase
+	submissionUsecase usecase.SubmissionUsecase
+	echo              *echo.Echo
+	port              string
 }
 
 // NewServer ..
@@ -38,6 +39,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) routes() {
+	s.echo.Static("/storage", "submission")
 	s.echo.GET("/ping", s.handlePing)
 
 	apiV1 := s.echo.Group("/api/v1")
@@ -47,6 +49,10 @@ func (s *Server) routes() {
 	// example using auth middleware
 	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
+
+	apiV1.POST("/submissions", s.handleCreateSubmission)
+	apiV1.POST("/submissions/upload", s.handleUpload)
+	apiV1.GET("/submissions/:assignmentID", s.handleGetAssignmentSubmission)
 }
 
 func (s *Server) handlePing(c echo.Context) error {

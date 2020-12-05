@@ -41,6 +41,15 @@ func JWTSecret() string {
 	return val
 }
 
+// BaseURL ..
+func BaseURL() string {
+	if val, ok := os.LookupEnv("BASE_URL"); ok {
+		return val
+	}
+
+	return "localhost:" + os.Getenv("PORT")
+}
+
 // PostgresDSN :nodoc:
 func PostgresDSN() string {
 	port := os.Getenv("DB_PORT")

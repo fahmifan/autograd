@@ -32,8 +32,8 @@ type userRes struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 func userResFromModel(m *model.User) *userRes {
