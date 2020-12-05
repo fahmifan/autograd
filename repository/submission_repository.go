@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 
 	"gorm.io/gorm"
 
@@ -14,8 +13,7 @@ import (
 // SubmissionRepository ..
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	FindAllByAssignmentID(ctx context.Context, assignmentID int64) ([]*model.Submission, error)
-	FindCursorByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) ([]*model.Submission, error)
+	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error)
 }
 
 type submissionRepo struct {
@@ -41,37 +39,28 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 	return err
 }
 
-func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, assignmentID int64) ([]*model.Submission, error) {
-	submissions := []*model.Submission{}
-	err := s.db.Where("assignment_id = ?", assignmentID).Find(&submissions).Error
+func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error) {
+	count := int64(0)
+	err := s.db.Model(model.Submission{}).Where("assignment_id = ?", assignmentID).Count(&count).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
 			"assignmentID": assignmentID,
 		}).Error(err)
-		return nil, err
+		return nil, count, err
 	}
 
-	return submissions, nil
-}
-
-func (s *submissionRepo) FindCursorByAssignmentID(ctx context.Context, cursor *model.Cursor, assignmentID int64) ([]*model.Submission, error) {
 	submissions := []*model.Submission{}
-	query := s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.Size)).Offset(int(cursor.Offset)).Order(cursor.Sort).Find(&submissions)
-	err := query.Error
+	err = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.GetSize())).
+		Offset(int(cursor.GetOffset())).Order("created_at " + cursor.GetSort()).Find(&submissions).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
 			"cursor":       cursor,
 			"assignmentID": assignmentID,
 		}).Error(err)
-		return nil, err
+		return nil, count, err
 	}
 
-	rows := query.RowsAffected
-	if rows == 0 {
-		return nil, errors.New("submission with assignmentID " + utils.Int64ToString(assignmentID) + " doesn't exist")
-	}
-
-	return submissions, nil
+	return submissions, count, nil
 }

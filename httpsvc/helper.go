@@ -2,7 +2,7 @@ package httpsvc
 
 import (
 	"errors"
-	"net/url"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -117,38 +117,14 @@ func setUserToCtx(c echo.Context, user *model.User) {
 	c.Set(userInfoCtx, *user)
 }
 
-func generateCursorRequest(query url.Values) *model.CursorRequest {
-	size, page, sort := int64(10), int64(1), "created_at desc"
+func getCursorFromContext(c echo.Context) model.Cursor {
+	size := utils.StringToInt64(c.QueryParam("size"))
+	page := utils.StringToInt64(c.QueryParam("page"))
+	sort := c.QueryParam("sort")
 
-	for key, values := range query {
-		value := values[0]
-
-		switch key {
-		case "size":
-			size = utils.StringToInt64(value)
-			break
-		case "page":
-			page = utils.StringToInt64(value)
-			break
-		case "sort":
-			sort = value
-			break
-		}
+	if strings.ToUpper(sort) != "ASC" {
+		sort = "DESC"
 	}
 
-	return &model.CursorRequest{Size: size, Page: page, Sort: sort}
-}
-
-func calculateCursorOffsetValue(cursor *model.Cursor) int64 {
-	return (cursor.Page - 1) * cursor.Size
-}
-
-func calculateCursorTotalPageValue(cursor *model.Cursor) int64 {
-	totalData := cursor.TotalData / cursor.Size
-	remainderData := cursor.TotalData % cursor.Size
-	if remainderData != 0 {
-		totalData++
-	}
-
-	return totalData
+	return model.NewCursor(size, page, sort)
 }
