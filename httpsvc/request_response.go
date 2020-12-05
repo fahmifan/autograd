@@ -53,6 +53,26 @@ func submissionModelToResponse(m *model.Submission) *submissionResponse {
 	}
 }
 
+type uploadRequest struct {
+	SourceCode string `json:"sourceCode"`
+}
+
+func uploadRequestToModel(r *uploadRequest) *model.Upload {
+	return &model.Upload{
+		SourceCode: r.SourceCode,
+	}
+}
+
+type uploadResponse struct {
+	FileURL string `json:"fileURL"`
+}
+
+func uploadModelToResponse(m *model.Upload) *uploadResponse {
+	return &uploadResponse{
+		FileURL: m.FileURL,
+	}
+}
+
 type cursorResponse struct {
 	Size      int64       `json:"size"`
 	Page      int64       `json:"page"`
@@ -70,17 +90,5 @@ func newCursorResponse(c model.Cursor, data interface{}, count int64) *cursorRes
 		TotalPage: c.GetTotalPage(count),
 		TotalData: count,
 		Data:      data,
-	}
-}
-
-func uploadRequestToModel(r *model.UploadRequest) *model.Upload {
-	return &model.Upload{
-		SourceCode: r.SourceCode,
-	}
-}
-
-func uploadModelToResponse(m *model.Upload) *model.UploadResponse {
-	return &model.UploadResponse{
-		FileURL: m.FileURL,
 	}
 }

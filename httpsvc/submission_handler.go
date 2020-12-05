@@ -3,7 +3,6 @@ package httpsvc
 import (
 	"net/http"
 
-	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 
 	"github.com/labstack/echo/v4"
@@ -29,7 +28,7 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 }
 
 func (s *Server) handleUpload(c echo.Context) error {
-	uploadReq := &model.UploadRequest{}
+	uploadReq := &uploadRequest{}
 	err := c.Bind(uploadReq)
 	if err != nil {
 		logrus.Error(err)
