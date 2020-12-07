@@ -13,14 +13,6 @@ type submissionRequest struct {
 	FileURL      string `json:"fileURL"`
 }
 
-func submissionRequestToModel(r *submissionRequest) *model.Submission {
-	return &model.Submission{
-		AssignmentID: r.AssignmentID,
-		SubmittedBy:  r.SubmittedBy,
-		FileURL:      r.FileURL,
-	}
-}
-
 type submissionResponse struct {
 	ID           string  `json:"id"`
 	AssignmentID string  `json:"assignmentID"`
@@ -57,20 +49,8 @@ type uploadRequest struct {
 	SourceCode string `json:"sourceCode"`
 }
 
-func uploadRequestToModel(r *uploadRequest) *model.Upload {
-	return &model.Upload{
-		SourceCode: r.SourceCode,
-	}
-}
-
 type uploadResponse struct {
 	FileURL string `json:"fileURL"`
-}
-
-func uploadModelToResponse(m *model.Upload) *uploadResponse {
-	return &uploadResponse{
-		FileURL: m.FileURL,
-	}
 }
 
 type cursorResponse struct {
