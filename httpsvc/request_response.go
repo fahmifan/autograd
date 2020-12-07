@@ -40,21 +40,21 @@ func assignmentModelToResponse(m *model.Assignment) *assignmentResponse {
 }
 
 type cursorResponse struct {
-	Size      int64       `json:"size"`
-	Page      int64       `json:"page"`
+	Size      string      `json:"size"`
+	Page      string      `json:"page"`
 	Sort      string      `json:"sort"`
-	TotalPage int64       `json:"totalPage"`
-	TotalData int64       `json:"totalData"`
+	TotalPage string      `json:"totalPage"`
+	TotalData string      `json:"totalData"`
 	Data      interface{} `json:"data"`
 }
 
 func newCursorResponse(c model.Cursor, data interface{}, count int64) *cursorResponse {
 	return &cursorResponse{
-		Size:      c.GetSize(),
-		Page:      c.GetPage(),
+		Size:      utils.Int64ToString(c.GetSize()),
+		Page:      utils.Int64ToString(c.GetPage()),
 		Sort:      c.GetSort(),
-		TotalPage: c.GetTotalPage(count),
-		TotalData: count,
+		TotalPage: utils.Int64ToString(c.GetTotalPage(count)),
+		TotalData: utils.Int64ToString(count),
 		Data:      data,
 	}
 }
