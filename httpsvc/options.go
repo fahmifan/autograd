@@ -19,6 +19,13 @@ func WithUserUsecase(u usecase.UserUsecase) Option {
 	}
 }
 
+// WithAssignmentUsecase ..
+func WithAssignmentUsecase(a usecase.AssignmentUsecase) Option {
+	return func(s *Server) {
+		s.assignmentUsecase = a
+	}
+}
+
 // WithSubmissionUsecase ..
 func WithSubmissionUsecase(sub usecase.SubmissionUsecase) Option {
 	return func(s *Server) {

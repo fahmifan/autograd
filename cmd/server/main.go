@@ -43,6 +43,8 @@ func main() {
 
 	userRepo := repository.NewUserRepository(postgres)
 	userUsecase := usecase.NewUserUsecase(userRepo)
+	assignmentRepo := repository.NewAssignmentRepository(postgres)
+	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo)
 	submissionRepo := repository.NewSubmissionRepo(postgres)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo)
 
@@ -50,6 +52,7 @@ func main() {
 		config.Port(),
 		httpsvc.WithExampleUsecase(exampleUsecase),
 		httpsvc.WithUserUsecase(userUsecase),
+		httpsvc.WithAssignmentUsecase(assignmentUsecase),
 		httpsvc.WithSubmissionUsecase(submissionUsecase),
 	)
 
