@@ -28,11 +28,21 @@ func assigmentUpdateReqToModel(r *assignmentUpdateRequest) *model.Assignment {
 }
 
 type assignmentRequest struct {
-	AssignedBy        int64  `json:"assignedBy"`
+	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
 	Description       string `json:"description"`
 	CaseInputFileURL  string `json:"caseInputFileURL"`
 	CaseOutputFileURL string `json:"caseOutputFileURL"`
+}
+
+func assignmentRequestToModel(r *assignmentRequest) *model.Assignment {
+	return &model.Assignment{
+		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		Name:              r.Name,
+		Description:       r.Description,
+		CaseInputFileURL:  r.CaseInputFileURL,
+		CaseOutputFileURL: r.CaseOutputFileURL,
+	}
 }
 
 type assignmentResponse struct {
