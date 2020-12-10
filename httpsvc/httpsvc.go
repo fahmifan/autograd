@@ -52,6 +52,7 @@ func (s *Server) routes() {
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
 
 	apiV1.POST("/assignments", s.handleCreateAssignment)
+	apiV1.PUT("/assignments", s.handleUpdateAssignment)
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
 	apiV1.POST("/submissions/upload", s.handleUpload)

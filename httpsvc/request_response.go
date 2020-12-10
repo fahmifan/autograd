@@ -7,6 +7,26 @@ import (
 	"github.com/miun173/autograd/utils"
 )
 
+type assignmentUpdateRequest struct {
+	ID                string `json:"id"`
+	AssignedBy        string `json:"assignedBy"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	CaseInputFileURL  string `json:"caseInputFileURL"`
+	CaseOutputFileURL string `json:"caseOutputFileURL"`
+}
+
+func assigmentUpdateReqToModel(r *assignmentUpdateRequest) *model.Assignment {
+	return &model.Assignment{
+		ID:                utils.StringToInt64(r.ID),
+		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		Name:              r.Name,
+		Description:       r.Description,
+		CaseInputFileURL:  r.CaseInputFileURL,
+		CaseOutputFileURL: r.CaseOutputFileURL,
+	}
+}
+
 type assignmentRequest struct {
 	AssignedBy        int64  `json:"assignedBy"`
 	Name              string `json:"name"`

@@ -13,6 +13,7 @@ import (
 // AssignmentUsecase ..
 type AssignmentUsecase interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
+	Update(ctx context.Context, assignment *model.Assignment) error
 }
 
 type assignmentUsecase struct {
@@ -38,6 +39,25 @@ func (a *assignmentUsecase) Create(ctx context.Context, assignment *model.Assign
 
 	assignment.ID = utils.GenerateID()
 	err := a.assignmentRepo.Create(ctx, assignment)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *assignmentUsecase) Update(ctx context.Context, assignment *model.Assignment) error {
+	if assignment == nil {
+		return errors.New("invalid arguments")
+	}
+
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":        utils.Dump(ctx),
+		"assignment": utils.Dump(assignment),
+	})
+
+	err := a.assignmentRepo.Update(ctx, assignment)
 	if err != nil {
 		logger.Error(err)
 		return err

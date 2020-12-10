@@ -33,3 +33,22 @@ func (s *Server) handleCreateAssignment(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, assignmentModelToResponse(assignment))
 }
+
+func (s *Server) handleUpdateAssignment(c echo.Context) error {
+	assignmentReq := &assignmentUpdateRequest{}
+	err := c.Bind(assignmentReq)
+	if err != nil {
+
+		return responseError(c, err)
+	}
+
+	assignment := assigmentUpdateReqToModel(assignmentReq)
+	err = s.assignmentUsecase.Update(c.Request().Context(), assignment)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, assignmentModelToResponse(assignment))
+
+}
