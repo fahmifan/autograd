@@ -69,6 +69,32 @@ func assignmentModelToResponse(m *model.Assignment) *assignmentResponse {
 	}
 }
 
+type assignmentDeleteResponse struct {
+	ID                string `json:"id"`
+	AssignedBy        string `json:"assignedBy"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	CaseInputFileURL  string `json:"caseInputFileURL"`
+	CaseOutputFileURL string `json:"caseOutputFileURL"`
+	CreatedAt         string `json:"createdAt"`
+	UpdatedAt         string `json:"updatedAt"`
+	DeletedAt         string `json:"deletedAt"`
+}
+
+func assignmentModelToDeleteResponse(m *model.Assignment) *assignmentDeleteResponse {
+	return &assignmentDeleteResponse{
+		ID:                utils.Int64ToString(m.ID),
+		AssignedBy:        utils.Int64ToString(m.AssignedBy),
+		Name:              m.Name,
+		Description:       m.Description,
+		CaseInputFileURL:  m.CaseInputFileURL,
+		CaseOutputFileURL: m.CaseOutputFileURL,
+		CreatedAt:         m.CreatedAt.Format(time.RFC3339Nano),
+		UpdatedAt:         m.UpdatedAt.Format(time.RFC3339Nano),
+		DeletedAt:         m.DeletedAt.Format(time.RFC3339Nano),
+	}
+}
+
 type cursorResponse struct {
 	Size      string      `json:"size"`
 	Page      string      `json:"page"`

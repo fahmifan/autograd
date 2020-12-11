@@ -53,6 +53,7 @@ func (s *Server) routes() {
 
 	apiV1.POST("/assignments", s.handleCreateAssignment)
 	apiV1.PUT("/assignments", s.handleUpdateAssignment)
+	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
 	apiV1.POST("/submissions/upload", s.handleUpload)
