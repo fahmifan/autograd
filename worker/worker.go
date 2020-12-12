@@ -17,7 +17,7 @@ type Worker struct {
 	pool       *work.WorkerPool
 	redisPool  *redis.Pool
 	enqueuer   *work.Enqueuer
-	grader     Grader
+	grader     GraderUsecase
 	submission Submission
 }
 

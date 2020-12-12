@@ -15,7 +15,7 @@ func WithWorkerPool(rd *redis.Pool) Option {
 }
 
 // WithGrader ..
-func WithGrader(gr Grader) Option {
+func WithGrader(gr GraderUsecase) Option {
 	return func(c *Worker) {
 		c.grader = gr
 	}

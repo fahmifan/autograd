@@ -16,8 +16,8 @@ const (
 	jobGradeSubmission        string = "grade_submission"
 )
 
-// Grader ..
-type Grader interface {
+// GraderUsecase ..
+type GraderUsecase interface {
 	GradeSubmission(submissionID int64) error
 }
 
@@ -30,7 +30,7 @@ type jobHandler struct {
 	pool       *work.WorkerPool
 	redisPool  *redis.Pool
 	enqueuer   *work.Enqueuer
-	grader     Grader
+	grader     GraderUsecase
 	submission Submission
 }
 
