@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
@@ -42,23 +41,22 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 }
 
 func (a *assignmentRepo) Delete(ctx context.Context, assignment *model.Assignment) error {
-	err := a.db.First(assignment).Error
+	err := a.db.Delete(assignment).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":        utils.Dump(ctx),
-			"assignment": utils.Dump(assignment),
+			"assignment": assignment,
 		}).Error(err)
+		return err
 	}
 
-	deletedAt := time.Now()
-	assignment.DeletedAt = &deletedAt
-
-	err = a.db.Save(assignment).Error
+	err = a.db.Unscoped().First(assignment).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":        utils.Dump(ctx),
-			"assignment": utils.Dump(assignment),
+			"assignment": assignment,
 		}).Error(err)
+		return err
 	}
 
 	return err

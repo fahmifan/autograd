@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Assignment ..
 type Assignment struct {
@@ -12,5 +16,5 @@ type Assignment struct {
 	CaseOutputFileURL string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
-	DeletedAt         *time.Time
+	DeletedAt         gorm.DeletedAt
 }
