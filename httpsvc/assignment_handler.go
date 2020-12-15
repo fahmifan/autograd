@@ -40,6 +40,19 @@ func (s *Server) handleDeleteAssignment(c echo.Context) error {
 	return c.JSON(http.StatusOK, assignmentModelToDeleteResponse(assignment))
 }
 
+func (s *Server) handleGetAssignment(c echo.Context) error {
+	cursor := getCursorFromContext(c)
+	assignments, count, err := s.assignmentUsecase.FindAll(c.Request().Context(), cursor)
+	if err != nil {
+
+		return responseError(c, err)
+	}
+
+	assignmentResponses := newAssignmentResponses(assignments)
+
+	return c.JSON(http.StatusOK, newCursorResponse(cursor, assignmentResponses, count))
+}
+
 func (s *Server) handleUpdateAssignment(c echo.Context) error {
 	assignmentReq := &assignmentUpdateRequest{}
 	err := c.Bind(assignmentReq)

@@ -69,6 +69,14 @@ func assignmentModelToResponse(m *model.Assignment) *assignmentResponse {
 	}
 }
 
+func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*assignmentResponse) {
+	for _, assignment := range assignments {
+		assignmentRes = append(assignmentRes, assignmentModelToResponse(assignment))
+	}
+
+	return
+}
+
 type assignmentDeleteResponse struct {
 	ID                string `json:"id"`
 	AssignedBy        string `json:"assignedBy"`

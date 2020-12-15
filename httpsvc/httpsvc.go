@@ -51,6 +51,7 @@ func (s *Server) routes() {
 	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
 
+	apiV1.GET("/assignments", s.handleGetAssignment)
 	apiV1.POST("/assignments", s.handleCreateAssignment)
 	apiV1.PUT("/assignments", s.handleUpdateAssignment)
 	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)

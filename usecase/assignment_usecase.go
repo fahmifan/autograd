@@ -14,6 +14,7 @@ import (
 type AssignmentUsecase interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
 	Delete(ctx context.Context, assignment *model.Assignment) error
+	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
 	Update(ctx context.Context, assignment *model.Assignment) error
 }
 
@@ -61,6 +62,21 @@ func (a *assignmentUsecase) Delete(ctx context.Context, assignment *model.Assign
 	}
 
 	return nil
+}
+
+func (a *assignmentUsecase) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":    utils.Dump(ctx),
+		"cursor": utils.Dump(cursor),
+	})
+
+	assignments, count, err = a.assignmentRepo.FindAll(ctx, cursor)
+	if err != nil {
+		logger.Error(err)
+		return nil, 0, err
+	}
+
+	return
 }
 
 func (a *assignmentUsecase) Update(ctx context.Context, assignment *model.Assignment) error {
