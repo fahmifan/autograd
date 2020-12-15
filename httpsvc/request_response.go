@@ -7,7 +7,7 @@ import (
 	"github.com/miun173/autograd/utils"
 )
 
-type assignmentUpdateRequest struct {
+type assignmentReq struct {
 	ID                string `json:"id"`
 	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
@@ -16,7 +16,17 @@ type assignmentUpdateRequest struct {
 	CaseOutputFileURL string `json:"caseOutputFileURL"`
 }
 
-func assigmentUpdateReqToModel(r *assignmentUpdateRequest) *model.Assignment {
+func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
+	return &model.Assignment{
+		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		Name:              r.Name,
+		Description:       r.Description,
+		CaseInputFileURL:  r.CaseInputFileURL,
+		CaseOutputFileURL: r.CaseOutputFileURL,
+	}
+}
+
+func assigmentUpdateReqToModel(r *assignmentReq) *model.Assignment {
 	return &model.Assignment{
 		ID:                utils.StringToInt64(r.ID),
 		AssignedBy:        utils.StringToInt64(r.AssignedBy),
@@ -27,25 +37,7 @@ func assigmentUpdateReqToModel(r *assignmentUpdateRequest) *model.Assignment {
 	}
 }
 
-type assignmentRequest struct {
-	AssignedBy        string `json:"assignedBy"`
-	Name              string `json:"name"`
-	Description       string `json:"description"`
-	CaseInputFileURL  string `json:"caseInputFileURL"`
-	CaseOutputFileURL string `json:"caseOutputFileURL"`
-}
-
-func assignmentRequestToModel(r *assignmentRequest) *model.Assignment {
-	return &model.Assignment{
-		AssignedBy:        utils.StringToInt64(r.AssignedBy),
-		Name:              r.Name,
-		Description:       r.Description,
-		CaseInputFileURL:  r.CaseInputFileURL,
-		CaseOutputFileURL: r.CaseOutputFileURL,
-	}
-}
-
-type assignmentResponse struct {
+type assignmentRes struct {
 	ID                string `json:"id"`
 	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
@@ -57,8 +49,8 @@ type assignmentResponse struct {
 	DeletedAt         string `json:"deletedAt"`
 }
 
-func assignmentModelToResponse(m *model.Assignment) *assignmentResponse {
-	return &assignmentResponse{
+func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
+	return &assignmentRes{
 		ID:                utils.Int64ToString(m.ID),
 		AssignedBy:        utils.Int64ToString(m.AssignedBy),
 		Name:              m.Name,
@@ -70,16 +62,16 @@ func assignmentModelToResponse(m *model.Assignment) *assignmentResponse {
 	}
 }
 
-func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*assignmentResponse) {
+func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*assignmentRes) {
 	for _, assignment := range assignments {
-		assignmentRes = append(assignmentRes, assignmentModelToResponse(assignment))
+		assignmentRes = append(assignmentRes, assignmentModelToCreateRes(assignment))
 	}
 
 	return
 }
 
-func assignmentModelToDeleteResponse(m *model.Assignment) *assignmentResponse {
-	return &assignmentResponse{
+func assignmentModelToDeleteRes(m *model.Assignment) *assignmentRes {
+	return &assignmentRes{
 		ID:                utils.Int64ToString(m.ID),
 		AssignedBy:        utils.Int64ToString(m.AssignedBy),
 		Name:              m.Name,
@@ -92,7 +84,7 @@ func assignmentModelToDeleteResponse(m *model.Assignment) *assignmentResponse {
 	}
 }
 
-type cursorResponse struct {
+type cursorRes struct {
 	Size      string      `json:"size"`
 	Page      string      `json:"page"`
 	Sort      string      `json:"sort"`
@@ -101,8 +93,8 @@ type cursorResponse struct {
 	Data      interface{} `json:"data"`
 }
 
-func newCursorResponse(c model.Cursor, data interface{}, count int64) *cursorResponse {
-	return &cursorResponse{
+func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
+	return &cursorRes{
 		Size:      utils.Int64ToString(c.GetSize()),
 		Page:      utils.Int64ToString(c.GetPage()),
 		Sort:      c.GetSort(),
@@ -112,21 +104,21 @@ func newCursorResponse(c model.Cursor, data interface{}, count int64) *cursorRes
 	}
 }
 
-type uploadRequest struct {
+type uploadReq struct {
 	SourceCode string `json:"sourceCode"`
 }
 
-type uploadResponse struct {
+type uploadRes struct {
 	FileURL string `json:"fileURL"`
 }
 
-type submissionRequest struct {
+type submissionReq struct {
 	AssignmentID int64  `json:"assignmentID"`
 	SubmittedBy  int64  `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
 }
 
-type submissionResponse struct {
+type submissionRes struct {
 	ID           string  `json:"id"`
 	AssignmentID string  `json:"assignmentID"`
 	SubmittedBy  string  `json:"submittedBy"`
@@ -137,16 +129,8 @@ type submissionResponse struct {
 	UpdatedAt    string  `json:"updatedAt"`
 }
 
-func newSubmissionResponses(submissions []*model.Submission) (submissionRes []*submissionResponse) {
-	for _, submission := range submissions {
-		submissionRes = append(submissionRes, submissionModelToResponse(submission))
-	}
-
-	return
-}
-
-func submissionModelToResponse(m *model.Submission) *submissionResponse {
-	return &submissionResponse{
+func submissionModelToRes(m *model.Submission) *submissionRes {
+	return &submissionRes{
 		ID:           utils.Int64ToString(m.ID),
 		AssignmentID: utils.Int64ToString(m.AssignmentID),
 		SubmittedBy:  utils.Int64ToString(m.SubmittedBy),
@@ -156,4 +140,12 @@ func submissionModelToResponse(m *model.Submission) *submissionResponse {
 		CreatedAt:    m.CreatedAt.Format(time.RFC3339Nano),
 		UpdatedAt:    m.UpdatedAt.Format(time.RFC3339Nano),
 	}
+}
+
+func newSubmissionResponses(submissions []*model.Submission) (submissionRes []*submissionRes) {
+	for _, submission := range submissions {
+		submissionRes = append(submissionRes, submissionModelToRes(submission))
+	}
+
+	return
 }

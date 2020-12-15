@@ -12,7 +12,7 @@ import (
 )
 
 func (s *Server) handleCreateSubmission(c echo.Context) error {
-	submissionReq := &submissionRequest{}
+	submissionReq := &submissionReq{}
 	err := c.Bind(submissionReq)
 	if err != nil {
 		logrus.Error(err)
@@ -32,11 +32,11 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, submissionModelToResponse(submission))
+	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
 func (s *Server) handleUpload(c echo.Context) error {
-	uploadReq := &uploadRequest{}
+	uploadReq := &uploadReq{}
 	err := c.Bind(uploadReq)
 	if err != nil {
 		logrus.Error(err)
@@ -56,7 +56,7 @@ func (s *Server) handleUpload(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	uploadRes := &uploadResponse{}
+	uploadRes := &uploadRes{}
 	err = smapping.FillStruct(uploadRes, smapping.MapFields(upload))
 	if err != nil {
 		logrus.Error(err)
@@ -77,5 +77,5 @@ func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 
 	submissionRes := newSubmissionResponses(submissions)
 
-	return c.JSON(http.StatusOK, newCursorResponse(cursor, submissionRes, count))
+	return c.JSON(http.StatusOK, newCursorRes(cursor, submissionRes, count))
 }

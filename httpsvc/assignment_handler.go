@@ -11,21 +11,21 @@ import (
 )
 
 func (s *Server) handleCreateAssignment(c echo.Context) error {
-	assignmentReq := &assignmentRequest{}
+	assignmentReq := &assignmentReq{}
 	err := c.Bind(assignmentReq)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	assignment := assignmentRequestToModel(assignmentReq)
+	assignment := assignmentCreateReqToModel(assignmentReq)
 	err = s.assignmentUsecase.Create(c.Request().Context(), assignment)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToResponse(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
 }
 
 func (s *Server) handleDeleteAssignment(c echo.Context) error {
@@ -37,7 +37,7 @@ func (s *Server) handleDeleteAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToDeleteResponse(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToDeleteRes(assignment))
 }
 
 func (s *Server) handleGetAssignment(c echo.Context) error {
@@ -50,11 +50,11 @@ func (s *Server) handleGetAssignment(c echo.Context) error {
 
 	assignmentResponses := newAssignmentResponses(assignments)
 
-	return c.JSON(http.StatusOK, newCursorResponse(cursor, assignmentResponses, count))
+	return c.JSON(http.StatusOK, newCursorRes(cursor, assignmentResponses, count))
 }
 
 func (s *Server) handleUpdateAssignment(c echo.Context) error {
-	assignmentReq := &assignmentUpdateRequest{}
+	assignmentReq := &assignmentReq{}
 	err := c.Bind(assignmentReq)
 	if err != nil {
 
@@ -68,6 +68,6 @@ func (s *Server) handleUpdateAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToResponse(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
 
 }
