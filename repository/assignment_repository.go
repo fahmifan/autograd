@@ -13,6 +13,7 @@ import (
 type AssignmentRepository interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
 	Delete(ctx context.Context, assignment *model.Assignment) error
+	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
 	Update(ctx context.Context, assignment *model.Assignment) error
 }
@@ -60,6 +61,24 @@ func (a *assignmentRepo) Delete(ctx context.Context, assignment *model.Assignmen
 	}
 
 	return err
+}
+
+func (a *assignmentRepo) FindByID(ctx context.Context, id int64) (*model.Assignment, error) {
+	assignment := &model.Assignment{}
+	err := a.db.Where("id = ? ", id).Take(assignment).Error
+	switch err {
+	case nil: // ignore
+	case gorm.ErrRecordNotFound:
+		return nil, nil
+	default:
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
+	return assignment, nil
 }
 
 func (a *assignmentRepo) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error) {
