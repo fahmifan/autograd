@@ -8,7 +8,7 @@ import (
 )
 
 type assignmentReq struct {
-	ID                string `json:"id"`
+	ID                string `json:"id,omitempty"`
 	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
 	Description       string `json:"description"`
@@ -46,7 +46,7 @@ type assignmentRes struct {
 	CaseOutputFileURL string `json:"caseOutputFileURL"`
 	CreatedAt         string `json:"createdAt"`
 	UpdatedAt         string `json:"updatedAt"`
-	DeletedAt         string `json:"deletedAt"`
+	DeletedAt         string `json:"deletedAt,omitempty"`
 }
 
 func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
