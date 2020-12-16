@@ -42,9 +42,21 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 }
 
 func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignment, error) {
+	tx := a.db.Begin()
+	err := tx.Where("assignment_id = ?", id).Delete(&model.Submission{}).Error
+	if err != nil {
+		tx.Rollback()
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
 	assignment := &model.Assignment{}
-	err := a.db.Where("id = ?", id).Delete(assignment).Error
+	err = tx.Where("id = ?", id).Delete(assignment).Error
 	if err != nil {
+		tx.Rollback()
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
 			"id":  id,
@@ -52,8 +64,9 @@ func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignmen
 		return nil, err
 	}
 
-	err = a.db.Where("assignment_id = ?", id).Delete(&model.Submission{}).Error
+	err = tx.Unscoped().Where("id = ?", id).First(assignment).Error
 	if err != nil {
+		tx.Rollback()
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
 			"id":  id,
@@ -61,15 +74,7 @@ func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignmen
 		return nil, err
 	}
 
-	err = a.db.Unscoped().Where("id = ?", id).First(assignment).Error
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
-		return nil, err
-	}
-
+	tx.Commit()
 	return assignment, nil
 }
 
