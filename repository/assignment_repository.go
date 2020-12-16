@@ -52,6 +52,15 @@ func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignmen
 		return nil, err
 	}
 
+	err = a.db.Where("assignment_id = ?", id).Delete(&model.Submission{}).Error
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
 	err = a.db.Unscoped().Where("id = ?", id).First(assignment).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
