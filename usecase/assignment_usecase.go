@@ -13,7 +13,7 @@ import (
 // AssignmentUsecase ..
 type AssignmentUsecase interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
-	Delete(ctx context.Context, assignment *model.Assignment) error
+	Delete(ctx context.Context, id int64) (*model.Assignment, error)
 	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
 	Update(ctx context.Context, assignment *model.Assignment) error
@@ -50,19 +50,23 @@ func (a *assignmentUsecase) Create(ctx context.Context, assignment *model.Assign
 	return nil
 }
 
-func (a *assignmentUsecase) Delete(ctx context.Context, assignment *model.Assignment) error {
+func (a *assignmentUsecase) Delete(ctx context.Context, id int64) (*model.Assignment, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"assignment": utils.Dump(assignment),
+		"ctx": utils.Dump(ctx),
+		"id":  utils.Dump(id),
 	})
 
-	err := a.assignmentRepo.Delete(ctx, assignment)
+	assignment, err := a.assignmentRepo.Delete(ctx, id)
 	if err != nil {
 		logger.Error(err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	if assignment == nil {
+		return nil, ErrNotFound
+	}
+
+	return assignment, nil
 }
 
 func (a *assignmentUsecase) FindByID(ctx context.Context, id int64) (*model.Assignment, error) {

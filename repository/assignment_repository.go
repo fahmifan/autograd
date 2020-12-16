@@ -12,7 +12,7 @@ import (
 // AssignmentRepository ..
 type AssignmentRepository interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
-	Delete(ctx context.Context, assignment *model.Assignment) error
+	Delete(ctx context.Context, id int64) (*model.Assignment, error)
 	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
 	Update(ctx context.Context, assignment *model.Assignment) error
@@ -41,26 +41,27 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 	return err
 }
 
-func (a *assignmentRepo) Delete(ctx context.Context, assignment *model.Assignment) error {
-	err := a.db.Delete(assignment).Error
+func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignment, error) {
+	assignment := &model.Assignment{}
+	err := a.db.Where("id = ?", id).Delete(assignment).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"ctx":        utils.Dump(ctx),
-			"assignment": assignment,
+			"ctx": utils.Dump(ctx),
+			"id":  id,
 		}).Error(err)
-		return err
+		return nil, err
 	}
 
-	err = a.db.Unscoped().First(assignment).Error
+	err = a.db.Unscoped().Where("id = ?", id).First(assignment).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"ctx":        utils.Dump(ctx),
-			"assignment": assignment,
+			"ctx": utils.Dump(ctx),
+			"id":  id,
 		}).Error(err)
-		return err
+		return nil, err
 	}
 
-	return err
+	return assignment, nil
 }
 
 func (a *assignmentRepo) FindByID(ctx context.Context, id int64) (*model.Assignment, error) {
