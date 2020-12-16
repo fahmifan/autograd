@@ -14,6 +14,10 @@ func NewCursor(size, page int64, sort string) Cursor {
 
 // GetPage ..
 func (c Cursor) GetPage() int64 {
+	if c.page < 1 {
+		return 1
+	}
+
 	return c.page
 }
 

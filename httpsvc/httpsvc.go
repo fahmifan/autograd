@@ -13,6 +13,7 @@ import (
 type Server struct {
 	exampleUsecase    usecase.ExampleUsecase
 	userUsecase       usecase.UserUsecase
+	assignmentUsecase usecase.AssignmentUsecase
 	submissionUsecase usecase.SubmissionUsecase
 	echo              *echo.Echo
 	port              string
@@ -49,6 +50,12 @@ func (s *Server) routes() {
 	// example using auth middleware
 	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
+
+	apiV1.POST("/assignments", s.handleCreateAssignment)
+	apiV1.GET("/assignments/:ID", s.handleGetAssignment)
+	apiV1.GET("/assignments", s.handleGetAssignments)
+	apiV1.PUT("/assignments", s.handleUpdateAssignment)
+	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
 	apiV1.POST("/submissions/upload", s.handleUpload)

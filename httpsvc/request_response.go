@@ -7,21 +7,118 @@ import (
 	"github.com/miun173/autograd/utils"
 )
 
-type submissionRequest struct {
+type assignmentReq struct {
+	ID                string `json:"id,omitempty"`
+	AssignedBy        string `json:"assignedBy"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	CaseInputFileURL  string `json:"caseInputFileURL"`
+	CaseOutputFileURL string `json:"caseOutputFileURL"`
+}
+
+func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
+	return &model.Assignment{
+		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		Name:              r.Name,
+		Description:       r.Description,
+		CaseInputFileURL:  r.CaseInputFileURL,
+		CaseOutputFileURL: r.CaseOutputFileURL,
+	}
+}
+
+func assigmentUpdateReqToModel(r *assignmentReq) *model.Assignment {
+	return &model.Assignment{
+		ID:                utils.StringToInt64(r.ID),
+		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		Name:              r.Name,
+		Description:       r.Description,
+		CaseInputFileURL:  r.CaseInputFileURL,
+		CaseOutputFileURL: r.CaseOutputFileURL,
+	}
+}
+
+type assignmentRes struct {
+	ID                string `json:"id"`
+	AssignedBy        string `json:"assignedBy"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	CaseInputFileURL  string `json:"caseInputFileURL"`
+	CaseOutputFileURL string `json:"caseOutputFileURL"`
+	CreatedAt         string `json:"createdAt"`
+	UpdatedAt         string `json:"updatedAt"`
+	DeletedAt         string `json:"deletedAt,omitempty"`
+}
+
+func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
+	return &assignmentRes{
+		ID:                utils.Int64ToString(m.ID),
+		AssignedBy:        utils.Int64ToString(m.AssignedBy),
+		Name:              m.Name,
+		Description:       m.Description,
+		CaseInputFileURL:  m.CaseInputFileURL,
+		CaseOutputFileURL: m.CaseOutputFileURL,
+		CreatedAt:         m.CreatedAt.Format(time.RFC3339Nano),
+		UpdatedAt:         m.UpdatedAt.Format(time.RFC3339Nano),
+	}
+}
+
+func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*assignmentRes) {
+	for _, assignment := range assignments {
+		assignmentRes = append(assignmentRes, assignmentModelToCreateRes(assignment))
+	}
+
+	return
+}
+
+func assignmentModelToDeleteRes(m *model.Assignment) *assignmentRes {
+	return &assignmentRes{
+		ID:                utils.Int64ToString(m.ID),
+		AssignedBy:        utils.Int64ToString(m.AssignedBy),
+		Name:              m.Name,
+		Description:       m.Description,
+		CaseInputFileURL:  m.CaseInputFileURL,
+		CaseOutputFileURL: m.CaseOutputFileURL,
+		CreatedAt:         m.CreatedAt.Format(time.RFC3339Nano),
+		UpdatedAt:         m.UpdatedAt.Format(time.RFC3339Nano),
+		DeletedAt:         m.DeletedAt.Time.Format(time.RFC3339Nano),
+	}
+}
+
+type cursorRes struct {
+	Size      string      `json:"size"`
+	Page      string      `json:"page"`
+	Sort      string      `json:"sort"`
+	TotalPage string      `json:"totalPage"`
+	TotalData string      `json:"totalData"`
+	Data      interface{} `json:"data"`
+}
+
+func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
+	return &cursorRes{
+		Size:      utils.Int64ToString(c.GetSize()),
+		Page:      utils.Int64ToString(c.GetPage()),
+		Sort:      c.GetSort(),
+		TotalPage: utils.Int64ToString(c.GetTotalPage(count)),
+		TotalData: utils.Int64ToString(count),
+		Data:      data,
+	}
+}
+
+type uploadReq struct {
+	SourceCode string `json:"sourceCode"`
+}
+
+type uploadRes struct {
+	FileURL string `json:"fileURL"`
+}
+
+type submissionReq struct {
 	AssignmentID int64  `json:"assignmentID"`
 	SubmittedBy  int64  `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
 }
 
-func submissionRequestToModel(r *submissionRequest) *model.Submission {
-	return &model.Submission{
-		AssignmentID: r.AssignmentID,
-		SubmittedBy:  r.SubmittedBy,
-		FileURL:      r.FileURL,
-	}
-}
-
-type submissionResponse struct {
+type submissionRes struct {
 	ID           string  `json:"id"`
 	AssignmentID string  `json:"assignmentID"`
 	SubmittedBy  string  `json:"submittedBy"`
@@ -32,16 +129,8 @@ type submissionResponse struct {
 	UpdatedAt    string  `json:"updatedAt"`
 }
 
-func newSubmissionResponses(submissions []*model.Submission) (submissionRes []*submissionResponse) {
-	for _, submission := range submissions {
-		submissionRes = append(submissionRes, submissionModelToResponse(submission))
-	}
-
-	return
-}
-
-func submissionModelToResponse(m *model.Submission) *submissionResponse {
-	return &submissionResponse{
+func submissionModelToRes(m *model.Submission) *submissionRes {
+	return &submissionRes{
 		ID:           utils.Int64ToString(m.ID),
 		AssignmentID: utils.Int64ToString(m.AssignmentID),
 		SubmittedBy:  utils.Int64ToString(m.SubmittedBy),
@@ -53,42 +142,10 @@ func submissionModelToResponse(m *model.Submission) *submissionResponse {
 	}
 }
 
-type uploadRequest struct {
-	SourceCode string `json:"sourceCode"`
-}
-
-func uploadRequestToModel(r *uploadRequest) *model.Upload {
-	return &model.Upload{
-		SourceCode: r.SourceCode,
+func newSubmissionResponses(submissions []*model.Submission) (submissionRes []*submissionRes) {
+	for _, submission := range submissions {
+		submissionRes = append(submissionRes, submissionModelToRes(submission))
 	}
-}
 
-type uploadResponse struct {
-	FileURL string `json:"fileURL"`
-}
-
-func uploadModelToResponse(m *model.Upload) *uploadResponse {
-	return &uploadResponse{
-		FileURL: m.FileURL,
-	}
-}
-
-type cursorResponse struct {
-	Size      int64       `json:"size"`
-	Page      int64       `json:"page"`
-	Sort      string      `json:"sort"`
-	TotalPage int64       `json:"totalPage"`
-	TotalData int64       `json:"totalData"`
-	Data      interface{} `json:"data"`
-}
-
-func newCursorResponse(c model.Cursor, data interface{}, count int64) *cursorResponse {
-	return &cursorResponse{
-		Size:      c.GetSize(),
-		Page:      c.GetPage(),
-		Sort:      c.GetSort(),
-		TotalPage: c.GetTotalPage(count),
-		TotalData: count,
-		Data:      data,
-	}
+	return
 }

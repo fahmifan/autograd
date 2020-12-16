@@ -3,6 +3,8 @@ package httpsvc
 import (
 	"net/http"
 
+	"github.com/mashingan/smapping"
+	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 
 	"github.com/labstack/echo/v4"
@@ -10,39 +12,58 @@ import (
 )
 
 func (s *Server) handleCreateSubmission(c echo.Context) error {
-	submissionReq := &submissionRequest{}
+	submissionReq := &submissionReq{}
 	err := c.Bind(submissionReq)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	submission := submissionRequestToModel(submissionReq)
+	submission := &model.Submission{}
+	err = smapping.FillStruct(submission, smapping.MapFields(submissionReq))
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
 	err = s.submissionUsecase.Create(c.Request().Context(), submission)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, submissionModelToResponse(submission))
+	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
 func (s *Server) handleUpload(c echo.Context) error {
-	uploadReq := &uploadRequest{}
+	uploadReq := &uploadReq{}
 	err := c.Bind(uploadReq)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	upload := uploadRequestToModel(uploadReq)
+	upload := &model.Upload{}
+	err = smapping.FillStruct(upload, smapping.MapFields(uploadReq))
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
 	err = s.submissionUsecase.Upload(c.Request().Context(), upload)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, uploadModelToResponse(upload))
+	uploadRes := &uploadRes{}
+	err = smapping.FillStruct(uploadRes, smapping.MapFields(upload))
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, uploadRes)
 }
 
 func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
@@ -56,5 +77,5 @@ func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
 
 	submissionRes := newSubmissionResponses(submissions)
 
-	return c.JSON(http.StatusOK, newCursorResponse(cursor, submissionRes, count))
+	return c.JSON(http.StatusOK, newCursorRes(cursor, submissionRes, count))
 }
