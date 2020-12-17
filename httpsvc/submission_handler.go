@@ -43,25 +43,13 @@ func (s *Server) handleUpload(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	upload := &model.Upload{}
-	err = smapping.FillStruct(upload, smapping.MapFields(uploadReq))
+	fileURL, err := s.submissionUsecase.Upload(c.Request().Context(), uploadReq.SourceCode)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	err = s.submissionUsecase.Upload(c.Request().Context(), upload)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	uploadRes := &uploadRes{}
-	err = smapping.FillStruct(uploadRes, smapping.MapFields(upload))
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
+	uploadRes := &uploadRes{FileURL: fileURL}
 
 	return c.JSON(http.StatusOK, uploadRes)
 }

@@ -22,7 +22,7 @@ import (
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	Upload(ctx context.Context, upload *model.Upload) error
+	Upload(ctx context.Context, sourceCode string) (string, error)
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error)
 }
 
@@ -57,20 +57,20 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	return nil
 }
 
-func (s *submissionUsecase) Upload(ctx context.Context, upload *model.Upload) error {
-	if upload == nil {
-		return errors.New("invalid arguments")
+func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (string, error) {
+	if sourceCode == "" {
+		return "", errors.New("invalid arguments")
 	}
 
 	logger := logrus.WithFields(logrus.Fields{
-		"ctx":    utils.Dump(ctx),
-		"upload": utils.Dump(upload),
+		"ctx":        utils.Dump(ctx),
+		"sourceCode": utils.Dump(sourceCode),
 	})
 
 	cwd, err := os.Getwd()
 	if err != nil {
 		logger.Error(err)
-		return err
+		return "", err
 	}
 
 	fileName := generateFileName() + ".cpp"
@@ -78,15 +78,15 @@ func (s *submissionUsecase) Upload(ctx context.Context, upload *model.Upload) er
 	file, err := os.Create(filePath)
 	if err != nil {
 		logger.Error(err)
-		return err
+		return "", err
 	}
 
-	file.WriteString(upload.SourceCode)
+	file.WriteString(sourceCode)
 	defer file.Close()
 
-	upload.FileURL = config.BaseURL() + "/storage/" + fileName
+	fileURL := config.BaseURL() + "/storage/" + fileName
 
-	return nil
+	return fileURL, nil
 }
 
 func generateFileName() string {
