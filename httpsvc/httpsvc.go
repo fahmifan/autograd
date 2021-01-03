@@ -54,7 +54,7 @@ func (s *Server) routes() {
 	apiV1.POST("/assignments", s.handleCreateAssignment)
 	apiV1.GET("/assignments", s.handleGetAssignments)
 	apiV1.GET("/assignments/:ID", s.handleGetAssignment)
-	apiV1.GET("/assignments/:ID/submissions", s.handleGetAssignmentSubmission)
+	apiV1.GET("/assignments/:ID/submissions", s.handleGetAssignmentSubmissions)
 	apiV1.PUT("/assignments", s.handleUpdateAssignment)
 	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)
 

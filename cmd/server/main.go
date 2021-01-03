@@ -43,10 +43,10 @@ func main() {
 
 	userRepo := repository.NewUserRepository(postgres)
 	userUsecase := usecase.NewUserUsecase(userRepo)
-	assignmentRepo := repository.NewAssignmentRepository(postgres)
-	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo)
 	submissionRepo := repository.NewSubmissionRepo(postgres)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo)
+	assignmentRepo := repository.NewAssignmentRepository(postgres)
+	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
 
 	server := httpsvc.NewServer(
 		config.Port(),

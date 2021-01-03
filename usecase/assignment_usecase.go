@@ -14,19 +14,24 @@ import (
 type AssignmentUsecase interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
 	Delete(ctx context.Context, id int64) (*model.Assignment, error)
-	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
+	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
+	FindSubmissionsByID(ctx context.Context, cursor model.Cursor,
+		assignmentID int64) (submissions []*model.Submission, count int64, err error)
 	Update(ctx context.Context, assignment *model.Assignment) error
 }
 
 type assignmentUsecase struct {
 	assignmentRepo repository.AssignmentRepository
+	submissionRepo repository.SubmissionRepository
 }
 
 // NewAssignmentUsecase ..
-func NewAssignmentUsecase(assignmentRepo repository.AssignmentRepository) AssignmentUsecase {
+func NewAssignmentUsecase(assignmentRepo repository.AssignmentRepository,
+	submissionRepo repository.SubmissionRepository) AssignmentUsecase {
 	return &assignmentUsecase{
 		assignmentRepo: assignmentRepo,
+		submissionRepo: submissionRepo,
 	}
 }
 
@@ -69,6 +74,22 @@ func (a *assignmentUsecase) Delete(ctx context.Context, id int64) (*model.Assign
 	return assignment, nil
 }
 
+func (a *assignmentUsecase) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment,
+	count int64, err error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":    utils.Dump(ctx),
+		"cursor": utils.Dump(cursor),
+	})
+
+	assignments, count, err = a.assignmentRepo.FindAll(ctx, cursor)
+	if err != nil {
+		logger.Error(err)
+		return nil, 0, err
+	}
+
+	return
+}
+
 func (a *assignmentUsecase) FindByID(ctx context.Context, id int64) (*model.Assignment, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
@@ -88,15 +109,15 @@ func (a *assignmentUsecase) FindByID(ctx context.Context, id int64) (*model.Assi
 	return assignment, nil
 }
 
-func (a *assignmentUsecase) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error) {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":    utils.Dump(ctx),
-		"cursor": utils.Dump(cursor),
-	})
-
-	assignments, count, err = a.assignmentRepo.FindAll(ctx, cursor)
+func (a *assignmentUsecase) FindSubmissionsByID(ctx context.Context, cursor model.Cursor,
+	id int64) (submissions []*model.Submission, count int64, err error) {
+	submissions, count, err = a.submissionRepo.FindAllByAssignmentID(ctx, cursor, id)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":    utils.Dump(ctx),
+			"cursor": cursor,
+			"ID":     id,
+		}).Error(err)
 		return nil, 0, err
 	}
 

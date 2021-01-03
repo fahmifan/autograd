@@ -46,20 +46,6 @@ func (s *Server) handleGetSubmission(c echo.Context) error {
 	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
-func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
-	assignmentID := utils.StringToInt64(c.Param("ID"))
-	cursor := getCursorFromContext(c)
-	submissions, count, err := s.submissionUsecase.FindAllByAssignmentID(c.Request().Context(), cursor, assignmentID)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	submissionRes := newSubmissionResponses(submissions)
-
-	return c.JSON(http.StatusOK, newCursorRes(cursor, submissionRes, count))
-}
-
 func (s *Server) handleUpload(c echo.Context) error {
 	uploadReq := &uploadReq{}
 	err := c.Bind(uploadReq)
