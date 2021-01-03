@@ -52,14 +52,15 @@ func (s *Server) routes() {
 	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
 
 	apiV1.POST("/assignments", s.handleCreateAssignment)
-	apiV1.GET("/assignments/:ID", s.handleGetAssignment)
 	apiV1.GET("/assignments", s.handleGetAssignments)
+	apiV1.GET("/assignments/:ID", s.handleGetAssignment)
+	apiV1.GET("/assignments/:ID/submissions", s.handleGetAssignmentSubmission)
 	apiV1.PUT("/assignments", s.handleUpdateAssignment)
 	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
 	apiV1.POST("/submissions/upload", s.handleUpload)
-	apiV1.GET("/submissions/:assignmentID", s.handleGetAssignmentSubmission)
+	apiV1.GET("/submissions/:ID", s.handleGetSubmission)
 }
 
 func (s *Server) handlePing(c echo.Context) error {

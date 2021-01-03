@@ -23,6 +23,7 @@ import (
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Upload(ctx context.Context, sourceCode string) (string, error)
+	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error)
 }
 
@@ -55,6 +56,33 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	}
 
 	return nil
+}
+
+func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Submission, error) {
+	submission, err := s.submissionRepo.FindByID(ctx, id)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
+	return submission, nil
+}
+
+func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
+	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":          utils.Dump(ctx),
+			"cursor":       cursor,
+			"assignmentID": assignmentID,
+		}).Error(err)
+		return nil, 0, err
+	}
+
+	return
 }
 
 func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (string, error) {
@@ -97,18 +125,4 @@ func generateFileName() string {
 	h.Write([]byte(randomNumber + timestamp))
 
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
-	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":          utils.Dump(ctx),
-			"cursor":       cursor,
-			"assignmentID": assignmentID,
-		}).Error(err)
-		return nil, 0, err
-	}
-
-	return
 }
