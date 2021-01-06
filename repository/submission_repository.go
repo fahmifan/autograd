@@ -13,6 +13,7 @@ import (
 // SubmissionRepository ..
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
+	Delete(ctx context.Context, id int64) (*model.Submission, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error)
 }
@@ -38,6 +39,32 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 	}
 
 	return err
+}
+
+func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submission, error) {
+	tx := s.db.Begin()
+	submission := &model.Submission{}
+	err := tx.Where("id = ?", id).Delete(submission).Error
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
+	err = tx.Unscoped().Where("id = ?", id).First(submission).Error
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
+	tx.Commit()
+
+	return submission, nil
 }
 
 func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submission, error) {

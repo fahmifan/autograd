@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Submission ..
@@ -14,5 +16,5 @@ type Submission struct {
 	Feedback     string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	DeletedAt    *time.Time
+	DeletedAt    gorm.DeletedAt
 }

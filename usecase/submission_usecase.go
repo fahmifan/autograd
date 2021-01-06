@@ -22,6 +22,7 @@ import (
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
+	Delete(ctx context.Context, id int64) (*model.Submission, error)
 	Upload(ctx context.Context, sourceCode string) (string, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 }
@@ -55,6 +56,19 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	}
 
 	return nil
+}
+
+func (s *submissionUsecase) Delete(ctx context.Context, id int64) (*model.Submission, error) {
+	submission, err := s.submissionRepo.Delete(ctx, id)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  utils.Dump(id),
+		})
+		return nil, err
+	}
+
+	return submission, nil
 }
 
 func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Submission, error) {

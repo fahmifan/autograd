@@ -35,6 +35,17 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
+func (s *Server) handleDeleteSubmission(c echo.Context) error {
+	id := utils.StringToInt64(c.Param("ID"))
+	submission, err := s.submissionUsecase.Delete(c.Request().Context(), id)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, submissionModelToRes(submission))
+}
+
 func (s *Server) handleGetSubmission(c echo.Context) error {
 	id := utils.StringToInt64(c.Param("ID"))
 	submission, err := s.submissionUsecase.FindByID(c.Request().Context(), id)

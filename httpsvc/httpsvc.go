@@ -61,6 +61,7 @@ func (s *Server) routes() {
 	apiV1.POST("/submissions", s.handleCreateSubmission)
 	apiV1.POST("/submissions/upload", s.handleUpload)
 	apiV1.GET("/submissions/:ID", s.handleGetSubmission)
+	apiV1.DELETE("/submissions/:ID", s.handleDeleteSubmission)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
