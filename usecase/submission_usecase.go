@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -41,7 +40,7 @@ func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository) Submis
 
 func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
 	if submission == nil {
-		return errors.New("invalid arguments")
+		return ErrInvalidArguments
 	}
 
 	submission.ID = utils.GenerateID()
@@ -93,7 +92,7 @@ func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Subm
 
 func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submission) error {
 	if submission == nil {
-		return errors.New("invalid arguments")
+		return ErrInvalidArguments
 	}
 
 	err := s.submissionRepo.Update(ctx, submission)
@@ -110,7 +109,7 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 
 func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (string, error) {
 	if sourceCode == "" {
-		return "", errors.New("invalid arguments")
+		return "", ErrInvalidArguments
 	}
 
 	logger := logrus.WithFields(logrus.Fields{

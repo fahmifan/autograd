@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/repository"
@@ -37,7 +36,7 @@ func NewAssignmentUsecase(assignmentRepo repository.AssignmentRepository,
 
 func (a *assignmentUsecase) Create(ctx context.Context, assignment *model.Assignment) error {
 	if assignment == nil {
-		return errors.New("invalid arguments")
+		return ErrInvalidArguments
 	}
 
 	assignment.ID = utils.GenerateID()
@@ -122,7 +121,7 @@ func (a *assignmentUsecase) FindSubmissionsByID(ctx context.Context, cursor mode
 
 func (a *assignmentUsecase) Update(ctx context.Context, assignment *model.Assignment) error {
 	if assignment == nil {
-		return errors.New("invalid arguments")
+		return ErrInvalidArguments
 	}
 
 	err := a.assignmentRepo.Update(ctx, assignment)
