@@ -14,8 +14,9 @@ import (
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Delete(ctx context.Context, id int64) (*model.Submission, error)
-	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error)
+	FindByID(ctx context.Context, id int64) (*model.Submission, error)
+	Update(ctx context.Context, submission *model.Submission) error
 }
 
 type submissionRepo struct {
@@ -67,24 +68,6 @@ func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submissio
 	return submission, nil
 }
 
-func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submission, error) {
-	submission := &model.Submission{}
-	err := s.db.Where("id = ?", id).Take(submission).Error
-	switch err {
-	case nil: // ignore
-	case gorm.ErrRecordNotFound:
-		return nil, nil
-	default:
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
-		return nil, err
-	}
-
-	return submission, nil
-}
-
 func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error) {
 	count := int64(0)
 	err := s.db.Model(model.Submission{}).Where("assignment_id = ?", assignmentID).Count(&count).Error
@@ -109,4 +92,46 @@ func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model
 	}
 
 	return submissions, count, nil
+}
+
+func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submission, error) {
+	submission := &model.Submission{}
+	err := s.db.Where("id = ?", id).Take(submission).Error
+	switch err {
+	case nil: // ignore
+	case gorm.ErrRecordNotFound:
+		return nil, nil
+	default:
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
+	return submission, nil
+}
+
+func (s *submissionRepo) Update(ctx context.Context, submission *model.Submission) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":        ctx,
+		"submission": submission,
+	})
+
+	tx := s.db.Begin()
+	err := s.db.Model(&model.Submission{}).Where("id = ?", submission.ID).Updates(submission).Error
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	err = s.db.Where("id = ?", submission.ID).First(submission).Error
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	tx.Commit()
+
+	return err
 }

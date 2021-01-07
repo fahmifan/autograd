@@ -113,9 +113,27 @@ type uploadRes struct {
 }
 
 type submissionReq struct {
+	ID           string `json:"id,omitempty"`
 	AssignmentID int64  `json:"assignmentID"`
 	SubmittedBy  int64  `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
+}
+
+func submissionCreateReqToModel(s *submissionReq) *model.Submission {
+	return &model.Submission{
+		AssignmentID: s.AssignmentID,
+		SubmittedBy:  s.SubmittedBy,
+		FileURL:      s.FileURL,
+	}
+}
+
+func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
+	return &model.Submission{
+		ID:           utils.StringToInt64(s.ID),
+		AssignmentID: s.AssignmentID,
+		SubmittedBy:  s.SubmittedBy,
+		FileURL:      s.FileURL,
+	}
 }
 
 type submissionRes struct {

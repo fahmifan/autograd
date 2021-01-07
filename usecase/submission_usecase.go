@@ -23,8 +23,9 @@ import (
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	Delete(ctx context.Context, id int64) (*model.Submission, error)
-	Upload(ctx context.Context, sourceCode string) (string, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
+	Update(ctx context.Context, submission *model.Submission) error
+	Upload(ctx context.Context, sourceCode string) (string, error)
 }
 
 type submissionUsecase struct {
@@ -82,6 +83,23 @@ func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Subm
 	}
 
 	return submission, nil
+}
+
+func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submission) error {
+	if submission == nil {
+		return errors.New("invalid arguments")
+	}
+
+	err := s.submissionRepo.Update(ctx, submission)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"submission": utils.Dump(submission),
+		}).Error(err)
+		return err
+	}
+
+	return nil
 }
 
 func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (string, error) {
