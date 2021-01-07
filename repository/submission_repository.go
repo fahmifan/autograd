@@ -51,13 +51,20 @@ func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submissio
 	tx := s.db.Begin()
 	submission := &model.Submission{}
 	err := tx.Where("id = ?", id).Delete(submission).Error
-	if err != nil {
+	switch err {
+	case nil: // ignore
+	case gorm.ErrRecordNotFound:
+		tx.Rollback()
+		return nil, nil
+	default:
+		tx.Rollback()
 		logger.Error(err)
 		return nil, err
 	}
 
 	err = tx.Unscoped().Where("id = ?", id).First(submission).Error
 	if err != nil {
+		tx.Rollback()
 		logger.Error(err)
 		return nil, err
 	}
@@ -68,24 +75,20 @@ func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submissio
 }
 
 func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error) {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":          utils.Dump(ctx),
-		"assignmentID": assignmentID,
-	})
-
 	count := int64(0)
 	err := s.db.Model(model.Submission{}).Where("assignment_id = ?", assignmentID).Count(&count).Error
-	if err != nil {
-		logger.Error(err)
-		return nil, count, err
+	if count == 0 {
+		return nil, 0, nil
 	}
 
 	submissions := []*model.Submission{}
 	err = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.GetSize())).
 		Offset(int(cursor.GetOffset())).Order("created_at " + cursor.GetSort()).Find(&submissions).Error
 	if err != nil {
-		logger.WithFields(logrus.Fields{
-			"cursor": cursor,
+		logrus.WithFields(logrus.Fields{
+			"ctx":          utils.Dump(ctx),
+			"cursor":       cursor,
+			"assignmentID": assignmentID,
 		}).Error(err)
 		return nil, count, err
 	}
@@ -120,12 +123,14 @@ func (s *submissionRepo) Update(ctx context.Context, submission *model.Submissio
 	tx := s.db.Begin()
 	err := s.db.Model(&model.Submission{}).Where("id = ?", submission.ID).Updates(submission).Error
 	if err != nil {
+		tx.Rollback()
 		logger.Error(err)
 		return err
 	}
 
 	err = s.db.Where("id = ?", submission.ID).First(submission).Error
 	if err != nil {
+		tx.Rollback()
 		logger.Error(err)
 		return err
 	}

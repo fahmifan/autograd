@@ -113,6 +113,10 @@ func (a *assignmentUsecase) FindSubmissionsByID(ctx context.Context, cursor mode
 		return nil, 0, err
 	}
 
+	if submissions == nil {
+		return nil, 0, ErrNotFound
+	}
+
 	return
 }
 

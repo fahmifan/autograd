@@ -67,6 +67,10 @@ func (s *submissionUsecase) Delete(ctx context.Context, id int64) (*model.Submis
 		return nil, err
 	}
 
+	if submission == nil {
+		return nil, ErrNotFound
+	}
+
 	return submission, nil
 }
 
@@ -78,6 +82,10 @@ func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Subm
 			"id":  id,
 		}).Error(err)
 		return nil, err
+	}
+
+	if submission == nil {
+		return nil, ErrNotFound
 	}
 
 	return submission, nil
