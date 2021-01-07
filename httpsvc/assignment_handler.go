@@ -23,7 +23,7 @@ func (s *Server) handleCreateAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 }
 
 func (s *Server) handleDeleteAssignment(c echo.Context) error {
@@ -45,7 +45,7 @@ func (s *Server) handleGetAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 }
 
 func (s *Server) handleGetAssignments(c echo.Context) error {
@@ -90,6 +90,6 @@ func (s *Server) handleUpdateAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 
 }

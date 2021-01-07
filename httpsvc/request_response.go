@@ -49,7 +49,7 @@ type assignmentRes struct {
 	DeletedAt         string `json:"deletedAt,omitempty"`
 }
 
-func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
+func assignmentModelToRes(m *model.Assignment) *assignmentRes {
 	return &assignmentRes{
 		ID:                utils.Int64ToString(m.ID),
 		AssignedBy:        utils.Int64ToString(m.AssignedBy),
@@ -64,7 +64,7 @@ func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
 
 func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*assignmentRes) {
 	for _, assignment := range assignments {
-		assignmentRes = append(assignmentRes, assignmentModelToCreateRes(assignment))
+		assignmentRes = append(assignmentRes, assignmentModelToRes(assignment))
 	}
 
 	return
