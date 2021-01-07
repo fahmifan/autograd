@@ -43,23 +43,22 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 }
 
 func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submission, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"id":  id,
+	})
+
 	tx := s.db.Begin()
 	submission := &model.Submission{}
 	err := tx.Where("id = ?", id).Delete(submission).Error
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
 	err = tx.Unscoped().Where("id = ?", id).First(submission).Error
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
@@ -69,13 +68,15 @@ func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submissio
 }
 
 func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":          utils.Dump(ctx),
+		"assignmentID": assignmentID,
+	})
+
 	count := int64(0)
 	err := s.db.Model(model.Submission{}).Where("assignment_id = ?", assignmentID).Count(&count).Error
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":          utils.Dump(ctx),
-			"assignmentID": assignmentID,
-		}).Error(err)
+		logger.Error(err)
 		return nil, count, err
 	}
 
@@ -83,10 +84,8 @@ func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model
 	err = s.db.Where("assignment_id = ?", assignmentID).Limit(int(cursor.GetSize())).
 		Offset(int(cursor.GetOffset())).Order("created_at " + cursor.GetSort()).Find(&submissions).Error
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":          utils.Dump(ctx),
-			"cursor":       cursor,
-			"assignmentID": assignmentID,
+		logger.WithFields(logrus.Fields{
+			"cursor": cursor,
 		}).Error(err)
 		return nil, count, err
 	}

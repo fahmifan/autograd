@@ -44,15 +44,13 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		return errors.New("invalid arguments")
 	}
 
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"submission": utils.Dump(submission),
-	})
-
 	submission.ID = utils.GenerateID()
 	err := s.submissionRepo.Create(ctx, submission)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"submission": utils.Dump(submission),
+		}).Error(err)
 		return err
 	}
 
@@ -65,7 +63,7 @@ func (s *submissionUsecase) Delete(ctx context.Context, id int64) (*model.Submis
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
 			"id":  utils.Dump(id),
-		})
+		}).Error(err)
 		return nil, err
 	}
 

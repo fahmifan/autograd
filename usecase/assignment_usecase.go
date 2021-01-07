@@ -40,15 +40,13 @@ func (a *assignmentUsecase) Create(ctx context.Context, assignment *model.Assign
 		return errors.New("invalid arguments")
 	}
 
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"assignment": utils.Dump(assignment),
-	})
-
 	assignment.ID = utils.GenerateID()
 	err := a.assignmentRepo.Create(ctx, assignment)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"assignment": utils.Dump(assignment),
+		}).Error(err)
 		return err
 	}
 
@@ -56,14 +54,12 @@ func (a *assignmentUsecase) Create(ctx context.Context, assignment *model.Assign
 }
 
 func (a *assignmentUsecase) Delete(ctx context.Context, id int64) (*model.Assignment, error) {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx": utils.Dump(ctx),
-		"id":  utils.Dump(id),
-	})
-
 	assignment, err := a.assignmentRepo.Delete(ctx, id)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  utils.Dump(id),
+		}).Error(err)
 		return nil, err
 	}
 
@@ -76,14 +72,12 @@ func (a *assignmentUsecase) Delete(ctx context.Context, id int64) (*model.Assign
 
 func (a *assignmentUsecase) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment,
 	count int64, err error) {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":    utils.Dump(ctx),
-		"cursor": utils.Dump(cursor),
-	})
-
 	assignments, count, err = a.assignmentRepo.FindAll(ctx, cursor)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":    utils.Dump(ctx),
+			"cursor": utils.Dump(cursor),
+		}).Error(err)
 		return nil, 0, err
 	}
 
@@ -91,14 +85,12 @@ func (a *assignmentUsecase) FindAll(ctx context.Context, cursor model.Cursor) (a
 }
 
 func (a *assignmentUsecase) FindByID(ctx context.Context, id int64) (*model.Assignment, error) {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx": utils.Dump(ctx),
-		"id":  utils.Dump(id),
-	})
-
 	assignment, err := a.assignmentRepo.FindByID(ctx, id)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  utils.Dump(id),
+		}).Error(err)
 		return nil, err
 	}
 
@@ -129,14 +121,12 @@ func (a *assignmentUsecase) Update(ctx context.Context, assignment *model.Assign
 		return errors.New("invalid arguments")
 	}
 
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"assignment": utils.Dump(assignment),
-	})
-
 	err := a.assignmentRepo.Update(ctx, assignment)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"assignment": utils.Dump(assignment),
+		}).Error(err)
 		return err
 	}
 
