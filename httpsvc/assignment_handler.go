@@ -28,7 +28,7 @@ func (s *Server) handleCreateAssignment(c echo.Context) error {
 
 func (s *Server) handleDeleteAssignment(c echo.Context) error {
 	id := utils.StringToInt64(c.Param("ID"))
-	assignment, err := s.assignmentUsecase.Delete(c.Request().Context(), id)
+	assignment, err := s.assignmentUsecase.DeleteByID(c.Request().Context(), id)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)

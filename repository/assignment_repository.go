@@ -12,7 +12,7 @@ import (
 // AssignmentRepository ..
 type AssignmentRepository interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
-	Delete(ctx context.Context, id int64) (*model.Assignment, error)
+	DeleteByID(ctx context.Context, id int64) (*model.Assignment, error)
 	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
 	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 	Update(ctx context.Context, assignment *model.Assignment) error
@@ -41,7 +41,7 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 	return err
 }
 
-func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignment, error) {
+func (a *assignmentRepo) DeleteByID(ctx context.Context, id int64) (*model.Assignment, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
 		"id":  utils.Dump(id),

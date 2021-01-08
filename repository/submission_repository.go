@@ -13,7 +13,7 @@ import (
 // SubmissionRepository ..
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	Delete(ctx context.Context, id int64) (*model.Submission, error)
+	DeleteByID(ctx context.Context, id int64) (*model.Submission, error)
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	Update(ctx context.Context, submission *model.Submission) error
@@ -42,7 +42,7 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 	return err
 }
 
-func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submission, error) {
+func (s *submissionRepo) DeleteByID(ctx context.Context, id int64) (*model.Submission, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
 		"id":  utils.Dump(id),
