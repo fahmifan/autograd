@@ -2,7 +2,6 @@ package httpsvc
 
 import (
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -120,11 +119,7 @@ func setUserToCtx(c echo.Context, user *model.User) {
 func getCursorFromContext(c echo.Context) model.Cursor {
 	size := utils.StringToInt64(c.QueryParam("size"))
 	page := utils.StringToInt64(c.QueryParam("page"))
-	sort := c.QueryParam("sort")
-
-	if strings.ToUpper(sort) != "ASC" {
-		sort = "DESC"
-	}
+	sort := model.NewSorter(c.QueryParam("sort"))
 
 	return model.NewCursor(size, page, sort)
 }

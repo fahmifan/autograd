@@ -97,7 +97,7 @@ func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
 	return &cursorRes{
 		Size:      utils.Int64ToString(c.GetSize()),
 		Page:      utils.Int64ToString(c.GetPage()),
-		Sort:      c.GetSort(),
+		Sort:      c.GetSort().String(),
 		TotalPage: utils.Int64ToString(c.GetTotalPage(count)),
 		TotalData: utils.Int64ToString(count),
 		Data:      data,
