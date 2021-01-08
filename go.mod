@@ -14,6 +14,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/sony/sonyflake v1.0.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	gorm.io/driver/postgres v1.0.5
 	gorm.io/gorm v1.20.5
 )
