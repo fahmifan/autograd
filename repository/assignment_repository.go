@@ -42,14 +42,16 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 }
 
 func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignment, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"id":  utils.Dump(id),
+	})
+
 	tx := a.db.Begin()
 	err := tx.Where("assignment_id = ?", id).Delete(&model.Submission{}).Error
 	if err != nil {
 		tx.Rollback()
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
@@ -57,31 +59,26 @@ func (a *assignmentRepo) Delete(ctx context.Context, id int64) (*model.Assignmen
 	err = tx.Where("id = ?", id).Delete(assignment).Error
 	if err != nil {
 		tx.Rollback()
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
 	err = tx.Unscoped().Where("id = ?", id).First(assignment).Error
 	if err != nil {
 		tx.Rollback()
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
 	tx.Commit()
+
 	return assignment, nil
 }
 
 func (a *assignmentRepo) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx":    utils.Dump(ctx),
-		"cursor": cursor,
+		"cursor": utils.Dump(cursor),
 	})
 
 	err = a.db.Model(model.Assignment{}).Count(&count).Error
@@ -110,7 +107,7 @@ func (a *assignmentRepo) FindByID(ctx context.Context, id int64) (*model.Assignm
 	default:
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  id,
+			"id":  utils.Dump(id),
 		}).Error(err)
 		return nil, err
 	}
@@ -120,8 +117,8 @@ func (a *assignmentRepo) FindByID(ctx context.Context, id int64) (*model.Assignm
 
 func (a *assignmentRepo) Update(ctx context.Context, assignment *model.Assignment) error {
 	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        ctx,
-		"assignment": assignment,
+		"ctx":        utils.Dump(ctx),
+		"assignment": utils.Dump(assignment),
 	})
 
 	tx := a.db.Begin()

@@ -106,8 +106,8 @@ func (a *assignmentUsecase) FindSubmissionsByID(ctx context.Context, cursor mode
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":    utils.Dump(ctx),
-			"cursor": cursor,
-			"ID":     id,
+			"cursor": utils.Dump(cursor),
+			"id":     utils.Dump(id),
 		}).Error(err)
 		return nil, 0, err
 	}

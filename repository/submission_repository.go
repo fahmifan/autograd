@@ -45,7 +45,7 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 func (s *submissionRepo) Delete(ctx context.Context, id int64) (*model.Submission, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
-		"id":  id,
+		"id":  utils.Dump(id),
 	})
 
 	tx := s.db.Begin()
@@ -87,8 +87,8 @@ func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
-			"cursor":       cursor,
-			"assignmentID": assignmentID,
+			"cursor":       utils.Dump(cursor),
+			"assignmentID": utils.Dump(assignmentID),
 		}).Error(err)
 		return nil, count, err
 	}
@@ -106,7 +106,7 @@ func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submiss
 	default:
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  id,
+			"id":  utils.Dump(id),
 		}).Error(err)
 		return nil, err
 	}
@@ -116,8 +116,8 @@ func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submiss
 
 func (s *submissionRepo) Update(ctx context.Context, submission *model.Submission) error {
 	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        ctx,
-		"submission": submission,
+		"ctx":        utils.Dump(ctx),
+		"submission": utils.Dump(submission),
 	})
 
 	tx := s.db.Begin()

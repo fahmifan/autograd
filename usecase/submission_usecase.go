@@ -78,7 +78,7 @@ func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Subm
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  id,
+			"id":  utils.Dump(id),
 		}).Error(err)
 		return nil, err
 	}
