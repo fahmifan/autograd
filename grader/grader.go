@@ -2,6 +2,7 @@ package grader
 
 import (
 	"bufio"
+	"context"
 	"crypto/md5"
 	"fmt"
 	"io"
@@ -20,16 +21,13 @@ type SubmissionUsecase interface {
 }
 
 type assignment struct {
-	id        int64
-	inputURL  string
-	outputURL string
-	input     []string
-	output    []string
+	input  []string
+	output []string
 }
 
 // AssignmentUsecase ..
 type AssignmentUsecase interface {
-	FindByID(id int64) (*assignment, error)
+	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 }
 
 // Grader implements worker.GraderUsecase
@@ -115,21 +113,21 @@ func (g *Grader) getSubmissionSrcCodeByID(id int64) (srcCodePath string, err err
 // find the model.Assignment from usecase
 // then download the input & output code to local path
 func (g *Grader) getAssignment(assignmentID int64) (asg *assignment, err error) {
-	asg, err = g.assignmentUsecase.FindByID(assignmentID)
+	res, err := g.assignmentUsecase.FindByID(context.Background(), assignmentID)
 	if err != nil {
 		return nil, err
 	}
 
 	// download source code to local filepath
 	inputPath := ""
-	inputPath, asg.input, err = g.parseAssignmentIO(asg.inputURL)
+	inputPath, asg.input, err = g.parseAssignmentIO(res.CaseInputFileURL)
 	if err != nil {
 		return
 	}
 	defer g.removeFile(inputPath)
 
 	outputPath := ""
-	outputPath, asg.output, err = g.parseAssignmentIO(asg.outputURL)
+	outputPath, asg.output, err = g.parseAssignmentIO(res.CaseOutputFileURL)
 	if err != nil {
 		return
 	}

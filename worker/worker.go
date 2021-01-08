@@ -10,6 +10,10 @@ import (
 
 var defaultJobOpt = work.JobOptions{MaxConcurrency: 3, MaxFails: 3}
 
+// The real one
+// const cronEvery10Minute = "0 10 * * *"
+
+// TODO: the value is in debug mode
 const cronEvery10Minute = "*/60 * * * *"
 
 // Worker ..

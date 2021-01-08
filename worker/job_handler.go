@@ -84,10 +84,10 @@ func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
 			return ctx.Err()
 		case ids := <-idsChan:
 			for _, id := range ids {
-				logrus.Warn("process id >>> ", id)
-				continue
 				_, err := h.enqueuer.EnqueueUnique(jobGradeAssignment, work.Q{"assignmentID": id})
-				return fmt.Errorf("unable to enqueue assignment %d: %w", id, err)
+				if err != nil {
+					return fmt.Errorf("unable to enqueue assignment %d: %w", id, err)
+				}
 			}
 		}
 
