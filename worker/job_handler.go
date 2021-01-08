@@ -1,12 +1,17 @@
 package worker
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
+	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
 )
 
 // job names
@@ -16,36 +21,81 @@ const (
 	jobGradeSubmission        string = "grade_submission"
 )
 
-// GraderUsecase ..
-type GraderUsecase interface {
+// Grader ..
+type Grader interface {
 	GradeSubmission(submissionID int64) error
 }
 
-// Submission ..
-type Submission interface {
-	FindAllUncheckByAssignmentID(assignmentID int64) (count int64, ids []int64, err error)
+// SubmissionUsecase ..
+type SubmissionUsecase interface {
+	FindAllUncheckByAssignmentID(assignmentID int64) (ids []int64, count int64, err error)
+}
+
+// AssignmentUsecase ..
+type AssignmentUsecase interface {
+	FindAllDueDates(c model.Cursor) (ids []int64, count int64, err error)
 }
 
 type jobHandler struct {
 	pool       *work.WorkerPool
 	redisPool  *redis.Pool
 	enqueuer   *work.Enqueuer
-	grader     GraderUsecase
-	submission Submission
+	grader     Grader
+	submission SubmissionUsecase
+	assignment AssignmentUsecase
 }
 
 func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
-	ids, err := getAllDueAssignments()
-	if err != nil {
-		logrus.Error(err)
-		return fmt.Errorf("unable to get all due assignments: %w", err)
-	}
+	var size, page int64 = 10, 1
+	cursor := model.NewCursor(size, page, model.SortCreatedAtDesc)
+	idsChan := make(chan []int64)
 
-	for _, id := range ids {
-		_, err := h.enqueuer.EnqueueUnique(jobGradeAssignment, work.Q{"assignmentID": id})
-		if err != nil {
-			logrus.Errorf("unable to enqueue assignment %d: %w", id, err)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	eg, ctx := errgroup.WithContext(ctx)
+	defer cancel()
+
+	// produce
+	eg.Go(func() error {
+		defer close(idsChan)
+		for {
+			ids, _, err := h.assignment.FindAllDueDates(cursor)
+			if err != nil {
+				logrus.Error(err)
+				return fmt.Errorf("unable to get all due assignments: %w", err)
+			}
+
+			if len(ids) == 0 {
+				break
+			}
+
+			idsChan <- ids
+
+			page++
+			cursor.SetPage(page)
 		}
+
+		return nil
+	})
+
+	// consume
+	eg.Go(func() error {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case ids := <-idsChan:
+			for _, id := range ids {
+				_, err := h.enqueuer.EnqueueUnique(jobGradeAssignment, work.Q{"assignmentID": id})
+				return fmt.Errorf("unable to enqueue assignment %d: %w", id, err)
+			}
+		}
+
+		return nil
+	})
+
+	err := eg.Wait()
+	if err != nil && !errors.Is(err, context.Canceled) {
+		logrus.Error(err)
+		return err
 	}
 
 	return nil
@@ -53,7 +103,7 @@ func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
 
 func (h *jobHandler) handleGradeAssignment(job *work.Job) error {
 	assignmentID := job.ArgInt64("assignmentID")
-	_, ids, err := h.submission.FindAllUncheckByAssignmentID(assignmentID)
+	ids, _, err := h.submission.FindAllUncheckByAssignmentID(assignmentID)
 	if err != nil {
 		return err
 	}
@@ -72,8 +122,4 @@ func (h *jobHandler) handleGradeAssignment(job *work.Job) error {
 func (h *jobHandler) handleGradeSubmission(job *work.Job) error {
 	submissionID := utils.StringToInt64(job.ArgString("submissionID"))
 	return h.grader.GradeSubmission(submissionID)
-}
-
-func getAllDueAssignments() (ids []int64, err error) {
-	return
 }

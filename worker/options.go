@@ -15,8 +15,22 @@ func WithWorkerPool(rd *redis.Pool) Option {
 }
 
 // WithGrader ..
-func WithGrader(gr GraderUsecase) Option {
+func WithGrader(gr Grader) Option {
 	return func(c *Worker) {
 		c.grader = gr
+	}
+}
+
+// WithSubmissionUsecase ..
+func WithSubmissionUsecase(s SubmissionUsecase) Option {
+	return func(c *Worker) {
+		c.submission = s
+	}
+}
+
+// WithAssignmentUsecase ..
+func WithAssignmentUsecase(a AssignmentUsecase) Option {
+	return func(c *Worker) {
+		c.assignment = a
 	}
 }

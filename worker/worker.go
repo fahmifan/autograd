@@ -10,15 +10,16 @@ import (
 
 var defaultJobOpt = work.JobOptions{MaxConcurrency: 3, MaxFails: 3}
 
-const cronEvery10Minute = "*/10 * * * *"
+const cronEvery10Minute = "*/60 * * * *"
 
 // Worker ..
 type Worker struct {
 	pool       *work.WorkerPool
 	redisPool  *redis.Pool
 	enqueuer   *work.Enqueuer
-	grader     GraderUsecase
-	submission Submission
+	grader     Grader
+	submission SubmissionUsecase
+	assignment AssignmentUsecase
 }
 
 // NewWorker ..
@@ -27,6 +28,7 @@ func NewWorker(opts ...Option) *Worker {
 	for _, opt := range opts {
 		opt(wrk)
 	}
+	wrk.enqueuer = newEnqueuer(wrk.redisPool)
 
 	return wrk
 }
@@ -66,6 +68,7 @@ func (w *Worker) registerJobConfig(handler *jobHandler, job *work.Job, next work
 	handler.enqueuer = w.enqueuer
 	handler.grader = w.grader
 	handler.submission = w.submission
+	handler.assignment = w.assignment
 
 	return next()
 }
