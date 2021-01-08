@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -46,6 +45,7 @@ type jobHandler struct {
 }
 
 func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
+	logrus.Warn("start >>> ", time.Now())
 	var size, page int64 = 10, 1
 	cursor := model.NewCursor(size, page, model.SortCreatedAtDesc)
 	idsChan := make(chan []int64)
@@ -84,6 +84,8 @@ func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
 			return ctx.Err()
 		case ids := <-idsChan:
 			for _, id := range ids {
+				logrus.Warn("process id >>> ", id)
+				continue
 				_, err := h.enqueuer.EnqueueUnique(jobGradeAssignment, work.Q{"assignmentID": id})
 				return fmt.Errorf("unable to enqueue assignment %d: %w", id, err)
 			}
@@ -93,11 +95,12 @@ func (h *jobHandler) handleCheckAllDueAssignments(job *work.Job) error {
 	})
 
 	err := eg.Wait()
-	if err != nil && !errors.Is(err, context.Canceled) {
+	if err != nil && err != context.Canceled {
 		logrus.Error(err)
 		return err
 	}
 
+	logrus.Warn("done")
 	return nil
 }
 
