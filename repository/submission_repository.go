@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"math"
 
 	"gorm.io/gorm"
 
@@ -17,6 +18,7 @@ type SubmissionRepository interface {
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	Update(ctx context.Context, submission *model.Submission) error
+	UpdateGradeByID(ctx context.Context, id, grade int64) error
 }
 
 type submissionRepo struct {
@@ -103,6 +105,23 @@ func (s *submissionRepo) Update(ctx context.Context, submission *model.Submissio
 			"ctx":        utils.Dump(ctx),
 			"submission": utils.Dump(submission),
 		}).Error(err)
+	}
+
+	return nil
+}
+
+func round(num float64) int {
+	return int(num + math.Copysign(0.5, num))
+}
+
+// UpdateGradeByID ..
+func (s *submissionRepo) UpdateGradeByID(ctx context.Context, id, grade int64) error {
+	err := s.db.
+		Model(model.Submission{}).
+		Where("id = ?", id).
+		Update("grade", grade).Error
+	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 

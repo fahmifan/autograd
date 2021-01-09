@@ -48,6 +48,7 @@ func (s *Server) Run() {
 
 func (s *Server) routes() {
 	s.echo.Static("/storage", "submission")
+	s.echo.Static("/media", "media")
 	s.echo.GET("/ping", s.handlePing)
 
 	apiV1 := s.echo.Group("/api/v1")

@@ -1,11 +1,13 @@
 package httpsvc
 
 import (
+	"fmt"
 	"net/http"
 	"path"
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/miun173/autograd/config"
 	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -33,5 +35,7 @@ func (s *Server) handleUploadMedia(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusCreated, `{"status": "ok"}`)
+	publicURL := fmt.Sprintf("%s/%s", config.BaseURL(), dst)
+	res := map[string]string{"publicURL": publicURL}
+	return c.JSON(http.StatusCreated, res)
 }

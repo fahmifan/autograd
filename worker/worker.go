@@ -56,10 +56,10 @@ func (w *Worker) registerJobs() {
 	w.pool.Middleware(w.registerJobConfig)
 
 	w.pool.JobWithOptions(jobGradeAssignment, defaultJobOpt, (*jobHandler).handleGradeAssignment)
-	w.pool.JobWithOptions(jobCheckAllDueAssignments, defaultJobOpt, (*jobHandler).handleCheckAllDueAssignments)
+	// w.pool.JobWithOptions(jobCheckAllDueAssignments, defaultJobOpt, (*jobHandler).handleCheckAllDueAssignments)
 	w.pool.JobWithOptions(jobGradeSubmission, defaultJobOpt, (*jobHandler).handleGradeSubmission)
 
-	w.pool.PeriodicallyEnqueue(cronEvery10Minute, jobCheckAllDueAssignments)
+	// w.pool.PeriodicallyEnqueue(cronEvery10Minute, jobCheckAllDueAssignments)
 }
 
 func (w *Worker) registerJobConfig(handler *jobHandler, job *work.Job, next work.NextMiddlewareFunc) error {

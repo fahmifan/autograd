@@ -3,10 +3,11 @@ package grader
 import (
 	"bufio"
 	"context"
-	"crypto/md5"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -17,7 +18,8 @@ import (
 
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
-	FindByID(id int64) (*model.Submission, error)
+	FindByID(ctx context.Context, id int64) (*model.Submission, error)
+	UpdateGradeByID(ctx context.Context, id, grade int64) error
 }
 
 type assignment struct {
@@ -38,10 +40,16 @@ type Grader struct {
 }
 
 // NewGrader ..
-func NewGrader(c Compiler) *Grader {
-	return &Grader{
+func NewGrader(c Compiler, opts ...Option) *Grader {
+	g := &Grader{
 		compiler: c,
 	}
+
+	for _, opt := range opts {
+		opt(g)
+	}
+
+	return g
 }
 
 // Grade ..
@@ -81,7 +89,7 @@ func (g *Grader) Grade(srcCodePath string, inputs, expecteds []string) (outputs 
 
 // GradeSubmission find the submission source code and call Grade
 func (g *Grader) GradeSubmission(submissionID int64) (err error) {
-	submission, err := g.submisisonUsecase.FindByID(submissionID)
+	submission, err := g.submisisonUsecase.FindByID(context.Background(), submissionID)
 	if err != nil {
 		err = fmt.Errorf("unable to get submission %d: %w", submissionID, err)
 		logrus.Error(err)
@@ -102,8 +110,29 @@ func (g *Grader) GradeSubmission(submissionID int64) (err error) {
 		return
 	}
 
-	_, _, err = g.Grade(srcCodePath, asg.input, asg.output)
+	_, corrects, err := g.Grade(srcCodePath, asg.input, asg.output)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	err = g.submisisonUsecase.UpdateGradeByID(context.Background(), submissionID, calcCorrects(corrects))
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
 	return
+}
+
+func calcCorrects(corrects []bool) (sum int64) {
+	for _, c := range corrects {
+		if c == true {
+			sum++
+		}
+	}
+
+	return (sum / int64(len(corrects))) * 100
 }
 
 func (g *Grader) getSubmissionSrcCodeByID(id int64) (srcCodePath string, err error) {
@@ -117,6 +146,12 @@ func (g *Grader) getAssignment(assignmentID int64) (asg *assignment, err error) 
 	if err != nil {
 		return nil, err
 	}
+
+	if res == nil {
+		return nil, errors.New("unable to find assignment")
+	}
+
+	asg = &assignment{}
 
 	// download source code to local filepath
 	inputPath := ""
@@ -163,10 +198,14 @@ func (g *Grader) download(srcURL string, dest *string) (outputPath string, err e
 	}
 	defer resp.Body.Close()
 
+	theURL, err := url.Parse(srcURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse url %v", err)
+	}
+
+	paths := strings.Split(theURL.Path, "/")
 	if dest == nil {
-		hash := md5.New()
-		hashed := hash.Sum([]byte(srcURL))
-		outputPath = fmt.Sprintf(path.Join(os.TempDir(), string(hashed)))
+		outputPath = path.Join(os.TempDir(), paths[len(paths)-1])
 	}
 
 	out, err := os.Create(outputPath)

@@ -16,6 +16,7 @@ func init() {
 		return
 	}
 
+	logrus.SetReportCaller(true)
 	logrus.Info("load .env file to os env")
 }
 
@@ -48,7 +49,7 @@ func BaseURL() string {
 		return val
 	}
 
-	return "localhost:" + os.Getenv("PORT")
+	return "http://localhost:" + os.Getenv("PORT")
 }
 
 // PostgresDSN ..

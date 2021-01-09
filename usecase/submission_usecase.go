@@ -25,6 +25,8 @@ type SubmissionUsecase interface {
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	Update(ctx context.Context, submission *model.Submission) error
 	Upload(ctx context.Context, sourceCode string) (string, error)
+	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error)
+	UpdateGradeByID(ctx context.Context, id, grade int64) error
 }
 
 type submissionUsecase struct {
@@ -159,4 +161,36 @@ func generateFileName() string {
 	h.Write([]byte(randomNumber + timestamp))
 
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
+	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":          utils.Dump(ctx),
+			"cursor":       cursor,
+			"assignmentID": assignmentID,
+		}).Error(err)
+		return nil, 0, err
+	}
+
+	return
+}
+
+// UpdateGradeByID ..
+func (s *submissionUsecase) UpdateGradeByID(ctx context.Context, id, grade int64) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"id":    id,
+		"grade": grade,
+	})
+	sbm, err := s.submissionRepo.FindByID(ctx, id)
+	if err != nil {
+		logger.Error(err)
+	}
+
+	if sbm == nil {
+		return ErrNotFound
+	}
+
+	return s.submissionRepo.UpdateGradeByID(ctx, id, grade)
 }
