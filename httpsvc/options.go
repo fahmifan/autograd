@@ -32,3 +32,10 @@ func WithSubmissionUsecase(sub usecase.SubmissionUsecase) Option {
 		s.submissionUsecase = sub
 	}
 }
+
+// WithUploader ..
+func WithUploader(up Uploader) Option {
+	return func(s *Server) {
+		s.uploader = up
+	}
+}

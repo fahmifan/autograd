@@ -5,6 +5,7 @@ import (
 
 	"github.com/miun173/autograd/config"
 	db "github.com/miun173/autograd/db/migrations"
+	"github.com/miun173/autograd/fs"
 	"github.com/miun173/autograd/httpsvc"
 	"github.com/miun173/autograd/repository"
 	"github.com/miun173/autograd/usecase"
@@ -47,6 +48,7 @@ func main() {
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo)
 	assignmentRepo := repository.NewAssignmentRepository(postgres)
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
+	localFS := fs.NewFileSaver()
 
 	server := httpsvc.NewServer(
 		config.Port(),
@@ -54,6 +56,7 @@ func main() {
 		httpsvc.WithUserUsecase(userUsecase),
 		httpsvc.WithAssignmentUsecase(assignmentUsecase),
 		httpsvc.WithSubmissionUsecase(submissionUsecase),
+		httpsvc.WithUploader(localFS),
 	)
 
 	server.Run()

@@ -1,6 +1,7 @@
 package httpsvc
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,14 +10,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Uploader ..
+type Uploader interface {
+	Upload(dst string, r io.Reader) error
+}
+
 // Server ..
 type Server struct {
+	echo              *echo.Echo
+	port              string
 	exampleUsecase    usecase.ExampleUsecase
 	userUsecase       usecase.UserUsecase
 	assignmentUsecase usecase.AssignmentUsecase
 	submissionUsecase usecase.SubmissionUsecase
-	echo              *echo.Echo
-	port              string
+	uploader          Uploader
 }
 
 // NewServer ..
@@ -63,6 +70,8 @@ func (s *Server) routes() {
 	apiV1.GET("/submissions/:ID", s.handleGetSubmission)
 	apiV1.PUT("/submissions", s.handleUpdateSubmission)
 	apiV1.DELETE("/submissions/:ID", s.handleDeleteSubmission)
+
+	apiV1.POST("/media/upload", s.handleUploadMedia)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
