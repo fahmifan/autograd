@@ -112,13 +112,13 @@ func (g *Grader) GradeSubmission(submissionID int64) (err error) {
 
 	_, corrects, err := g.Grade(srcCodePath, asg.input, asg.output)
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithField("srcCodePath", srcCodePath).Error(err)
 		return err
 	}
 
 	err = g.submisisonUsecase.UpdateGradeByID(context.Background(), submissionID, calcCorrects(corrects))
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithField("submissionID", submissionID).Error(err)
 		return err
 	}
 
