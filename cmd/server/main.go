@@ -9,6 +9,7 @@ import (
 	"github.com/miun173/autograd/httpsvc"
 	"github.com/miun173/autograd/repository"
 	"github.com/miun173/autograd/usecase"
+	"github.com/miun173/autograd/worker"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,7 +38,10 @@ func init() {
 }
 
 func main() {
+	redisPool := config.NewRedisPool(config.RedisWorkerHost())
 	postgres := db.NewPostgres()
+
+	broker := worker.NewBroker(redisPool)
 
 	exampleRepo := repository.NewExampleRepo()
 	exampleUsecase := usecase.NewExampleUsecase(exampleRepo)
@@ -45,9 +49,9 @@ func main() {
 	userRepo := repository.NewUserRepository(postgres)
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	submissionRepo := repository.NewSubmissionRepo(postgres)
-	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo)
 	assignmentRepo := repository.NewAssignmentRepository(postgres)
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
+	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
 	localFS := fs.NewFileSaver()
 
 	server := httpsvc.NewServer(

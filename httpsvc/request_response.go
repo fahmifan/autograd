@@ -137,14 +137,14 @@ func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
 }
 
 type submissionRes struct {
-	ID           string  `json:"id"`
-	AssignmentID string  `json:"assignmentID"`
-	SubmittedBy  string  `json:"submittedBy"`
-	FileURL      string  `json:"fileURL"`
-	Grade        float64 `json:"grade"`
-	Feedback     string  `json:"feedback"`
-	CreatedAt    string  `json:"createdAt"`
-	UpdatedAt    string  `json:"updatedAt"`
+	ID           string `json:"id"`
+	AssignmentID string `json:"assignmentID"`
+	SubmittedBy  string `json:"submittedBy"`
+	FileURL      string `json:"fileURL"`
+	Grade        int64  `json:"grade"`
+	Feedback     string `json:"feedback"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
 }
 
 func submissionModelToRes(m *model.Submission) *submissionRes {

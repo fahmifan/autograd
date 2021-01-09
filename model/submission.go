@@ -12,7 +12,7 @@ type Submission struct {
 	AssignmentID int64
 	SubmittedBy  int64
 	FileURL      string
-	Grade        float64
+	Grade        int64
 	Feedback     string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

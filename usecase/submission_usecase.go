@@ -29,15 +29,37 @@ type SubmissionUsecase interface {
 	UpdateGradeByID(ctx context.Context, id, grade int64) error
 }
 
+// WorkerBroker ..
+type WorkerBroker interface {
+	EnqueueJobGradeSubmission(submissionID int64) error
+}
+
 type submissionUsecase struct {
 	submissionRepo repository.SubmissionRepository
+	broker         WorkerBroker
+}
+
+// SubmissionOption ..
+type SubmissionOption func(s *submissionUsecase)
+
+// SubmissionUsecaseWithBroker ..
+func SubmissionUsecaseWithBroker(b WorkerBroker) SubmissionOption {
+	return func(s *submissionUsecase) {
+		s.broker = b
+	}
 }
 
 // NewSubmissionUsecase ..
-func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository) SubmissionUsecase {
-	return &submissionUsecase{
+func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository, opts ...SubmissionOption) SubmissionUsecase {
+	s := &submissionUsecase{
 		submissionRepo: submissionRepo,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
@@ -117,6 +139,13 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 		logger.Error(err)
 		return err
 	}
+
+	go func(submissionID int64) {
+		err := s.broker.EnqueueJobGradeSubmission(submissionID)
+		if err != nil {
+			logger.Error(err)
+		}
+	}(submission.ID)
 
 	return nil
 }

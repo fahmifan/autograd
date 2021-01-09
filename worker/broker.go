@@ -28,5 +28,8 @@ func NewBroker(redisPool *redis.Pool) *Broker {
 func (b *Broker) EnqueueJobGradeSubmission(submissionID int64) error {
 	arg := work.Q{"submissionID": utils.Int64ToString(submissionID)}
 	_, err := b.enqueuer.EnqueueUnique(jobGradeSubmission, arg)
-	return fmt.Errorf("failed to enqueue %s: %w", jobGradeSubmission, err)
+	if err != nil {
+		return fmt.Errorf("failed to enqueue %s: %w", jobGradeSubmission, err)
+	}
+	return nil
 }

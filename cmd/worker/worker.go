@@ -52,9 +52,6 @@ func main() {
 	)
 	wrk.Start()
 
-	broker := worker.NewBroker(redisPool)
-	broker.EnqueueJobGradeSubmission(336588465439244552)
-
 	// Wait for a signal to quit:
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, os.Kill)
