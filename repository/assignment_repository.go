@@ -109,27 +109,14 @@ func (a *assignmentRepo) FindByID(ctx context.Context, id int64) (*model.Assignm
 }
 
 func (a *assignmentRepo) Update(ctx context.Context, assignment *model.Assignment) error {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"assignment": utils.Dump(assignment),
-	})
-
-	tx := a.db.Begin()
 	err := a.db.Model(&model.Assignment{}).Where("id = ?", assignment.ID).Updates(assignment).Error
 	if err != nil {
-		tx.Rollback()
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"assignment": utils.Dump(assignment),
+		}).Error(err)
 		return err
 	}
 
-	err = a.db.Where("id = ?", assignment.ID).First(assignment).Error
-	if err != nil {
-		tx.Rollback()
-		logger.Error(err)
-		return err
-	}
-
-	tx.Commit()
-
-	return err
+	return nil
 }

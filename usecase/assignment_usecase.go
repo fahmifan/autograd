@@ -128,12 +128,20 @@ func (a *assignmentUsecase) Update(ctx context.Context, assignment *model.Assign
 		return ErrInvalidArguments
 	}
 
-	err := a.assignmentRepo.Update(ctx, assignment)
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":        utils.Dump(ctx),
+		"assignment": utils.Dump(assignment),
+	})
+
+	_, err := a.FindByID(ctx, assignment.ID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":        utils.Dump(ctx),
-			"assignment": utils.Dump(assignment),
-		}).Error(err)
+		logger.Error(err)
+		return err
+	}
+
+	err = a.assignmentRepo.Update(ctx, assignment)
+	if err != nil {
+		logger.Error(err)
 		return err
 	}
 
