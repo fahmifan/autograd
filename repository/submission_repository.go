@@ -13,7 +13,7 @@ import (
 // SubmissionRepository ..
 type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	DeleteByID(ctx context.Context, id int64) (*model.Submission, error)
+	DeleteByID(ctx context.Context, id int64) error
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	Update(ctx context.Context, submission *model.Submission) error
@@ -37,41 +37,23 @@ func (s *submissionRepo) Create(ctx context.Context, submission *model.Submissio
 			"ctx":        utils.Dump(ctx),
 			"submission": utils.Dump(submission),
 		}).Error(err)
+		return err
 	}
 
-	return err
+	return nil
 }
 
-func (s *submissionRepo) DeleteByID(ctx context.Context, id int64) (*model.Submission, error) {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx": utils.Dump(ctx),
-		"id":  utils.Dump(id),
-	})
-
-	tx := s.db.Begin()
-	submission := &model.Submission{}
-	err := tx.Where("id = ?", id).Delete(submission).Error
-	switch err {
-	case nil: // ignore
-	case gorm.ErrRecordNotFound:
-		tx.Rollback()
-		return nil, nil
-	default:
-		tx.Rollback()
-		logger.Error(err)
-		return nil, err
-	}
-
-	err = tx.Unscoped().Where("id = ?", id).First(submission).Error
+func (s *submissionRepo) DeleteByID(ctx context.Context, id int64) error {
+	err := s.db.Where("id = ?", id).Delete(&model.Submission{}).Error
 	if err != nil {
-		tx.Rollback()
-		logger.Error(err)
-		return nil, err
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  utils.Dump(id),
+		}).Error(err)
+		return err
 	}
 
-	tx.Commit()
-
-	return submission, nil
+	return nil
 }
 
 func (s *submissionRepo) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) ([]*model.Submission, int64, error) {

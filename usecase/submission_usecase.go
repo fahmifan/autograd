@@ -57,17 +57,21 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 }
 
 func (s *submissionUsecase) DeleteByID(ctx context.Context, id int64) (*model.Submission, error) {
-	submission, err := s.submissionRepo.DeleteByID(ctx, id)
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"id":  utils.Dump(id),
+	})
+
+	submission, err := s.FindByID(ctx, id)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
-	if submission == nil {
-		return nil, ErrNotFound
+	err = s.submissionRepo.DeleteByID(ctx, id)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
 	}
 
 	return submission, nil
