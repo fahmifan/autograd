@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"math"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -119,7 +120,10 @@ func (s *submissionRepo) UpdateGradeByID(ctx context.Context, id, grade int64) e
 	err := s.db.
 		Model(model.Submission{}).
 		Where("id = ?", id).
-		Update("grade", grade).Error
+		Updates(map[string]interface{}{
+			"grade":      grade,
+			"updated_at": time.Now(),
+		}).Error
 	if err != nil {
 		logrus.Error(err)
 		return err

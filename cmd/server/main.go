@@ -2,10 +2,13 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/miun173/autograd/config"
 	db "github.com/miun173/autograd/db/migrations"
 	"github.com/miun173/autograd/fs"
+	"github.com/miun173/autograd/grader"
 	"github.com/miun173/autograd/httpsvc"
 	"github.com/miun173/autograd/repository"
 	"github.com/miun173/autograd/usecase"
@@ -63,5 +66,35 @@ func main() {
 		httpsvc.WithUploader(localFS),
 	)
 
-	server.Run()
+	cppCompiler := grader.NewCompiler(grader.CPPCompiler)
+	cppGrader := grader.NewGrader(cppCompiler,
+		grader.WithAssignmentUsecase(assignmentUsecase),
+		grader.WithSubmissionUsecase(submissionUsecase),
+	)
+	wrk := worker.NewWorker(
+		worker.WithWorkerPool(redisPool),
+		worker.WithGrader(cppGrader),
+	)
+
+	go func() {
+		logrus.Info("run server")
+		server.Run()
+	}()
+
+	go func() {
+		logrus.Info("run worker")
+		wrk.Start()
+	}()
+
+	// Wait for a signal to quit:
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, os.Kill)
+	<-signalChan
+
+	logrus.Info("stopping worker")
+	time.AfterFunc(time.Second*10, func() {
+		os.Exit(1)
+	})
+	wrk.Stop()
+	logrus.Info("worker stopped")
 }
