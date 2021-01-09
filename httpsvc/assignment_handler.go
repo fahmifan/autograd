@@ -23,12 +23,12 @@ func (s *Server) handleCreateAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 }
 
 func (s *Server) handleDeleteAssignment(c echo.Context) error {
 	id := utils.StringToInt64(c.Param("ID"))
-	assignment, err := s.assignmentUsecase.Delete(c.Request().Context(), id)
+	assignment, err := s.assignmentUsecase.DeleteByID(c.Request().Context(), id)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
@@ -45,7 +45,7 @@ func (s *Server) handleGetAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 }
 
 func (s *Server) handleGetAssignments(c echo.Context) error {
@@ -59,6 +59,20 @@ func (s *Server) handleGetAssignments(c echo.Context) error {
 	assignmentResponses := newAssignmentResponses(assignments)
 
 	return c.JSON(http.StatusOK, newCursorRes(cursor, assignmentResponses, count))
+}
+
+func (s *Server) handleGetAssignmentSubmissions(c echo.Context) error {
+	id := utils.StringToInt64(c.Param("ID"))
+	cursor := getCursorFromContext(c)
+	submissions, count, err := s.assignmentUsecase.FindSubmissionsByID(c.Request().Context(), cursor, id)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	submissionRes := newSubmissionResponses(submissions)
+
+	return c.JSON(http.StatusOK, newCursorRes(cursor, submissionRes, count))
 }
 
 func (s *Server) handleUpdateAssignment(c echo.Context) error {
@@ -76,6 +90,6 @@ func (s *Server) handleUpdateAssignment(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, assignmentModelToCreateRes(assignment))
+	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 
 }

@@ -30,7 +30,7 @@ func NewUserUsecase(userRepo repository.UserRepository) UserUsecase {
 
 func (u *userUsecase) Create(ctx context.Context, user *model.User) error {
 	if user == nil {
-		return errors.New("invalid arguments")
+		return ErrInvalidArguments
 	}
 
 	logger := logrus.WithFields(logrus.Fields{

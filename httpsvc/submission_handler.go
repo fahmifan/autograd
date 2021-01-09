@@ -3,8 +3,6 @@ package httpsvc
 import (
 	"net/http"
 
-	"github.com/mashingan/smapping"
-	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/utils"
 
 	"github.com/labstack/echo/v4"
@@ -19,14 +17,48 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	submission := &model.Submission{}
-	err = smapping.FillStruct(submission, smapping.MapFields(submissionReq))
+	submission := submissionCreateReqToModel(submissionReq)
+	err = s.submissionUsecase.Create(c.Request().Context(), submission)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	err = s.submissionUsecase.Create(c.Request().Context(), submission)
+	return c.JSON(http.StatusOK, submissionModelToRes(submission))
+}
+
+func (s *Server) handleDeleteSubmission(c echo.Context) error {
+	id := utils.StringToInt64(c.Param("ID"))
+	submission, err := s.submissionUsecase.DeleteByID(c.Request().Context(), id)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, submissionModelToRes(submission))
+}
+
+func (s *Server) handleGetSubmission(c echo.Context) error {
+	id := utils.StringToInt64(c.Param("ID"))
+	submission, err := s.submissionUsecase.FindByID(c.Request().Context(), id)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, submissionModelToRes(submission))
+}
+
+func (s *Server) handleUpdateSubmission(c echo.Context) error {
+	submissionReq := &submissionReq{}
+	err := c.Bind(submissionReq)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	submission := submissionUpdateReqToModel(submissionReq)
+	err = s.submissionUsecase.Update(c.Request().Context(), submission)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
@@ -43,39 +75,13 @@ func (s *Server) handleUpload(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	upload := &model.Upload{}
-	err = smapping.FillStruct(upload, smapping.MapFields(uploadReq))
+	fileURL, err := s.submissionUsecase.Upload(c.Request().Context(), uploadReq.SourceCode)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
 
-	err = s.submissionUsecase.Upload(c.Request().Context(), upload)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	uploadRes := &uploadRes{}
-	err = smapping.FillStruct(uploadRes, smapping.MapFields(upload))
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
+	uploadRes := &uploadRes{FileURL: fileURL}
 
 	return c.JSON(http.StatusOK, uploadRes)
-}
-
-func (s *Server) handleGetAssignmentSubmission(c echo.Context) error {
-	assignmentID := utils.StringToInt64(c.Param("assignmentID"))
-	cursor := getCursorFromContext(c)
-	submissions, count, err := s.submissionUsecase.FindAllByAssignmentID(c.Request().Context(), cursor, assignmentID)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	submissionRes := newSubmissionResponses(submissions)
-
-	return c.JSON(http.StatusOK, newCursorRes(cursor, submissionRes, count))
 }

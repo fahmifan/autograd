@@ -49,7 +49,7 @@ type assignmentRes struct {
 	DeletedAt         string `json:"deletedAt,omitempty"`
 }
 
-func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
+func assignmentModelToRes(m *model.Assignment) *assignmentRes {
 	return &assignmentRes{
 		ID:                utils.Int64ToString(m.ID),
 		AssignedBy:        utils.Int64ToString(m.AssignedBy),
@@ -64,7 +64,7 @@ func assignmentModelToCreateRes(m *model.Assignment) *assignmentRes {
 
 func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*assignmentRes) {
 	for _, assignment := range assignments {
-		assignmentRes = append(assignmentRes, assignmentModelToCreateRes(assignment))
+		assignmentRes = append(assignmentRes, assignmentModelToRes(assignment))
 	}
 
 	return
@@ -113,9 +113,27 @@ type uploadRes struct {
 }
 
 type submissionReq struct {
+	ID           string `json:"id,omitempty"`
 	AssignmentID int64  `json:"assignmentID"`
 	SubmittedBy  int64  `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
+}
+
+func submissionCreateReqToModel(s *submissionReq) *model.Submission {
+	return &model.Submission{
+		AssignmentID: s.AssignmentID,
+		SubmittedBy:  s.SubmittedBy,
+		FileURL:      s.FileURL,
+	}
+}
+
+func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
+	return &model.Submission{
+		ID:           utils.StringToInt64(s.ID),
+		AssignmentID: s.AssignmentID,
+		SubmittedBy:  s.SubmittedBy,
+		FileURL:      s.FileURL,
+	}
 }
 
 type submissionRes struct {

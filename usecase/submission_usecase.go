@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -22,8 +21,10 @@ import (
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *model.Submission) error
-	Upload(ctx context.Context, upload *model.Upload) error
-	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error)
+	DeleteByID(ctx context.Context, id int64) (*model.Submission, error)
+	FindByID(ctx context.Context, id int64) (*model.Submission, error)
+	Update(ctx context.Context, submission *model.Submission) error
+	Upload(ctx context.Context, sourceCode string) (string, error)
 }
 
 type submissionUsecase struct {
@@ -39,7 +40,63 @@ func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository) Submis
 
 func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
 	if submission == nil {
-		return errors.New("invalid arguments")
+		return ErrInvalidArguments
+	}
+
+	submission.ID = utils.GenerateID()
+	err := s.submissionRepo.Create(ctx, submission)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"submission": utils.Dump(submission),
+		}).Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *submissionUsecase) DeleteByID(ctx context.Context, id int64) (*model.Submission, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"id":  id,
+	})
+
+	submission, err := s.FindByID(ctx, id)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	err = s.submissionRepo.DeleteByID(ctx, id)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	return submission, nil
+}
+
+func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Submission, error) {
+	submission, err := s.submissionRepo.FindByID(ctx, id)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx": utils.Dump(ctx),
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	}
+
+	if submission == nil {
+		return nil, ErrNotFound
+	}
+
+	return submission, nil
+}
+
+func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submission) error {
+	if submission == nil {
+		return ErrInvalidArguments
 	}
 
 	logger := logrus.WithFields(logrus.Fields{
@@ -47,8 +104,13 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		"submission": utils.Dump(submission),
 	})
 
-	submission.ID = utils.GenerateID()
-	err := s.submissionRepo.Create(ctx, submission)
+	_, err := s.FindByID(ctx, submission.ID)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	err = s.submissionRepo.Update(ctx, submission)
 	if err != nil {
 		logger.Error(err)
 		return err
@@ -57,20 +119,20 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	return nil
 }
 
-func (s *submissionUsecase) Upload(ctx context.Context, upload *model.Upload) error {
-	if upload == nil {
-		return errors.New("invalid arguments")
+func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (string, error) {
+	if sourceCode == "" {
+		return "", ErrInvalidArguments
 	}
 
 	logger := logrus.WithFields(logrus.Fields{
-		"ctx":    utils.Dump(ctx),
-		"upload": utils.Dump(upload),
+		"ctx":        utils.Dump(ctx),
+		"sourceCode": sourceCode,
 	})
 
 	cwd, err := os.Getwd()
 	if err != nil {
 		logger.Error(err)
-		return err
+		return "", err
 	}
 
 	fileName := generateFileName() + ".cpp"
@@ -78,15 +140,15 @@ func (s *submissionUsecase) Upload(ctx context.Context, upload *model.Upload) er
 	file, err := os.Create(filePath)
 	if err != nil {
 		logger.Error(err)
-		return err
+		return "", err
 	}
 
-	file.WriteString(upload.SourceCode)
+	file.WriteString(sourceCode)
 	defer file.Close()
 
-	upload.FileURL = config.BaseURL() + "/storage/" + fileName
+	fileURL := config.BaseURL() + "/storage/" + fileName
 
-	return nil
+	return fileURL, nil
 }
 
 func generateFileName() string {
@@ -97,18 +159,4 @@ func generateFileName() string {
 	h.Write([]byte(randomNumber + timestamp))
 
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
-	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":          utils.Dump(ctx),
-			"cursor":       cursor,
-			"assignmentID": assignmentID,
-		}).Error(err)
-		return nil, 0, err
-	}
-
-	return
 }
