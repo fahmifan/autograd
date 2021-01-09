@@ -53,17 +53,21 @@ func (a *assignmentUsecase) Create(ctx context.Context, assignment *model.Assign
 }
 
 func (a *assignmentUsecase) DeleteByID(ctx context.Context, id int64) (*model.Assignment, error) {
-	assignment, err := a.assignmentRepo.DeleteByID(ctx, id)
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx": utils.Dump(ctx),
+		"id":  id,
+	})
+
+	assignment, err := a.FindByID(ctx, id)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx": utils.Dump(ctx),
-			"id":  id,
-		}).Error(err)
+		logger.Error(err)
 		return nil, err
 	}
 
-	if assignment == nil {
-		return nil, ErrNotFound
+	err = a.assignmentRepo.DeleteByID(ctx, id)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
 	}
 
 	return assignment, nil

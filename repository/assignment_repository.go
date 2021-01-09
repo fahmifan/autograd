@@ -12,7 +12,7 @@ import (
 // AssignmentRepository ..
 type AssignmentRepository interface {
 	Create(ctx context.Context, assignment *model.Assignment) error
-	DeleteByID(ctx context.Context, id int64) (*model.Assignment, error)
+	DeleteByID(ctx context.Context, id int64) error
 	FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error)
 	FindByID(ctx context.Context, id int64) (*model.Assignment, error)
 	Update(ctx context.Context, assignment *model.Assignment) error
@@ -36,12 +36,13 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 			"ctx":        utils.Dump(ctx),
 			"assignment": utils.Dump(assignment),
 		}).Error(err)
+		return err
 	}
 
-	return err
+	return nil
 }
 
-func (a *assignmentRepo) DeleteByID(ctx context.Context, id int64) (*model.Assignment, error) {
+func (a *assignmentRepo) DeleteByID(ctx context.Context, id int64) error {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
 		"id":  id,
@@ -52,27 +53,19 @@ func (a *assignmentRepo) DeleteByID(ctx context.Context, id int64) (*model.Assig
 	if err != nil {
 		tx.Rollback()
 		logger.Error(err)
-		return nil, err
+		return err
 	}
 
-	assignment := &model.Assignment{}
-	err = tx.Where("id = ?", id).Delete(assignment).Error
+	err = tx.Where("id = ?", id).Delete(&model.Assignment{}).Error
 	if err != nil {
 		tx.Rollback()
 		logger.Error(err)
-		return nil, err
-	}
-
-	err = tx.Unscoped().Where("id = ?", id).First(assignment).Error
-	if err != nil {
-		tx.Rollback()
-		logger.Error(err)
-		return nil, err
+		return err
 	}
 
 	tx.Commit()
 
-	return assignment, nil
+	return nil
 }
 
 func (a *assignmentRepo) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error) {
