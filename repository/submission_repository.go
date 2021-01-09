@@ -97,27 +97,14 @@ func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submiss
 }
 
 func (s *submissionRepo) Update(ctx context.Context, submission *model.Submission) error {
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"submission": utils.Dump(submission),
-	})
-
-	tx := s.db.Begin()
 	err := s.db.Model(&model.Submission{}).Where("id = ?", submission.ID).Updates(submission).Error
 	if err != nil {
-		tx.Rollback()
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.Dump(ctx),
+			"submission": utils.Dump(submission),
+		}).Error(err)
 		return err
 	}
 
-	err = s.db.Where("id = ?", submission.ID).First(submission).Error
-	if err != nil {
-		tx.Rollback()
-		logger.Error(err)
-		return err
-	}
-
-	tx.Commit()
-
-	return err
+	return nil
 }

@@ -99,12 +99,20 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 		return ErrInvalidArguments
 	}
 
-	err := s.submissionRepo.Update(ctx, submission)
+	logger := logrus.WithFields(logrus.Fields{
+		"ctx":        utils.Dump(ctx),
+		"submission": utils.Dump(submission),
+	})
+
+	_, err := s.FindByID(ctx, submission.ID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"ctx":        utils.Dump(ctx),
-			"submission": utils.Dump(submission),
-		}).Error(err)
+		logger.Error(err)
+		return err
+	}
+
+	err = s.submissionRepo.Update(ctx, submission)
+	if err != nil {
+		logger.Error(err)
 		return err
 	}
 
