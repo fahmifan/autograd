@@ -44,7 +44,7 @@ func (a *assignmentRepo) Create(ctx context.Context, assignment *model.Assignmen
 func (a *assignmentRepo) DeleteByID(ctx context.Context, id int64) (*model.Assignment, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
-		"id":  utils.Dump(id),
+		"id":  id,
 	})
 
 	tx := a.db.Begin()
@@ -107,7 +107,7 @@ func (a *assignmentRepo) FindByID(ctx context.Context, id int64) (*model.Assignm
 	default:
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
+			"id":  id,
 		}).Error(err)
 		return nil, err
 	}

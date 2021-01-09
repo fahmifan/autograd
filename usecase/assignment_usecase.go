@@ -57,7 +57,7 @@ func (a *assignmentUsecase) DeleteByID(ctx context.Context, id int64) (*model.As
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
+			"id":  id,
 		}).Error(err)
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (a *assignmentUsecase) FindByID(ctx context.Context, id int64) (*model.Assi
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
+			"id":  id,
 		}).Error(err)
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (a *assignmentUsecase) FindSubmissionsByID(ctx context.Context, cursor mode
 		logrus.WithFields(logrus.Fields{
 			"ctx":    utils.Dump(ctx),
 			"cursor": utils.Dump(cursor),
-			"id":     utils.Dump(id),
+			"id":     id,
 		}).Error(err)
 		return nil, 0, err
 	}

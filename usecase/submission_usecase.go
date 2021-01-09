@@ -59,7 +59,7 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 func (s *submissionUsecase) DeleteByID(ctx context.Context, id int64) (*model.Submission, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
-		"id":  utils.Dump(id),
+		"id":  id,
 	})
 
 	submission, err := s.FindByID(ctx, id)
@@ -82,7 +82,7 @@ func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Subm
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
+			"id":  id,
 		}).Error(err)
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (stri
 
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx":        utils.Dump(ctx),
-		"sourceCode": utils.Dump(sourceCode),
+		"sourceCode": sourceCode,
 	})
 
 	cwd, err := os.Getwd()

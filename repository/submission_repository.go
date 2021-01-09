@@ -48,7 +48,7 @@ func (s *submissionRepo) DeleteByID(ctx context.Context, id int64) error {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
+			"id":  id,
 		}).Error(err)
 		return err
 	}
@@ -88,7 +88,7 @@ func (s *submissionRepo) FindByID(ctx context.Context, id int64) (*model.Submiss
 	default:
 		logrus.WithFields(logrus.Fields{
 			"ctx": utils.Dump(ctx),
-			"id":  utils.Dump(id),
+			"id":  id,
 		}).Error(err)
 		return nil, err
 	}
