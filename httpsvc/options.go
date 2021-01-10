@@ -1,6 +1,9 @@
 package httpsvc
 
-import "github.com/miun173/autograd/usecase"
+import (
+	"github.com/miun173/autograd/usecase"
+	usecaseIface "github.com/miun173/autograd/usecase/iface"
+)
 
 // Option ..
 type Option func(*Server)
@@ -33,9 +36,9 @@ func WithSubmissionUsecase(sub usecase.SubmissionUsecase) Option {
 	}
 }
 
-// WithUploader ..
-func WithUploader(up Uploader) Option {
+// WithMediaUsecase ..
+func WithMediaUsecase(med usecaseIface.MediaUsecase) Option {
 	return func(s *Server) {
-		s.uploader = up
+		s.mediaUsecase = med
 	}
 }

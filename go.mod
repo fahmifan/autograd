@@ -9,7 +9,6 @@ require (
 	github.com/gomodule/redigo v1.8.2
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.1.17
-	github.com/mashingan/smapping v0.1.3
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/sony/sonyflake v1.0.0

@@ -1,19 +1,14 @@
 package httpsvc
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/usecase"
+	usecaseIface "github.com/miun173/autograd/usecase/iface"
 	"github.com/sirupsen/logrus"
 )
-
-// Uploader ..
-type Uploader interface {
-	Upload(dst string, r io.Reader) error
-}
 
 // Server ..
 type Server struct {
@@ -23,7 +18,7 @@ type Server struct {
 	userUsecase       usecase.UserUsecase
 	assignmentUsecase usecase.AssignmentUsecase
 	submissionUsecase usecase.SubmissionUsecase
-	uploader          Uploader
+	mediaUsecase      usecaseIface.MediaUsecase
 }
 
 // NewServer ..
