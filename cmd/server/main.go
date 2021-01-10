@@ -46,7 +46,7 @@ func main() {
 
 	broker := worker.NewBroker(redisPool)
 
-	localFS := fs.NewFileSaver()
+	localStorage := fs.NewLocalStorage()
 	exampleRepo := repository.NewExampleRepo()
 	exampleUsecase := usecase.NewExampleUsecase(exampleRepo)
 
@@ -56,7 +56,7 @@ func main() {
 	assignmentRepo := repository.NewAssignmentRepository(postgres)
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
-	mediaUsecase := usecase.NewMediaUsecase(localFS)
+	mediaUsecase := usecase.NewMediaUsecase(localStorage)
 
 	server := httpsvc.NewServer(
 		config.Port(),

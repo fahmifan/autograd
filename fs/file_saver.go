@@ -1,3 +1,4 @@
+// Package fs provides implementation for uploading file
 package fs
 
 import (
@@ -9,16 +10,16 @@ import (
 	"path"
 )
 
-// FileSaver ..
-type FileSaver struct{}
+// LocalStorage ..
+type LocalStorage struct{}
 
-// NewFileSaver ..
-func NewFileSaver() *FileSaver {
-	return &FileSaver{}
+// NewLocalStorage ..
+func NewLocalStorage() *LocalStorage {
+	return &LocalStorage{}
 }
 
 // Upload save file to local storage
-func (f *FileSaver) Upload(dst string, r io.Reader) error {
+func (f *LocalStorage) Upload(dst string, r io.Reader) error {
 	dir, _ := path.Split(dst)
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil && !errors.Is(err, os.ErrExist) {
