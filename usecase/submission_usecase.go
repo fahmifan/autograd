@@ -77,6 +77,13 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		return err
 	}
 
+	go func(sbmID int64) {
+		err := s.broker.EnqueueJobGradeSubmission(sbmID)
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(submission.ID)
+
 	return nil
 }
 
