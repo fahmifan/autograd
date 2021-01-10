@@ -56,9 +56,10 @@ func (w *Worker) registerJobs() {
 	w.pool.Middleware(w.registerJobConfig)
 
 	w.pool.JobWithOptions(jobGradeAssignment, defaultJobOpt, (*jobHandler).handleGradeAssignment)
-	// w.pool.JobWithOptions(jobCheckAllDueAssignments, defaultJobOpt, (*jobHandler).handleCheckAllDueAssignments)
 	w.pool.JobWithOptions(jobGradeSubmission, defaultJobOpt, (*jobHandler).handleGradeSubmission)
 
+	// TODO: disable for now
+	// w.pool.JobWithOptions(jobCheckAllDueAssignments, defaultJobOpt, (*jobHandler).handleCheckAllDueAssignments)
 	// w.pool.PeriodicallyEnqueue(cronEvery10Minute, jobCheckAllDueAssignments)
 }
 

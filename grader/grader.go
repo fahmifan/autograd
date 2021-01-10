@@ -135,10 +135,6 @@ func calcCorrects(corrects []bool) (sum int64) {
 	return (sum / int64(len(corrects))) * 100
 }
 
-func (g *Grader) getSubmissionSrcCodeByID(id int64) (srcCodePath string, err error) {
-	return
-}
-
 // find the model.Assignment from usecase
 // then download the input & output code to local path
 func (g *Grader) getAssignment(assignmentID int64) (asg *assignment, err error) {
