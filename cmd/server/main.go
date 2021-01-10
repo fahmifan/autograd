@@ -56,10 +56,11 @@ func main() {
 	assignmentRepo := repository.NewAssignmentRepository(postgres)
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
-	mediaUsecase := usecase.NewMediaUsecase(localStorage)
+	mediaUsecase := usecase.NewMediaUsecase(config.FileUploadPath(), localStorage)
 
 	server := httpsvc.NewServer(
 		config.Port(),
+		config.FileUploadPath(),
 		httpsvc.WithExampleUsecase(exampleUsecase),
 		httpsvc.WithUserUsecase(userUsecase),
 		httpsvc.WithAssignmentUsecase(assignmentUsecase),

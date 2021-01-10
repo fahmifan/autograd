@@ -19,13 +19,15 @@ type Uploader interface {
 
 // MediaUsecase ..
 type MediaUsecase struct {
-	uploader Uploader
+	uploader  Uploader
+	dstFolder string
 }
 
 // NewMediaUsecase ..
-func NewMediaUsecase(uploader Uploader) *MediaUsecase {
+func NewMediaUsecase(dstFolder string, uploader Uploader) *MediaUsecase {
 	return &MediaUsecase{
-		uploader: uploader,
+		uploader:  uploader,
+		dstFolder: dstFolder,
 	}
 }
 
@@ -40,7 +42,7 @@ func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (pubURL string, er
 
 	ext := filepath.Ext(fileInfo.Filename)
 	fileName := utils.GenerateUniqueString() + ext
-	dst := path.Join("media", fileName)
+	dst := path.Join(m.dstFolder, fileName)
 
 	err = m.uploader.Upload(dst, src)
 	if err != nil {

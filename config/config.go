@@ -97,3 +97,13 @@ func NewRedisPool(host string) *redis.Pool {
 		},
 	}
 }
+
+// FileUploadPath ..
+func FileUploadPath() string {
+	val, ok := os.LookupEnv("FILE_UPLOAD_PATH")
+	if ok {
+		return val
+	}
+
+	return "file_upload_path"
+}

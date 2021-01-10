@@ -14,6 +14,7 @@ import (
 type Server struct {
 	echo              *echo.Echo
 	port              string
+	staticMediaPath   string
 	exampleUsecase    usecase.ExampleUsecase
 	userUsecase       usecase.UserUsecase
 	assignmentUsecase usecase.AssignmentUsecase
@@ -22,10 +23,11 @@ type Server struct {
 }
 
 // NewServer ..
-func NewServer(port string, opts ...Option) *Server {
+func NewServer(port, staticMediaPath string, opts ...Option) *Server {
 	s := &Server{
-		echo: echo.New(),
-		port: port,
+		echo:            echo.New(),
+		port:            port,
+		staticMediaPath: staticMediaPath,
 	}
 
 	for _, opt := range opts {
@@ -42,9 +44,11 @@ func (s *Server) Run() {
 }
 
 func (s *Server) routes() {
-	s.echo.Static("/storage", "submission")
-	s.echo.Static("/media", "media")
 	s.echo.GET("/ping", s.handlePing)
+
+	// TODO: add auth for private static
+	s.echo.Static("/storage", "submission")
+	s.echo.Static("/media", s.staticMediaPath)
 
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/users", s.handleCreateUser)

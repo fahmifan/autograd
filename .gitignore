@@ -1,4 +1,4 @@
 .vscode
 submission/*.bin
-media/*
+file_upload_path/*
 .env
