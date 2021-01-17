@@ -66,22 +66,3 @@ func (s *Server) handleUpdateSubmission(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
-
-func (s *Server) handleUpload(c echo.Context) error {
-	uploadReq := &uploadReq{}
-	err := c.Bind(uploadReq)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	fileURL, err := s.submissionUsecase.Upload(c.Request().Context(), uploadReq.SourceCode)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
-
-	uploadRes := &uploadRes{FileURL: fileURL}
-
-	return c.JSON(http.StatusOK, uploadRes)
-}

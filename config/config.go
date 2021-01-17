@@ -49,7 +49,7 @@ func BaseURL() string {
 		return val
 	}
 
-	return "http://localhost:" + os.Getenv("PORT")
+	return fmt.Sprintf("http://localhost:%s", os.Getenv("PORT"))
 }
 
 // PostgresDSN ..
