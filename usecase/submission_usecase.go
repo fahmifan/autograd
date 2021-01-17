@@ -2,11 +2,6 @@ package usecase
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
-	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/repository"
@@ -149,22 +144,12 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 	return nil
 }
 
-func generateFileName() string {
-	h := md5.New()
-	randomNumber := fmt.Sprint(rand.Intn(10))
-	timestamp := fmt.Sprint(time.Now().Unix())
-
-	h.Write([]byte(randomNumber + timestamp))
-
-	return hex.EncodeToString(h.Sum(nil))
-}
-
 func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
 	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":          utils.Dump(ctx),
-			"cursor":       cursor,
+			"cursor":       utils.Dump(cursor),
 			"assignmentID": assignmentID,
 		}).Error(err)
 		return nil, 0, err
@@ -175,13 +160,12 @@ func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor mo
 
 // UpdateGradeByID ..
 func (s *submissionUsecase) UpdateGradeByID(ctx context.Context, id, grade int64) error {
-	logger := logrus.WithFields(logrus.Fields{
-		"id":    id,
-		"grade": grade,
-	})
 	sbm, err := s.submissionRepo.FindByID(ctx, id)
 	if err != nil {
-		logger.Error(err)
+		logrus.WithFields(logrus.Fields{
+			"id":    id,
+			"grade": grade,
+		}).Error(err)
 	}
 
 	if sbm == nil {
