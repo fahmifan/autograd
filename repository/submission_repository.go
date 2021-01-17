@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"math"
 	"time"
 
 	"gorm.io/gorm"
@@ -109,10 +108,6 @@ func (s *submissionRepo) Update(ctx context.Context, submission *model.Submissio
 	}
 
 	return nil
-}
-
-func round(num float64) int {
-	return int(num + math.Copysign(0.5, num))
 }
 
 // UpdateGradeByID ..
