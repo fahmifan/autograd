@@ -6,6 +6,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
 	"github.com/miun173/autograd/config"
+	"github.com/miun173/autograd/model"
 )
 
 var defaultJobOpt = work.JobOptions{MaxConcurrency: 3, MaxFails: 3}
@@ -21,9 +22,9 @@ type Worker struct {
 	pool       *work.WorkerPool
 	redisPool  *redis.Pool
 	enqueuer   *work.Enqueuer
-	grader     Grader
-	submission SubmissionUsecase
-	assignment AssignmentUsecase
+	grader     model.GraderUsecase
+	submission model.SubmissionUsecase
+	assignment model.AssignmentUsecase
 }
 
 // NewWorker ..
@@ -55,10 +56,10 @@ func (w *Worker) registerJobs() {
 	w.pool = work.NewWorkerPool(jobHandler{}, conc, nameSpace, w.redisPool)
 	w.pool.Middleware(w.registerJobConfig)
 
-	w.pool.JobWithOptions(jobGradeAssignment, defaultJobOpt, (*jobHandler).handleGradeAssignment)
 	w.pool.JobWithOptions(jobGradeSubmission, defaultJobOpt, (*jobHandler).handleGradeSubmission)
 
 	// TODO: disable for now
+	// w.pool.JobWithOptions(jobGradeAssignment, defaultJobOpt, (*jobHandler).handleGradeAssignment)
 	// w.pool.JobWithOptions(jobCheckAllDueAssignments, defaultJobOpt, (*jobHandler).handleCheckAllDueAssignments)
 	// w.pool.PeriodicallyEnqueue(cronEvery10Minute, jobCheckAllDueAssignments)
 }

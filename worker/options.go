@@ -2,6 +2,7 @@ package worker
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/miun173/autograd/model"
 )
 
 // Option ..
@@ -15,21 +16,21 @@ func WithWorkerPool(rd *redis.Pool) Option {
 }
 
 // WithGrader ..
-func WithGrader(gr Grader) Option {
+func WithGrader(gr model.GraderUsecase) Option {
 	return func(c *Worker) {
 		c.grader = gr
 	}
 }
 
 // WithSubmissionUsecase ..
-func WithSubmissionUsecase(s SubmissionUsecase) Option {
+func WithSubmissionUsecase(s model.SubmissionUsecase) Option {
 	return func(c *Worker) {
 		c.submission = s
 	}
 }
 
 // WithAssignmentUsecase ..
-func WithAssignmentUsecase(a AssignmentUsecase) Option {
+func WithAssignmentUsecase(a model.AssignmentUsecase) Option {
 	return func(c *Worker) {
 		c.assignment = a
 	}

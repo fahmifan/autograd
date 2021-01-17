@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"time"
@@ -8,7 +9,6 @@ import (
 	"github.com/miun173/autograd/config"
 	db "github.com/miun173/autograd/db/migrations"
 	"github.com/miun173/autograd/fs"
-	"github.com/miun173/autograd/grader"
 	"github.com/miun173/autograd/httpsvc"
 	"github.com/miun173/autograd/repository"
 	"github.com/miun173/autograd/usecase"
@@ -43,39 +43,31 @@ func init() {
 func main() {
 	redisPool := config.NewRedisPool(config.RedisWorkerHost())
 	postgres := db.NewPostgres()
-
 	broker := worker.NewBroker(redisPool)
-
 	localStorage := fs.NewLocalStorage()
-	exampleRepo := repository.NewExampleRepo()
-	exampleUsecase := usecase.NewExampleUsecase(exampleRepo)
 
 	userRepo := repository.NewUserRepository(postgres)
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	submissionRepo := repository.NewSubmissionRepo(postgres)
 	assignmentRepo := repository.NewAssignmentRepository(postgres)
+
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
 	mediaUsecase := usecase.NewMediaUsecase(config.FileUploadPath(), localStorage)
+	graderUsecase := usecase.NewGraderUsecase(submissionUsecase, assignmentUsecase)
 
 	server := httpsvc.NewServer(
 		config.Port(),
 		config.FileUploadPath(),
-		httpsvc.WithExampleUsecase(exampleUsecase),
 		httpsvc.WithUserUsecase(userUsecase),
 		httpsvc.WithAssignmentUsecase(assignmentUsecase),
 		httpsvc.WithSubmissionUsecase(submissionUsecase),
 		httpsvc.WithMediaUsecase(mediaUsecase),
 	)
 
-	cppCompiler := grader.NewCompiler(grader.CPPCompiler)
-	cppGrader := grader.NewGrader(cppCompiler,
-		grader.WithAssignmentUsecase(assignmentUsecase),
-		grader.WithSubmissionUsecase(submissionUsecase),
-	)
 	wrk := worker.NewWorker(
 		worker.WithWorkerPool(redisPool),
-		worker.WithGrader(cppGrader),
+		worker.WithGrader(graderUsecase),
 	)
 
 	go func() {
@@ -93,10 +85,16 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, os.Kill)
 	<-signalChan
 
+	logrus.Info("stopping server")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	server.Stop(ctx)
+
 	logrus.Info("stopping worker")
-	time.AfterFunc(time.Second*10, func() {
+	time.AfterFunc(time.Second*30, func() {
 		os.Exit(1)
 	})
 	wrk.Stop()
 	logrus.Info("worker stopped")
+
 }

@@ -1,12 +1,13 @@
 package httpsvc
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/usecase"
-	usecaseIface "github.com/miun173/autograd/usecase/iface"
+
+	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,11 +16,10 @@ type Server struct {
 	echo              *echo.Echo
 	port              string
 	staticMediaPath   string
-	exampleUsecase    usecase.ExampleUsecase
 	userUsecase       usecase.UserUsecase
 	assignmentUsecase usecase.AssignmentUsecase
 	submissionUsecase usecase.SubmissionUsecase
-	mediaUsecase      usecaseIface.MediaUsecase
+	mediaUsecase      model.MediaUsecase
 }
 
 // NewServer ..
@@ -41,6 +41,13 @@ func NewServer(port, staticMediaPath string, opts ...Option) *Server {
 func (s *Server) Run() {
 	s.routes()
 	logrus.Fatal(s.echo.Start(":" + s.port))
+}
+
+// Stop server gracefully
+func (s *Server) Stop(ctx context.Context) {
+	if err := s.echo.Shutdown(ctx); err != nil {
+		logrus.Fatal(err)
+	}
 }
 
 func (s *Server) routes() {
@@ -75,6 +82,5 @@ func (s *Server) routes() {
 }
 
 func (s *Server) handlePing(c echo.Context) error {
-	s.exampleUsecase.Test()
 	return c.String(http.StatusOK, "pong")
 }

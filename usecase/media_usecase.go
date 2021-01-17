@@ -1,13 +1,11 @@
 package usecase
 
 import (
-	"fmt"
 	"io"
 	"mime/multipart"
 	"path"
 	"path/filepath"
 
-	"github.com/miun173/autograd/config"
 	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -32,7 +30,7 @@ func NewMediaUsecase(dstFolder string, uploader Uploader) *MediaUsecase {
 }
 
 // Upload ..
-func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (pubURL string, err error) {
+func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (name string, err error) {
 	src, err := fileInfo.Open()
 	if err != nil {
 		logrus.Error(err)
@@ -50,6 +48,5 @@ func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (pubURL string, er
 		return
 	}
 
-	publicURL := fmt.Sprintf("%s/%s", config.BaseURL(), dst)
-	return publicURL, nil
+	return fileName, nil
 }

@@ -12,10 +12,10 @@ import (
 
 	"github.com/miun173/autograd/config"
 	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/utils"
-	"github.com/sirupsen/logrus"
-
 	"github.com/miun173/autograd/repository"
+	"github.com/miun173/autograd/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 // SubmissionUsecase ..
@@ -29,21 +29,17 @@ type SubmissionUsecase interface {
 	UpdateGradeByID(ctx context.Context, id, grade int64) error
 }
 
-// WorkerBroker ..
-type WorkerBroker interface {
-	EnqueueJobGradeSubmission(submissionID int64) error
-}
-
 type submissionUsecase struct {
 	submissionRepo repository.SubmissionRepository
-	broker         WorkerBroker
+	assignmentRepo repository.AssignmentRepository
+	broker         model.WorkerBroker
 }
 
 // SubmissionOption ..
 type SubmissionOption func(s *submissionUsecase)
 
 // SubmissionUsecaseWithBroker ..
-func SubmissionUsecaseWithBroker(b WorkerBroker) SubmissionOption {
+func SubmissionUsecaseWithBroker(b model.WorkerBroker) SubmissionOption {
 	return func(s *submissionUsecase) {
 		s.broker = b
 	}

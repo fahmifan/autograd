@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/miun173/autograd/grader"
+	"github.com/miun173/autograd/model"
 )
 
 func init() {
@@ -107,8 +108,7 @@ func findSubmissionsInDir(dir string) (subs map[string][]subm, err error) {
 }
 
 func main() {
-	compiler := grader.NewCompiler(grader.CPPCompiler)
-	grad := grader.NewGrader(compiler)
+	grad := grader.New(grader.TypeCPP)
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -162,13 +162,17 @@ func main() {
 		fmt.Printf("%s:\n---\n", testCode)
 		for _, src := range source {
 			fmt.Printf("%s:\n", src.UserID)
-			outputs, correct, err := grad.Grade(src.Path, inputs, expecteds)
+			result, err := grad.Grade(&model.GradingArg{
+				SourceCodePath: src.Path,
+				Expecteds:      expecteds,
+				Inputs:         inputs,
+			})
 			if err != nil {
 				logrus.Error(err)
 				return
 			}
 
-			fmt.Printf("outputs: %v | corrects: %v\n\n", outputs, correct)
+			fmt.Printf("outputs: %v | corrects: %v | score: %d\n\n", result.Outputs, result.Corrects, result.Score())
 		}
 	}
 }

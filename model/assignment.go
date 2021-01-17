@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,4 +18,9 @@ type Assignment struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt
+}
+
+// AssignmentUsecase ..
+type AssignmentUsecase interface {
+	FindByID(ctx context.Context, id int64) (*Assignment, error)
 }

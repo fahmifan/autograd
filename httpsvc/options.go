@@ -1,19 +1,12 @@
 package httpsvc
 
 import (
+	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/usecase"
-	usecaseIface "github.com/miun173/autograd/usecase/iface"
 )
 
 // Option ..
 type Option func(*Server)
-
-// WithExampleUsecase ..
-func WithExampleUsecase(ex usecase.ExampleUsecase) Option {
-	return func(s *Server) {
-		s.exampleUsecase = ex
-	}
-}
 
 // WithUserUsecase ..
 func WithUserUsecase(u usecase.UserUsecase) Option {
@@ -37,7 +30,7 @@ func WithSubmissionUsecase(sub usecase.SubmissionUsecase) Option {
 }
 
 // WithMediaUsecase ..
-func WithMediaUsecase(med usecaseIface.MediaUsecase) Option {
+func WithMediaUsecase(med model.MediaUsecase) Option {
 	return func(s *Server) {
 		s.mediaUsecase = med
 	}
