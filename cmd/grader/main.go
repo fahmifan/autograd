@@ -12,8 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/miun173/autograd/grader"
-	"github.com/miun173/autograd/model"
+	"github.com/fahmifan/autograd/grader"
+	"github.com/fahmifan/autograd/model"
 )
 
 func init() {

@@ -6,7 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/miun173/autograd/utils"
+	"github.com/fahmifan/autograd/utils"
 	"github.com/sirupsen/logrus"
 )
 

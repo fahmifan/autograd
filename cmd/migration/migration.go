@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/fahmifan/autograd/config"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/miun173/autograd/config"
 	"github.com/sirupsen/logrus"
 )
 

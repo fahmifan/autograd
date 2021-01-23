@@ -13,8 +13,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/miun173/autograd/grader"
-	"github.com/miun173/autograd/model"
+	"github.com/fahmifan/autograd/grader"
+	"github.com/fahmifan/autograd/model"
 	"github.com/sirupsen/logrus"
 )
 

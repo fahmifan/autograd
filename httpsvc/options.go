@@ -1,8 +1,8 @@
 package httpsvc
 
 import (
-	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/usecase"
+	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/usecase"
 )
 
 // Option ..

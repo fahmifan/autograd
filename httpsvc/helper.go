@@ -4,13 +4,13 @@ import (
 	"errors"
 	"time"
 
+	"github.com/fahmifan/autograd/utils"
 	"github.com/labstack/echo/v4"
-	"github.com/miun173/autograd/utils"
 	"github.com/sirupsen/logrus"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/miun173/autograd/config"
-	"github.com/miun173/autograd/model"
+	"github.com/fahmifan/autograd/config"
+	"github.com/fahmifan/autograd/model"
 )
 
 // Create the JWT key used to create the signature

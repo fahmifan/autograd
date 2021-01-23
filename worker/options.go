@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"github.com/miun173/autograd/model"
+	"github.com/fahmifan/autograd/model"
 )
 
 // Option ..

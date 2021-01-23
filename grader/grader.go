@@ -1,7 +1,7 @@
 package grader
 
 import (
-	"github.com/miun173/autograd/model"
+	"github.com/fahmifan/autograd/model"
 )
 
 // Type types of graders

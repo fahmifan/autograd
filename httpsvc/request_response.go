@@ -3,8 +3,8 @@ package httpsvc
 import (
 	"time"
 
-	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/utils"
+	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/utils"
 )
 
 type assignmentReq struct {

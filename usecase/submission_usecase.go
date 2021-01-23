@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/repository"
-	"github.com/miun173/autograd/utils"
+	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/repository"
+	"github.com/fahmifan/autograd/utils"
 
 	"github.com/sirupsen/logrus"
 )

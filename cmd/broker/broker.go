@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/miun173/autograd/config"
-	"github.com/miun173/autograd/worker"
+	"github.com/fahmifan/autograd/config"
+	"github.com/fahmifan/autograd/worker"
 )
 
 // for testing wokrer & broker
