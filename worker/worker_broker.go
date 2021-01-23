@@ -3,10 +3,10 @@ package worker
 import (
 	"fmt"
 
+	"github.com/fahmifan/autograd/config"
+	"github.com/fahmifan/autograd/utils"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
-	"github.com/miun173/autograd/config"
-	"github.com/miun173/autograd/utils"
 )
 
 // newEnqueuer ..

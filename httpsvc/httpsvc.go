@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/usecase"
+	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/usecase"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"

@@ -1,9 +1,9 @@
 package worker
 
 import (
+	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/utils"
 	"github.com/gomodule/redigo/redis"
-	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/utils"
 
 	"github.com/gocraft/work"
 	"github.com/sirupsen/logrus"
