@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewPostgres :nodoc:
+// NewPostgres ..
 func NewPostgres() *gorm.DB {
 	db, err := gorm.Open(postgres.Open(config.PostgresDSN()), &gorm.Config{})
 	if err != nil {

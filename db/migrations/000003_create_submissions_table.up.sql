@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS "submissions" (
     "assignment_id" BIGINT REFERENCES assignments(id) NOT NULL,
     "submitted_by" BIGINT REFERENCES users(id) NOT NULL,
     "is_graded" BOOLEAN DEFAULT FALSE NOT NULL,
-    "grade" NUMERIC(3, 2) DEFAULT 0 NOT NULL,
+    "grade" INT NOT NULL DEFAULT 0,
     "feedback" TEXT DEFAULT '' NOT NULL,
     "file_url" TEXT DEFAULT '' NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL,

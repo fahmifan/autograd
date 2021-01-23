@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Role :nodoc:
+// Role ..
 type Role int
 
 // user roles
@@ -13,7 +13,7 @@ const (
 	RoleStudent = Role(2)
 )
 
-// ToString :nodoc:
+// ToString ..
 func (u Role) ToString() string {
 	switch u {
 	case RoleAdmin:
@@ -25,7 +25,7 @@ func (u Role) ToString() string {
 	}
 }
 
-// ParseRole :nodoc:
+// ParseRole ..
 func ParseRole(s string) Role {
 	switch s {
 	case "ADMIN":
@@ -37,7 +37,7 @@ func ParseRole(s string) Role {
 	}
 }
 
-// User :nodoc:
+// User ..
 type User struct {
 	ID        int64
 	Name      string

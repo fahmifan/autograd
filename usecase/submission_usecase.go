@@ -2,20 +2,12 @@ package usecase
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
-	"fmt"
-	"math/rand"
-	"os"
-	"path"
-	"time"
 
-	"github.com/miun173/autograd/config"
 	"github.com/miun173/autograd/model"
-	"github.com/miun173/autograd/utils"
-	"github.com/sirupsen/logrus"
-
 	"github.com/miun173/autograd/repository"
+	"github.com/miun173/autograd/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 // SubmissionUsecase ..
@@ -24,18 +16,37 @@ type SubmissionUsecase interface {
 	DeleteByID(ctx context.Context, id int64) (*model.Submission, error)
 	FindByID(ctx context.Context, id int64) (*model.Submission, error)
 	Update(ctx context.Context, submission *model.Submission) error
-	Upload(ctx context.Context, sourceCode string) (string, error)
+	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error)
+	UpdateGradeByID(ctx context.Context, id, grade int64) error
 }
 
 type submissionUsecase struct {
 	submissionRepo repository.SubmissionRepository
+	assignmentRepo repository.AssignmentRepository
+	broker         model.WorkerBroker
+}
+
+// SubmissionOption ..
+type SubmissionOption func(s *submissionUsecase)
+
+// SubmissionUsecaseWithBroker ..
+func SubmissionUsecaseWithBroker(b model.WorkerBroker) SubmissionOption {
+	return func(s *submissionUsecase) {
+		s.broker = b
+	}
 }
 
 // NewSubmissionUsecase ..
-func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository) SubmissionUsecase {
-	return &submissionUsecase{
+func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository, opts ...SubmissionOption) SubmissionUsecase {
+	s := &submissionUsecase{
 		submissionRepo: submissionRepo,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
@@ -52,6 +63,13 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		}).Error(err)
 		return err
 	}
+
+	go func(sbmID int64) {
+		err := s.broker.EnqueueJobGradeSubmission(sbmID)
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(submission.ID)
 
 	return nil
 }
@@ -116,47 +134,43 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 		return err
 	}
 
+	go func(submissionID int64) {
+		err := s.broker.EnqueueJobGradeSubmission(submissionID)
+		if err != nil {
+			logger.Error(err)
+		}
+	}(submission.ID)
+
 	return nil
 }
 
-func (s *submissionUsecase) Upload(ctx context.Context, sourceCode string) (string, error) {
-	if sourceCode == "" {
-		return "", ErrInvalidArguments
-	}
-
-	logger := logrus.WithFields(logrus.Fields{
-		"ctx":        utils.Dump(ctx),
-		"sourceCode": sourceCode,
-	})
-
-	cwd, err := os.Getwd()
+func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
+	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
 	if err != nil {
-		logger.Error(err)
-		return "", err
+		logrus.WithFields(logrus.Fields{
+			"ctx":          utils.Dump(ctx),
+			"cursor":       utils.Dump(cursor),
+			"assignmentID": assignmentID,
+		}).Error(err)
+		return nil, 0, err
 	}
 
-	fileName := generateFileName() + ".cpp"
-	filePath := path.Join(cwd, "submission", fileName)
-	file, err := os.Create(filePath)
-	if err != nil {
-		logger.Error(err)
-		return "", err
-	}
-
-	file.WriteString(sourceCode)
-	defer file.Close()
-
-	fileURL := config.BaseURL() + "/storage/" + fileName
-
-	return fileURL, nil
+	return
 }
 
-func generateFileName() string {
-	h := md5.New()
-	randomNumber := fmt.Sprint(rand.Intn(10))
-	timestamp := fmt.Sprint(time.Now().Unix())
+// UpdateGradeByID ..
+func (s *submissionUsecase) UpdateGradeByID(ctx context.Context, id, grade int64) error {
+	sbm, err := s.submissionRepo.FindByID(ctx, id)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"id":    id,
+			"grade": grade,
+		}).Error(err)
+	}
 
-	h.Write([]byte(randomNumber + timestamp))
+	if sbm == nil {
+		return ErrNotFound
+	}
 
-	return hex.EncodeToString(h.Sum(nil))
+	return s.submissionRepo.UpdateGradeByID(ctx, id, grade)
 }

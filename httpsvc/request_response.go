@@ -97,7 +97,7 @@ func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
 	return &cursorRes{
 		Size:      utils.Int64ToString(c.GetSize()),
 		Page:      utils.Int64ToString(c.GetPage()),
-		Sort:      c.GetSort(),
+		Sort:      c.GetSort().String(),
 		TotalPage: utils.Int64ToString(c.GetTotalPage(count)),
 		TotalData: utils.Int64ToString(count),
 		Data:      data,
@@ -137,14 +137,14 @@ func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
 }
 
 type submissionRes struct {
-	ID           string  `json:"id"`
-	AssignmentID string  `json:"assignmentID"`
-	SubmittedBy  string  `json:"submittedBy"`
-	FileURL      string  `json:"fileURL"`
-	Grade        float64 `json:"grade"`
-	Feedback     string  `json:"feedback"`
-	CreatedAt    string  `json:"createdAt"`
-	UpdatedAt    string  `json:"updatedAt"`
+	ID           string `json:"id"`
+	AssignmentID string `json:"assignmentID"`
+	SubmittedBy  string `json:"submittedBy"`
+	FileURL      string `json:"fileURL"`
+	Grade        int64  `json:"grade"`
+	Feedback     string `json:"feedback"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
 }
 
 func submissionModelToRes(m *model.Submission) *submissionRes {

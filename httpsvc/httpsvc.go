@@ -1,29 +1,33 @@
 package httpsvc
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/miun173/autograd/model"
 	"github.com/miun173/autograd/usecase"
+
+	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
 // Server ..
 type Server struct {
-	exampleUsecase    usecase.ExampleUsecase
+	echo              *echo.Echo
+	port              string
+	staticMediaPath   string
 	userUsecase       usecase.UserUsecase
 	assignmentUsecase usecase.AssignmentUsecase
 	submissionUsecase usecase.SubmissionUsecase
-	echo              *echo.Echo
-	port              string
+	mediaUsecase      model.MediaUsecase
 }
 
 // NewServer ..
-func NewServer(port string, opts ...Option) *Server {
+func NewServer(port, staticMediaPath string, opts ...Option) *Server {
 	s := &Server{
-		echo: echo.New(),
-		port: port,
+		echo:            echo.New(),
+		port:            port,
+		staticMediaPath: staticMediaPath,
 	}
 
 	for _, opt := range opts {
@@ -39,9 +43,19 @@ func (s *Server) Run() {
 	logrus.Fatal(s.echo.Start(":" + s.port))
 }
 
+// Stop server gracefully
+func (s *Server) Stop(ctx context.Context) {
+	if err := s.echo.Shutdown(ctx); err != nil {
+		logrus.Fatal(err)
+	}
+}
+
 func (s *Server) routes() {
-	s.echo.Static("/storage", "submission")
 	s.echo.GET("/ping", s.handlePing)
+
+	// TODO: add auth for private static
+	s.echo.Static("/storage", "submission")
+	s.echo.Static("/media", s.staticMediaPath)
 
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/users", s.handleCreateUser)
@@ -59,13 +73,13 @@ func (s *Server) routes() {
 	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)
 
 	apiV1.POST("/submissions", s.handleCreateSubmission)
-	apiV1.POST("/submissions/upload", s.handleUpload)
 	apiV1.GET("/submissions/:ID", s.handleGetSubmission)
 	apiV1.PUT("/submissions", s.handleUpdateSubmission)
 	apiV1.DELETE("/submissions/:ID", s.handleDeleteSubmission)
+
+	apiV1.POST("/media/upload", s.handleUploadMedia)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
-	s.exampleUsecase.Test()
 	return c.String(http.StatusOK, "pong")
 }

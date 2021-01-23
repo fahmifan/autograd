@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
@@ -15,6 +16,7 @@ func init() {
 		return
 	}
 
+	logrus.SetReportCaller(true)
 	logrus.Info("load .env file to os env")
 }
 
@@ -47,10 +49,10 @@ func BaseURL() string {
 		return val
 	}
 
-	return "localhost:" + os.Getenv("PORT")
+	return fmt.Sprintf("http://localhost:%s", os.Getenv("PORT"))
 }
 
-// PostgresDSN :nodoc:
+// PostgresDSN ..
 func PostgresDSN() string {
 	port := os.Getenv("DB_PORT")
 	dbname := os.Getenv("DB_NAME")
@@ -67,4 +69,41 @@ func PostgresDSN() string {
 		port,
 		dbname,
 		sslmode)
+}
+
+// WorkerNamespace ..
+func WorkerNamespace() string {
+	return "autograd_worker"
+}
+
+// WorkerConcurrency ..
+func WorkerConcurrency() uint {
+	return 5
+}
+
+// RedisWorkerHost ..
+func RedisWorkerHost() string {
+	return os.Getenv("REDIS_WORKER_HOST")
+}
+
+// NewRedisPool ..
+func NewRedisPool(host string) *redis.Pool {
+	return &redis.Pool{
+		MaxActive: 5,
+		MaxIdle:   5,
+		Wait:      true,
+		Dial: func() (redis.Conn, error) {
+			return redis.DialURL(host)
+		},
+	}
+}
+
+// FileUploadPath ..
+func FileUploadPath() string {
+	val, ok := os.LookupEnv("FILE_UPLOAD_PATH")
+	if ok {
+		return val
+	}
+
+	return "file_upload_path"
 }

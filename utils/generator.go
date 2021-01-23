@@ -1,7 +1,12 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"math/rand"
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/sony/sonyflake"
@@ -24,4 +29,15 @@ func GenerateID() int64 {
 	}
 
 	return int64(id)
+}
+
+// GenerateUniqueString ..
+func GenerateUniqueString() string {
+	h := md5.New()
+	randomNumber := fmt.Sprint(rand.Intn(10))
+	timestamp := fmt.Sprint(time.Now().Unix())
+
+	h.Write([]byte(randomNumber + timestamp))
+
+	return hex.EncodeToString(h.Sum(nil))
 }
