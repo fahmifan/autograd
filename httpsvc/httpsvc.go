@@ -61,23 +61,21 @@ func (s *Server) routes() {
 	apiV1.POST("/users", s.handleCreateUser)
 	apiV1.POST("/users/login", s.handleLogin)
 
-	// example using auth middleware
-	authorizeAdminStudent := []model.Role{model.RoleAdmin, model.RoleStudent}
-	apiV1.GET("/example-private-data", s.handlePing, AuthMiddleware, s.authorizeByRoleMiddleware(authorizeAdminStudent))
+	authAdminStudent := s.authorizeByRoleMiddleware([]model.Role{model.RoleAdmin, model.RoleStudent})
 
 	apiV1.POST("/assignments", s.handleCreateAssignment)
-	apiV1.GET("/assignments", s.handleGetAssignments)
-	apiV1.GET("/assignments/:ID", s.handleGetAssignment)
+	apiV1.GET("/assignments", s.handleGetAssignments, authAdminStudent)
+	apiV1.GET("/assignments/:ID", s.handleGetAssignment, authAdminStudent)
 	apiV1.GET("/assignments/:ID/submissions", s.handleGetAssignmentSubmissions)
 	apiV1.PUT("/assignments", s.handleUpdateAssignment)
 	apiV1.DELETE("/assignments/:ID", s.handleDeleteAssignment)
 
-	apiV1.POST("/submissions", s.handleCreateSubmission)
-	apiV1.GET("/submissions/:ID", s.handleGetSubmission)
+	apiV1.POST("/submissions", s.handleCreateSubmission, authAdminStudent)
+	apiV1.GET("/submissions/:ID", s.handleGetSubmission, authAdminStudent)
 	apiV1.PUT("/submissions", s.handleUpdateSubmission)
 	apiV1.DELETE("/submissions/:ID", s.handleDeleteSubmission)
 
-	apiV1.POST("/media/upload", s.handleUploadMedia)
+	apiV1.POST("/media/upload", s.handleUploadMedia, authAdminStudent)
 }
 
 func (s *Server) handlePing(c echo.Context) error {
