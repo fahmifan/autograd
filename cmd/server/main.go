@@ -65,10 +65,7 @@ func main() {
 		httpsvc.WithMediaUsecase(mediaUsecase),
 	)
 
-	wrk := worker.NewWorker(
-		worker.WithWorkerPool(redisPool),
-		worker.WithGrader(graderUsecase),
-	)
+	wrk := worker.NewWorker(redisPool, worker.WithGrader(graderUsecase))
 
 	go func() {
 		logrus.Info("run server")

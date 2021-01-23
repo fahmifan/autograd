@@ -1,19 +1,11 @@
 package worker
 
 import (
-	"github.com/gomodule/redigo/redis"
 	"github.com/miun173/autograd/model"
 )
 
 // Option ..
 type Option func(*Worker)
-
-// WithWorkerPool ..
-func WithWorkerPool(rd *redis.Pool) Option {
-	return func(c *Worker) {
-		c.redisPool = rd
-	}
-}
 
 // WithGrader ..
 func WithGrader(gr model.GraderUsecase) Option {

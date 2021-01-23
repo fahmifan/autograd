@@ -12,10 +12,7 @@ import (
 var defaultJobOpt = work.JobOptions{MaxConcurrency: 3, MaxFails: 3}
 
 // The real one
-// const cronEvery10Minute = "0 10 * * *"
-
-// TODO: the value is in debug mode
-const cronEvery10Minute = "*/60 * * * *"
+const cronEvery10Minute = "0 10 * * *"
 
 // Worker ..
 type Worker struct {
@@ -28,8 +25,10 @@ type Worker struct {
 }
 
 // NewWorker ..
-func NewWorker(opts ...Option) *Worker {
-	wrk := &Worker{}
+func NewWorker(redisPool *redis.Pool, opts ...Option) *Worker {
+	wrk := &Worker{
+		redisPool: redisPool,
+	}
 	for _, opt := range opts {
 		opt(wrk)
 	}
