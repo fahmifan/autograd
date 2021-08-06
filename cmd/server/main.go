@@ -42,7 +42,7 @@ func init() {
 
 func main() {
 	redisPool := config.NewRedisPool(config.RedisWorkerHost())
-	postgres := db.NewPostgres()
+	postgres := db.MustPostgres()
 	broker := worker.NewBroker(redisPool)
 	localStorage := fs.NewLocalStorage()
 

@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewPostgres ..
-func NewPostgres() *gorm.DB {
+// MustPostgres ..
+func MustPostgres() *gorm.DB {
 	db, err := gorm.Open(postgres.Open(config.PostgresDSN()), &gorm.Config{})
 	if err != nil {
 		logrus.Fatal(err)

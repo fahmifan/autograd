@@ -36,6 +36,30 @@ func (s *Server) authorizeByRoleMiddleware(authorizedRole []model.Role) func(nex
 	}
 }
 
+func (s *Server) authorizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := getUserFromCtx(c)
+		if user == nil {
+			log.Warn("user nil")
+			return responseError(c, ErrUnauthorized)
+		}
+
+		paths := strings.Split(c.Path(), "/")
+		if root := len(paths) < 2; root {
+			return next(c)
+		}
+
+		resource := model.Resource(paths[1])
+		action := model.Action(c.Request().Method)
+
+		if user.Role.HasAccess(resource, action) {
+
+		}
+
+		return next(c)
+	}
+}
+
 func authorizeByRole(userRole model.Role, authorizedRole []model.Role) bool {
 	for _, role := range authorizedRole {
 		if userRole == role {
@@ -52,13 +76,13 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		token, err := parseTokenFromHeader(&c.Request().Header)
 		if err != nil {
 			log.Error(err)
-			return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+			return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
 		}
 
 		user, ok := auth(token)
 		if !ok {
 			log.Error(ErrUnauthorized)
-			return c.JSON(http.StatusUnauthorized, map[string]string{"error": ErrUnauthorized.Error()})
+			return c.JSON(http.StatusUnauthorized, echo.Map{"error": ErrUnauthorized.Error()})
 		}
 
 		setUserToCtx(c, user)
