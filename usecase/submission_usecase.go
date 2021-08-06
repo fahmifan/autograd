@@ -10,35 +10,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// SubmissionUsecase ..
-type SubmissionUsecase interface {
-	Create(ctx context.Context, submission *model.Submission) error
-	DeleteByID(ctx context.Context, id int64) (*model.Submission, error)
-	FindByID(ctx context.Context, id int64) (*model.Submission, error)
-	Update(ctx context.Context, submission *model.Submission) error
-	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error)
-	UpdateGradeByID(ctx context.Context, id, grade int64) error
-}
-
-type submissionUsecase struct {
+type SubmissionUsecase struct {
 	submissionRepo repository.SubmissionRepository
-	assignmentRepo repository.AssignmentRepository
 	broker         model.WorkerBroker
 }
 
 // SubmissionOption ..
-type SubmissionOption func(s *submissionUsecase)
+type SubmissionOption func(s *SubmissionUsecase)
 
 // SubmissionUsecaseWithBroker ..
 func SubmissionUsecaseWithBroker(b model.WorkerBroker) SubmissionOption {
-	return func(s *submissionUsecase) {
+	return func(s *SubmissionUsecase) {
 		s.broker = b
 	}
 }
 
 // NewSubmissionUsecase ..
-func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository, opts ...SubmissionOption) SubmissionUsecase {
-	s := &submissionUsecase{
+func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository, opts ...SubmissionOption) *SubmissionUsecase {
+	s := &SubmissionUsecase{
 		submissionRepo: submissionRepo,
 	}
 
@@ -49,12 +38,11 @@ func NewSubmissionUsecase(submissionRepo repository.SubmissionRepository, opts .
 	return s
 }
 
-func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
+func (s *SubmissionUsecase) Create(ctx context.Context, submission *model.Submission) error {
 	if submission == nil {
 		return ErrInvalidArguments
 	}
 
-	submission.ID = utils.GenerateID()
 	err := s.submissionRepo.Create(ctx, submission)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -64,7 +52,7 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 		return err
 	}
 
-	go func(sbmID int64) {
+	go func(sbmID string) {
 		err := s.broker.EnqueueJobGradeSubmission(sbmID)
 		if err != nil {
 			logrus.Error(err)
@@ -74,7 +62,7 @@ func (s *submissionUsecase) Create(ctx context.Context, submission *model.Submis
 	return nil
 }
 
-func (s *submissionUsecase) DeleteByID(ctx context.Context, id int64) (*model.Submission, error) {
+func (s *SubmissionUsecase) DeleteByID(ctx context.Context, id string) (*model.Submission, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx": utils.Dump(ctx),
 		"id":  id,
@@ -95,7 +83,7 @@ func (s *submissionUsecase) DeleteByID(ctx context.Context, id int64) (*model.Su
 	return submission, nil
 }
 
-func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Submission, error) {
+func (s *SubmissionUsecase) FindByID(ctx context.Context, id string) (*model.Submission, error) {
 	submission, err := s.submissionRepo.FindByID(ctx, id)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -112,7 +100,7 @@ func (s *submissionUsecase) FindByID(ctx context.Context, id int64) (*model.Subm
 	return submission, nil
 }
 
-func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submission) error {
+func (s *SubmissionUsecase) Update(ctx context.Context, submission *model.Submission) error {
 	if submission == nil {
 		return ErrInvalidArguments
 	}
@@ -134,7 +122,7 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 		return err
 	}
 
-	go func(submissionID int64) {
+	go func(submissionID string) {
 		err := s.broker.EnqueueJobGradeSubmission(submissionID)
 		if err != nil {
 			logger.Error(err)
@@ -144,7 +132,7 @@ func (s *submissionUsecase) Update(ctx context.Context, submission *model.Submis
 	return nil
 }
 
-func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID int64) (submissions []*model.Submission, count int64, err error) {
+func (s *SubmissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID string) (submissions []*model.Submission, count int64, err error) {
 	submissions, count, err = s.submissionRepo.FindAllByAssignmentID(ctx, cursor, assignmentID)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -159,7 +147,7 @@ func (s *submissionUsecase) FindAllByAssignmentID(ctx context.Context, cursor mo
 }
 
 // UpdateGradeByID ..
-func (s *submissionUsecase) UpdateGradeByID(ctx context.Context, id, grade int64) error {
+func (s *SubmissionUsecase) UpdateGradeByID(ctx context.Context, id string, grade int64) error {
 	sbm, err := s.submissionRepo.FindByID(ctx, id)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{

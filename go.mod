@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gocraft/work v0.5.1
+	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.13.0
 	github.com/gomodule/redigo v1.8.2
 	github.com/joho/godotenv v1.3.0

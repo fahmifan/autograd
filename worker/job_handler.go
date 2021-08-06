@@ -2,7 +2,6 @@ package worker
 
 import (
 	"github.com/fahmifan/autograd/model"
-	"github.com/fahmifan/autograd/utils"
 	"github.com/gomodule/redigo/redis"
 
 	"github.com/gocraft/work"
@@ -26,7 +25,7 @@ type jobHandler struct {
 }
 
 func (h *jobHandler) handleGradeSubmission(job *work.Job) error {
-	submissionID := utils.StringToInt64(job.ArgString("submissionID"))
+	submissionID := job.ArgString("submissionID")
 	logger := logrus.WithField("submissionID", submissionID)
 
 	err := h.grader.GradeBySubmission(submissionID)

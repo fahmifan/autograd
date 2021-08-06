@@ -5,11 +5,11 @@ import (
 )
 
 // Type types of graders
-type Type int
+type Type string
 
 // grader types
 const (
-	TypeCPP = Type(0)
+	TypeCPP = Type("cpp")
 )
 
 // New new grader factory

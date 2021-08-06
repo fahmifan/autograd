@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "submissions" (
-    "id" BIGINT PRIMARY KEY,
-    "assignment_id" BIGINT REFERENCES assignments(id) NOT NULL,
-    "submitted_by" BIGINT REFERENCES users(id) NOT NULL,
+    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "assignment_id" UUID REFERENCES assignments(id) NOT NULL,
+    "submitted_by" UUID REFERENCES users(id) NOT NULL,
     "is_graded" BOOLEAN DEFAULT FALSE NOT NULL,
     "grade" INT NOT NULL DEFAULT 0,
     "feedback" TEXT DEFAULT '' NOT NULL,

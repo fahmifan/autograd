@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/fahmifan/autograd/config"
-	"github.com/fahmifan/autograd/utils"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
 )
@@ -25,8 +24,8 @@ func NewBroker(redisPool *redis.Pool) *Broker {
 }
 
 // EnqueueJobGradeSubmission ..
-func (b *Broker) EnqueueJobGradeSubmission(submissionID int64) error {
-	arg := work.Q{"submissionID": utils.Int64ToString(submissionID)}
+func (b *Broker) EnqueueJobGradeSubmission(submissionID string) error {
+	arg := work.Q{"submissionID": submissionID}
 	_, err := b.enqueuer.EnqueueUnique(jobGradeSubmission, arg)
 	if err != nil {
 		return fmt.Errorf("failed to enqueue %s: %w", jobGradeSubmission, err)

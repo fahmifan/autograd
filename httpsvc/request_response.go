@@ -18,7 +18,7 @@ type assignmentReq struct {
 
 func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
 	return &model.Assignment{
-		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		AssignedBy:        r.AssignedBy,
 		Name:              r.Name,
 		Description:       r.Description,
 		CaseInputFileURL:  r.CaseInputFileURL,
@@ -28,8 +28,8 @@ func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
 
 func assigmentUpdateReqToModel(r *assignmentReq) *model.Assignment {
 	return &model.Assignment{
-		ID:                utils.StringToInt64(r.ID),
-		AssignedBy:        utils.StringToInt64(r.AssignedBy),
+		Base:              model.Base{ID: r.ID},
+		AssignedBy:        r.AssignedBy,
 		Name:              r.Name,
 		Description:       r.Description,
 		CaseInputFileURL:  r.CaseInputFileURL,
@@ -51,8 +51,8 @@ type assignmentRes struct {
 
 func assignmentModelToRes(m *model.Assignment) *assignmentRes {
 	return &assignmentRes{
-		ID:                utils.Int64ToString(m.ID),
-		AssignedBy:        utils.Int64ToString(m.AssignedBy),
+		ID:                m.ID,
+		AssignedBy:        m.AssignedBy,
 		Name:              m.Name,
 		Description:       m.Description,
 		CaseInputFileURL:  m.CaseInputFileURL,
@@ -72,8 +72,8 @@ func newAssignmentResponses(assignments []*model.Assignment) (assignmentRes []*a
 
 func assignmentModelToDeleteRes(m *model.Assignment) *assignmentRes {
 	return &assignmentRes{
-		ID:                utils.Int64ToString(m.ID),
-		AssignedBy:        utils.Int64ToString(m.AssignedBy),
+		ID:                m.ID,
+		AssignedBy:        m.AssignedBy,
 		Name:              m.Name,
 		Description:       m.Description,
 		CaseInputFileURL:  m.CaseInputFileURL,
@@ -114,8 +114,8 @@ type uploadRes struct {
 
 type submissionReq struct {
 	ID           string `json:"id,omitempty"`
-	AssignmentID int64  `json:"assignmentID"`
-	SubmittedBy  int64  `json:"submittedBy"`
+	AssignmentID string `json:"assignmentID"`
+	SubmittedBy  string `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
 }
 
@@ -129,7 +129,7 @@ func submissionCreateReqToModel(s *submissionReq) *model.Submission {
 
 func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
 	return &model.Submission{
-		ID:           utils.StringToInt64(s.ID),
+		Base:         model.Base{ID: s.ID},
 		AssignmentID: s.AssignmentID,
 		SubmittedBy:  s.SubmittedBy,
 		FileURL:      s.FileURL,
@@ -149,9 +149,9 @@ type submissionRes struct {
 
 func submissionModelToRes(m *model.Submission) *submissionRes {
 	return &submissionRes{
-		ID:           utils.Int64ToString(m.ID),
-		AssignmentID: utils.Int64ToString(m.AssignmentID),
-		SubmittedBy:  utils.Int64ToString(m.SubmittedBy),
+		ID:           m.ID,
+		AssignmentID: m.AssignmentID,
+		SubmittedBy:  m.SubmittedBy,
 		FileURL:      m.FileURL,
 		Grade:        m.Grade,
 		Feedback:     m.Feedback,

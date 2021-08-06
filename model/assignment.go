@@ -2,25 +2,25 @@ package model
 
 import (
 	"context"
-	"time"
-
-	"gorm.io/gorm"
 )
 
 // Assignment ..
 type Assignment struct {
-	ID                int64
-	AssignedBy        int64
+	Base
+	AssignedBy        string
 	Name              string
 	Description       string
 	CaseInputFileURL  string
 	CaseOutputFileURL string
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	DeletedAt         gorm.DeletedAt
 }
 
 // AssignmentUsecase ..
 type AssignmentUsecase interface {
-	FindByID(ctx context.Context, id int64) (*Assignment, error)
+	Create(ctx context.Context, assignment *Assignment) error
+	DeleteByID(ctx context.Context, id string) (*Assignment, error)
+	FindAll(ctx context.Context, cursor Cursor) (assignments []*Assignment, count int64, err error)
+	FindByID(ctx context.Context, id string) (*Assignment, error)
+	FindSubmissionsByID(ctx context.Context, cursor Cursor,
+		assignmentID string) (submissions []*Submission, count int64, err error)
+	Update(ctx context.Context, assignment *Assignment) error
 }

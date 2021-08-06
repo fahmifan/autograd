@@ -42,24 +42,24 @@ func NewGraderUsecase(s model.SubmissionUsecase, a model.AssignmentUsecase) *Gra
 }
 
 // GradeBySubmission find the submission source code and call Grade
-func (s *GraderUsecase) GradeBySubmission(submissionID int64) (err error) {
+func (s *GraderUsecase) GradeBySubmission(submissionID string) (err error) {
 	submission, err := s.submisisonUsecase.FindByID(context.Background(), submissionID)
 	if err != nil {
-		err = fmt.Errorf("unable to get submission %d: %w", submissionID, err)
+		err = fmt.Errorf("unable to get submission %s: %w", submissionID, err)
 		logrus.Error(err)
 		return
 	}
 
 	srcCodePath, err := s.download(submission.FileURL, nil)
 	if err != nil {
-		err = fmt.Errorf("unable to download submission %d: %w", submissionID, err)
+		err = fmt.Errorf("unable to download submission %s: %w", submissionID, err)
 		logrus.Error(err)
 		return
 	}
 
 	asg, err := s.findAssignment(submission.AssignmentID)
 	if err != nil {
-		err = fmt.Errorf("unable to get assignment for submission %d: %w", submissionID, err)
+		err = fmt.Errorf("unable to get assignment for submission %s: %w", submissionID, err)
 		logrus.Error(err)
 		return
 	}
@@ -86,7 +86,7 @@ func (s *GraderUsecase) GradeBySubmission(submissionID int64) (err error) {
 
 // find the model.Assignment from usecase
 // then download the input & output code to local path
-func (s *GraderUsecase) findAssignment(assignmentID int64) (asg *assignment, err error) {
+func (s *GraderUsecase) findAssignment(assignmentID string) (asg *assignment, err error) {
 	res, err := s.assignmentUsecase.FindByID(context.Background(), assignmentID)
 	if err != nil {
 		return nil, err

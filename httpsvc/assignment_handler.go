@@ -3,7 +3,6 @@ package httpsvc
 import (
 	"net/http"
 
-	"github.com/fahmifan/autograd/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -27,7 +26,7 @@ func (s *Server) handleCreateAssignment(c echo.Context) error {
 }
 
 func (s *Server) handleDeleteAssignment(c echo.Context) error {
-	id := utils.StringToInt64(c.Param("ID"))
+	id := c.Param("id")
 	assignment, err := s.assignmentUsecase.DeleteByID(c.Request().Context(), id)
 	if err != nil {
 		logrus.Error(err)
@@ -38,7 +37,7 @@ func (s *Server) handleDeleteAssignment(c echo.Context) error {
 }
 
 func (s *Server) handleGetAssignment(c echo.Context) error {
-	id := utils.StringToInt64(c.Param("ID"))
+	id := c.Param("id")
 	assignment, err := s.assignmentUsecase.FindByID(c.Request().Context(), id)
 	if err != nil {
 		logrus.Error(err)
@@ -62,7 +61,7 @@ func (s *Server) handleGetAssignments(c echo.Context) error {
 }
 
 func (s *Server) handleGetAssignmentSubmissions(c echo.Context) error {
-	id := utils.StringToInt64(c.Param("ID"))
+	id := c.Param("id")
 	cursor := getCursorFromContext(c)
 	submissions, count, err := s.assignmentUsecase.FindSubmissionsByID(c.Request().Context(), cursor, id)
 	if err != nil {

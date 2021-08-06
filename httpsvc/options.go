@@ -2,28 +2,27 @@ package httpsvc
 
 import (
 	"github.com/fahmifan/autograd/model"
-	"github.com/fahmifan/autograd/usecase"
 )
 
 // Option ..
 type Option func(*Server)
 
 // WithUserUsecase ..
-func WithUserUsecase(u usecase.UserUsecase) Option {
+func WithUserUsecase(u model.UserUsecase) Option {
 	return func(s *Server) {
 		s.userUsecase = u
 	}
 }
 
 // WithAssignmentUsecase ..
-func WithAssignmentUsecase(a usecase.AssignmentUsecase) Option {
+func WithAssignmentUsecase(a model.AssignmentUsecase) Option {
 	return func(s *Server) {
 		s.assignmentUsecase = a
 	}
 }
 
 // WithSubmissionUsecase ..
-func WithSubmissionUsecase(sub usecase.SubmissionUsecase) Option {
+func WithSubmissionUsecase(sub model.SubmissionUsecase) Option {
 	return func(s *Server) {
 		s.submissionUsecase = sub
 	}

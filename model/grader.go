@@ -34,5 +34,5 @@ type GraderEngine interface {
 
 // GraderUsecase ..
 type GraderUsecase interface {
-	GradeBySubmission(submissionID int64) error
+	GradeBySubmission(submissionID string) error
 }
