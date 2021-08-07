@@ -27,9 +27,6 @@ func ParseRole(s string) Role {
 	}
 }
 
-type Resource string
-type Action string
-
 // roles ..
 const (
 	RoleAdmin   = Role(1)

@@ -9,10 +9,6 @@ import (
 
 func (s *Server) handleCreateAssignment(c echo.Context) error {
 	user := getUserFromCtx(c)
-	if user == nil {
-		return responseError(c, ErrUnauthorized)
-	}
-
 	assignmentReq := &assignmentReq{}
 	err := c.Bind(assignmentReq)
 	if err != nil {

@@ -28,7 +28,7 @@ func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.Handler
 			user, ok := auth(token)
 			if !ok {
 				log.Error(ErrUnauthorized)
-				return c.JSON(http.StatusUnauthorized, echo.Map{"error": ErrUnauthorized.Error()})
+				return responseError(c, ErrUnauthorized)
 			}
 
 			setUserToCtx(c, user)
@@ -52,6 +52,10 @@ func parseTokenFromHeader(header *http.Header) (string, error) {
 	var token string
 
 	authHeaders := strings.Split(header.Get("Authorization"), " ")
+	if len(authHeaders) != 2 {
+		return "", ErrTokenInvalid
+	}
+
 	if authHeaders[0] != "Bearer" {
 		err := ErrMissingAuthorization
 		log.WithField("Authorization", header.Get("Authorization")).Error(err)
