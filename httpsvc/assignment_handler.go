@@ -8,12 +8,18 @@ import (
 )
 
 func (s *Server) handleCreateAssignment(c echo.Context) error {
+	user := getUserFromCtx(c)
+	if user == nil {
+		return responseError(c, ErrUnauthorized)
+	}
+
 	assignmentReq := &assignmentReq{}
 	err := c.Bind(assignmentReq)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
+	assignmentReq.AssignedBy = user.ID
 
 	assignment := assignmentCreateReqToModel(assignmentReq)
 	err = s.assignmentUsecase.Create(c.Request().Context(), assignment)

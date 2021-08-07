@@ -1,31 +1,26 @@
 package usecase
 
 import (
-	"io"
 	"mime/multipart"
 	"path"
 	"path/filepath"
 
+	"github.com/fahmifan/autograd/model"
 	"github.com/fahmifan/autograd/utils"
 	"github.com/sirupsen/logrus"
 )
 
-// Uploader ..
-type Uploader interface {
-	Upload(dst string, r io.Reader) error
-}
-
 // MediaUsecase ..
 type MediaUsecase struct {
-	uploader  Uploader
-	dstFolder string
+	objectStorer model.ObjectStorer
+	dstFolder    string
 }
 
 // NewMediaUsecase ..
-func NewMediaUsecase(dstFolder string, uploader Uploader) *MediaUsecase {
+func NewMediaUsecase(dstFolder string, uploader model.ObjectStorer) *MediaUsecase {
 	return &MediaUsecase{
-		uploader:  uploader,
-		dstFolder: dstFolder,
+		objectStorer: uploader,
+		dstFolder:    dstFolder,
 	}
 }
 
@@ -42,7 +37,7 @@ func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (name string, err 
 	fileName := utils.GenerateUniqueString() + ext
 	dst := path.Join(m.dstFolder, fileName)
 
-	err = m.uploader.Upload(dst, src)
+	err = m.objectStorer.Store(dst, src)
 	if err != nil {
 		logrus.Error(err)
 		return

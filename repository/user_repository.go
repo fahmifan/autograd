@@ -13,7 +13,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, user *model.User) error
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
-	FindByID(ctx context.Context, id int64) (*model.User, error)
+	FindByID(ctx context.Context, id string) (*model.User, error)
 }
 
 type userRepo struct {
@@ -60,7 +60,7 @@ func (u *userRepo) FindByEmail(ctx context.Context, email string) (*model.User, 
 }
 
 // FindByID return nil, nil upon not found
-func (u *userRepo) FindByID(ctx context.Context, id int64) (*model.User, error) {
+func (u *userRepo) FindByID(ctx context.Context, id string) (*model.User, error) {
 	user := &model.User{}
 	err := u.db.Where("id = ?", id).Take(user).Error
 	switch err {

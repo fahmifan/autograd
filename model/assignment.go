@@ -7,11 +7,16 @@ import (
 // Assignment ..
 type Assignment struct {
 	Base
+	OwnedBy           string
 	AssignedBy        string
 	Name              string
 	Description       string
 	CaseInputFileURL  string
 	CaseOutputFileURL string
+}
+
+func (a *Assignment) IsOwnedBy(u User) bool {
+	return a.OwnedBy == u.ID
 }
 
 // AssignmentUsecase ..

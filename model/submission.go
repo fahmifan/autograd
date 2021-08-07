@@ -14,6 +14,11 @@ type Submission struct {
 	Feedback     string
 }
 
+// IsOwnedBy
+func (s *Submission) IsOwnedBy(u User) bool {
+	return s.SubmittedBy == u.ID
+}
+
 // SubmissionUsecase ..
 type SubmissionUsecase interface {
 	Create(ctx context.Context, submission *Submission) error

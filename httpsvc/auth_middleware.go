@@ -16,8 +16,7 @@ var ErrUnauthorized = errors.New("unauthorized")
 // ErrMissingAuthorization error
 var ErrMissingAuthorization = errors.New("missing Authorization header")
 
-// authorizeByRoleMiddleware authorized request by given authorized roles
-func (s *Server) authorizeByRoleMiddleware(authorizedRole []model.Role) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			user := getUserFromCtx(c)
@@ -26,48 +25,15 @@ func (s *Server) authorizeByRoleMiddleware(authorizedRole []model.Role) func(nex
 				return responseError(c, ErrUnauthorized)
 			}
 
-			if ok := authorizeByRole(user.Role, authorizedRole); !ok {
-				log.WithField("role", user.Role).Warn("unauthorized role")
-				return responseError(c, ErrUnauthorized)
+			for _, p := range perms {
+				if user.Role.Granted(p) {
+					return next(c)
+				}
 			}
 
 			return next(c)
 		}
 	}
-}
-
-func (s *Server) authorizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		user := getUserFromCtx(c)
-		if user == nil {
-			log.Warn("user nil")
-			return responseError(c, ErrUnauthorized)
-		}
-
-		paths := strings.Split(c.Path(), "/")
-		if root := len(paths) < 2; root {
-			return next(c)
-		}
-
-		resource := model.Resource(paths[1])
-		action := model.Action(c.Request().Method)
-
-		if user.Role.HasAccess(resource, action) {
-
-		}
-
-		return next(c)
-	}
-}
-
-func authorizeByRole(userRole model.Role, authorizedRole []model.Role) bool {
-	for _, role := range authorizedRole {
-		if userRole == role {
-			return true
-		}
-	}
-
-	return false
 }
 
 // AuthMiddleware ..

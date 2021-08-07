@@ -3,6 +3,7 @@ package httpsvc
 import (
 	"net/http"
 
+	"github.com/fahmifan/autograd/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -44,6 +45,11 @@ func (s *Server) handleGetSubmission(c echo.Context) error {
 		return responseError(c, err)
 	}
 
+	user := getUserFromCtx(c)
+	if user.Role == model.RoleStudent && !submission.IsOwnedBy(*user) {
+		return responseError(c, ErrUnauthorized)
+	}
+
 	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
@@ -56,6 +62,19 @@ func (s *Server) handleUpdateSubmission(c echo.Context) error {
 	}
 
 	submission := submissionUpdateReqToModel(submissionReq)
+	ctx := c.Request().Context()
+	user := getUserFromCtx(c)
+
+	oldSubm, err := s.submissionUsecase.FindByID(ctx, submission.ID)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	if !oldSubm.IsOwnedBy(*user) {
+		return responseError(c, ErrUnauthorized)
+	}
+
 	err = s.submissionUsecase.Update(c.Request().Context(), submission)
 	if err != nil {
 		logrus.Error(err)

@@ -60,21 +60,19 @@ func (s *Server) routes() {
 	apiV1.POST("/users", s.handleCreateUser)
 	apiV1.POST("/users/login", s.handleLogin)
 
-	authAdminStudent := s.authorizeByRoleMiddleware([]model.Role{model.RoleAdmin, model.RoleStudent})
+	apiV1.POST("/assignments", s.handleCreateAssignment, s.authorizedOne(model.CreateAssignment))
+	apiV1.GET("/assignments", s.handleGetAssignments, s.authorizedOne(model.ViewAnyAssignments))
+	apiV1.GET("/assignments/:id", s.handleGetAssignment, s.authorizedOne(model.ViewAssignment))
+	apiV1.GET("/assignments/:id/submissions", s.handleGetAssignmentSubmissions, s.authorizedOne(model.ViewAnySubmissions))
+	apiV1.PUT("/assignments/:id", s.handleUpdateAssignment, s.authorizedOne(model.UpdateAssignment))
+	apiV1.DELETE("/assignments/:id", s.handleDeleteAssignment, s.authorizedOne(model.DeleteAssignment))
 
-	apiV1.POST("/assignments", s.handleCreateAssignment)
-	apiV1.GET("/assignments", s.handleGetAssignments, authAdminStudent)
-	apiV1.GET("/assignments/:id", s.handleGetAssignment, authAdminStudent)
-	apiV1.GET("/assignments/:id/submissions", s.handleGetAssignmentSubmissions)
-	apiV1.PUT("/assignments", s.handleUpdateAssignment)
-	apiV1.DELETE("/assignments/:id", s.handleDeleteAssignment)
+	apiV1.POST("/submissions", s.handleCreateSubmission, s.authorizedOne(model.CreateSubmission))
+	apiV1.GET("/submissions/:id", s.handleGetSubmission, s.authorizedOne(model.ViewAnySubmissions))
+	apiV1.PUT("/submissions", s.handleUpdateSubmission, s.authorizedOne(model.UpdateSubmission))
+	apiV1.DELETE("/submissions/:id", s.handleDeleteSubmission, s.authorizedOne(model.DeleteSubmission))
 
-	apiV1.POST("/submissions", s.handleCreateSubmission, authAdminStudent)
-	apiV1.GET("/submissions/:id", s.handleGetSubmission, authAdminStudent)
-	apiV1.PUT("/submissions", s.handleUpdateSubmission)
-	apiV1.DELETE("/submissions/:id", s.handleDeleteSubmission)
-
-	apiV1.POST("/media/upload", s.handleUploadMedia, authAdminStudent)
+	apiV1.POST("/media/upload", s.handleUploadMedia, s.authorizedOne(model.CreateMedia))
 }
 
 func (s *Server) handlePing(c echo.Context) error {

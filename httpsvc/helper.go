@@ -48,7 +48,7 @@ func createTokenExpiry() int64 {
 
 func generateToken(user model.User, expiry int64) (string, error) {
 	claims := &Claims{
-		ID:    utils.Int64ToString(user.ID),
+		ID:    user.ID,
 		Email: user.Email,
 		Role:  user.Role.ToString(),
 		Name:  user.Name,
@@ -93,7 +93,7 @@ func auth(token string) (*model.User, bool) {
 	}
 
 	user := &model.User{
-		ID:    utils.StringToInt64(claims.ID),
+		Base:  model.Base{ID: claims.ID},
 		Email: claims.Email,
 		Role:  claims.GetRoleModel(),
 	}

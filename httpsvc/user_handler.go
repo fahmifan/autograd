@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/fahmifan/autograd/model"
-	"github.com/fahmifan/autograd/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -38,7 +37,7 @@ type userRes struct {
 
 func userResFromModel(m *model.User) *userRes {
 	return &userRes{
-		ID:        utils.Int64ToString(m.ID),
+		ID:        m.ID,
 		Email:     m.Email,
 		Role:      m.Role.ToString(),
 		CreatedAt: m.CreatedAt.Format(time.RFC3339Nano),

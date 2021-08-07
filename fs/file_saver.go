@@ -5,30 +5,24 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 )
 
-// LocalStorage ..
-type LocalStorage struct{}
+// LocalStorer ..
+type LocalStorer struct{}
 
 // NewLocalStorage ..
-func NewLocalStorage() *LocalStorage {
-	return &LocalStorage{}
+func NewLocalStorage() *LocalStorer {
+	return &LocalStorer{}
 }
 
-// Upload save file to local storage
-func (f *LocalStorage) Upload(dst string, r io.Reader) error {
+// Store store file to local storage
+func (f *LocalStorer) Store(dst string, r io.Reader) error {
 	dir, _ := path.Split(dst)
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil && !errors.Is(err, os.ErrExist) {
 		return fmt.Errorf("unable to create dir %s : %v", dir, err)
-	}
-
-	bt, err := ioutil.ReadAll(r)
-	if err != nil {
-		return fmt.Errorf("unable to read bytes: %v", err)
 	}
 
 	osFile, err := os.Create(dst)
@@ -36,10 +30,15 @@ func (f *LocalStorage) Upload(dst string, r io.Reader) error {
 		return fmt.Errorf("unable to create file %s : %v", dst, err)
 	}
 
-	_, err = osFile.Write(bt)
+	_, err = io.Copy(osFile, r)
 	if err != nil {
 		return fmt.Errorf("unable to write file %s : %v", dst, err)
 	}
 
 	return nil
+}
+
+// Seek seek a file to local disk
+func (f *LocalStorer) Seek(dst string) (r io.ReadCloser, err error) {
+	return os.Open(dst)
 }
