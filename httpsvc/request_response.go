@@ -8,7 +8,6 @@ import (
 )
 
 type assignmentReq struct {
-	ID                string `json:"id,omitempty"`
 	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
 	Description       string `json:"description"`
@@ -28,7 +27,6 @@ func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
 
 func assigmentUpdateReqToModel(r *assignmentReq) *model.Assignment {
 	return &model.Assignment{
-		Base:              model.Base{ID: r.ID},
 		AssignedBy:        r.AssignedBy,
 		Name:              r.Name,
 		Description:       r.Description,

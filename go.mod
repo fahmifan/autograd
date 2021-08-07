@@ -13,6 +13,7 @@ require (
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/sony/sonyflake v1.0.0
+	github.com/stretchr/testify v1.5.1
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	gorm.io/driver/postgres v1.0.5
 	gorm.io/gorm v1.20.5

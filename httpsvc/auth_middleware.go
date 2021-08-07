@@ -19,7 +19,19 @@ var ErrMissingAuthorization = errors.New("missing Authorization header")
 func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			user := getUserFromCtx(c)
+			token, err := parseTokenFromHeader(&c.Request().Header)
+			if err != nil {
+				log.Error(err)
+				return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
+			}
+
+			user, ok := auth(token)
+			if !ok {
+				log.Error(ErrUnauthorized)
+				return c.JSON(http.StatusUnauthorized, echo.Map{"error": ErrUnauthorized.Error()})
+			}
+
+			setUserToCtx(c, user)
 			if user == nil {
 				log.Warn("user nil")
 				return responseError(c, ErrUnauthorized)
@@ -31,7 +43,7 @@ func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.Handler
 				}
 			}
 
-			return next(c)
+			return responseError(c, ErrUnauthorized)
 		}
 	}
 }

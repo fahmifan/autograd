@@ -12,10 +12,10 @@ import (
 const userInfoCtx = "userInfoCtx"
 
 type userRequest struct {
-	Name     string
-	Email    string
-	Password string
-	Role     string
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
 }
 
 func (u *userRequest) toModel() *model.User {
@@ -49,6 +49,8 @@ func responseError(c echo.Context, err error) error {
 	switch err {
 	case nil:
 		return c.JSON(http.StatusOK, nil)
+	case ErrUnauthorized:
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "unauthorized"})
 	default:
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
