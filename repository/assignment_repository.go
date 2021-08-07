@@ -80,6 +80,7 @@ func (a *assignmentRepo) FindAll(ctx context.Context, cursor model.Cursor) (assi
 		return nil, count, err
 	}
 
+	// FIXME: cursor.GetSort() wrong output
 	err = a.db.Limit(int(cursor.GetSize())).Offset(int(cursor.GetOffset())).
 		Order("created_at " + cursor.GetSort()).Find(&assignments).Error
 	if err != nil {

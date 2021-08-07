@@ -48,26 +48,6 @@ func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.Handler
 	}
 }
 
-// AuthMiddleware ..
-func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		token, err := parseTokenFromHeader(&c.Request().Header)
-		if err != nil {
-			log.Error(err)
-			return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
-		}
-
-		user, ok := auth(token)
-		if !ok {
-			log.Error(ErrUnauthorized)
-			return c.JSON(http.StatusUnauthorized, echo.Map{"error": ErrUnauthorized.Error()})
-		}
-
-		setUserToCtx(c, user)
-		return next(c)
-	}
-}
-
 func parseTokenFromHeader(header *http.Header) (string, error) {
 	var token string
 
