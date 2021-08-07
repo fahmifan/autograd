@@ -45,17 +45,6 @@ func userResFromModel(m *model.User) *userRes {
 	}
 }
 
-func responseError(c echo.Context, err error) error {
-	switch err {
-	case nil:
-		return c.JSON(http.StatusOK, nil)
-	case ErrUnauthorized:
-		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "unauthorized"})
-	default:
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-}
-
 func (s *Server) handleCreateUser(c echo.Context) error {
 	userReq := &userRequest{}
 	err := c.Bind(userReq)
@@ -94,5 +83,5 @@ func (s *Server) handleLogin(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"token": token})
+	return c.JSON(http.StatusOK, echo.Map{"token": token})
 }

@@ -29,7 +29,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 // Create ..
 func (u *userRepo) Create(ctx context.Context, user *model.User) (err error) {
-	err = u.db.Create(user).Error
+	err = u.db.WithContext(ctx).Create(user).Error
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"ctx":  utils.Dump(ctx),
@@ -43,7 +43,7 @@ func (u *userRepo) Create(ctx context.Context, user *model.User) (err error) {
 // FindByEmail find user by username. Upon not found will return nil, nil
 func (u *userRepo) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	user := &model.User{}
-	err := u.db.Where("email = ?", email).Take(user).Error
+	err := u.db.WithContext(ctx).Where("email = ?", email).Take(user).Error
 	switch err {
 	case nil: // ignore
 	case gorm.ErrRecordNotFound:
@@ -62,7 +62,7 @@ func (u *userRepo) FindByEmail(ctx context.Context, email string) (*model.User, 
 // FindByID return nil, nil upon not found
 func (u *userRepo) FindByID(ctx context.Context, id string) (*model.User, error) {
 	user := &model.User{}
-	err := u.db.Where("id = ?", id).Take(user).Error
+	err := u.db.WithContext(ctx).Where("id = ?", id).Take(user).Error
 	switch err {
 	case nil: // ignore
 	case gorm.ErrRecordNotFound:

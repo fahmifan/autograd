@@ -6,7 +6,6 @@ import (
 
 	"github.com/fahmifan/autograd/utils"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/fahmifan/autograd/config"
@@ -107,12 +106,10 @@ func getUserFromCtx(c echo.Context) *model.User {
 		return &val
 	}
 
-	logrus.WithField("res", res).Warn("invalid userInfoCtx")
 	return nil
 }
 
 func setUserToCtx(c echo.Context, user *model.User) {
-	logrus.WithField("user", user).Warn("setUserToCtx")
 	c.Set(userInfoCtx, *user)
 }
 
