@@ -46,7 +46,7 @@ func (s *Server) Run() {
 // Stop server gracefully
 func (s *Server) Stop(ctx context.Context) {
 	if err := s.echo.Shutdown(ctx); err != nil {
-		logrus.Fatal(err)
+		logrus.Error(err)
 	}
 }
 

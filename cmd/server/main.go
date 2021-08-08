@@ -12,6 +12,7 @@ import (
 	"github.com/fahmifan/autograd/httpsvc"
 	"github.com/fahmifan/autograd/repository"
 	"github.com/fahmifan/autograd/usecase"
+	"github.com/fahmifan/autograd/web"
 	"github.com/fahmifan/autograd/worker"
 	"github.com/sirupsen/logrus"
 )
@@ -56,7 +57,7 @@ func main() {
 	mediaUsecase := usecase.NewMediaUsecase(config.FileUploadPath(), localStorage)
 	graderUsecase := usecase.NewGraderUsecase(submissionUsecase, assignmentUsecase)
 
-	server := httpsvc.NewServer(
+	apiServer := httpsvc.NewServer(
 		config.Port(),
 		config.FileUploadPath(),
 		httpsvc.WithUserUsecase(userUsecase),
@@ -64,34 +65,46 @@ func main() {
 		httpsvc.WithSubmissionUsecase(submissionUsecase),
 		httpsvc.WithMediaUsecase(mediaUsecase),
 	)
-
 	wrk := worker.NewWorker(redisPool, worker.WithGrader(graderUsecase))
 
-	go func() {
-		logrus.Info("run server")
-		server.Run()
-	}()
+	debugMode := config.Env() == "development"
+	webServer := web.NewServer(config.WebPort(), debugMode)
 
 	go func() {
 		logrus.Info("run worker")
 		wrk.Start()
 	}()
 
-	// Wait for a signal to quit:
+	go func() {
+		logrus.Info("run api server")
+		apiServer.Run()
+	}()
+
+	go func() {
+		logrus.Info("run web server")
+		webServer.Run()
+	}()
+
+	// gracefull shutdown
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, os.Kill)
+	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
 
-	logrus.Info("stopping server")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
-	server.Stop(ctx)
 
+	logrus.Info("stopping api server")
+	apiServer.Stop(ctx)
+
+	logrus.Info("stopping web server")
+	webServer.Stop(ctx)
+
+	// if worker unable to stop after 30 seconds kill it
 	logrus.Info("stopping worker")
 	time.AfterFunc(time.Second*30, func() {
+		logrus.Error("unable to stop worker gracefully")
 		os.Exit(1)
 	})
 	wrk.Stop()
 	logrus.Info("worker stopped")
-
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fahmifan/autograd/utils"
 	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -108,6 +109,7 @@ func FileUploadPath() string {
 	return "file_upload_path"
 }
 
-func WebPort() string {
-	return os.Getenv("WEB_PORT")
+// WebPort ..
+func WebPort() int {
+	return utils.StringToInt(os.Getenv("WEB_PORT"))
 }

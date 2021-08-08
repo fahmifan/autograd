@@ -2,41 +2,42 @@ package web
 
 import (
 	"context"
-	"io"
+	"fmt"
 	"net/http"
-	"text/template"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
+// Server ..
 type Server struct {
-	Echo *echo.Echo
-	Port string
+	echo  *echo.Echo
+	Port  int
+	Debug bool
 }
 
+// NewServer ..
+func NewServer(port int, debug bool) *Server {
+	return &Server{
+		echo:  echo.New(),
+		Port:  port,
+		Debug: debug,
+	}
+}
+
+// Run() ..
 func (s *Server) Run() error {
 	s.route()
 	logrus.Info(s.Port)
-	return s.Echo.Start(":" + s.Port)
+	return s.echo.Start(fmt.Sprintf(":%d", s.Port))
 }
 
-func (s *Server) Stop(ctx context.Context) error {
-	return s.Echo.Shutdown(ctx)
-}
-
-// TemplateRenderer is a custom html/template renderer for Echo framework
-type TemplateRenderer struct {
-	templates *template.Template
-}
-
-// Render renders a template document
-func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	if viewContext, isMap := data.(map[string]interface{}); isMap {
-		viewContext["reverse"] = c.Echo().Reverse
+// Stop ..
+func (s *Server) Stop(ctx context.Context) {
+	err := s.echo.Shutdown(ctx)
+	if err != nil {
+		logrus.Error(err)
 	}
-
-	return t.templates.ExecuteTemplate(w, name, data)
 }
 
 var _routes = struct {
@@ -48,13 +49,11 @@ var _routes = struct {
 }
 
 func (s *Server) route() {
-	s.Echo.Renderer = &TemplateRenderer{
-		templates: template.Must(template.ParseGlob("web/templates/**/*.html")),
-	}
+	s.echo.Renderer = NewRenderer("web/templates", s.Debug)
 
-	s.Echo.Static("/public", "web/public")
-	s.Echo.GET("", renderHTML("home.html")).Name = _routes.HomePage
-	s.Echo.GET("/auth/login", renderHTML("login.html")).Name = _routes.LoginPage
+	s.echo.Static("/public", "web/public")
+	s.echo.GET("", renderHTML("home.html")).Name = _routes.HomePage
+	s.echo.GET("/auth/login", renderHTML("auth/login.html")).Name = _routes.LoginPage
 }
 
 func renderHTML(file string) echo.HandlerFunc {
