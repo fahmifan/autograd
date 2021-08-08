@@ -7,6 +7,7 @@ import (
 	"github.com/fahmifan/autograd/model"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 )
 
@@ -50,6 +51,8 @@ func (s *Server) Stop(ctx context.Context) {
 }
 
 func (s *Server) routes() {
+	s.echo.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+
 	s.echo.GET("/ping", s.handlePing)
 
 	// TODO: add auth for private static

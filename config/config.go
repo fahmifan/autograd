@@ -107,3 +107,7 @@ func FileUploadPath() string {
 
 	return "file_upload_path"
 }
+
+func WebPort() string {
+	return os.Getenv("WEB_PORT")
+}
