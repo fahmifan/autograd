@@ -21,8 +21,18 @@
 
 <body>
     <main id="app">
+        <div v-if="showSuccessAlert" class="alert alert-success alert-dismissible" role="alert">
+            Login Success!
+            <button  @click="showSuccessAlert = false" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div v-if="showFailAlert" class="alert alert-danger alert-dismissible" role="alert">
+            Login Fail!
+            <button  @click="showFailAlert = false" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>     
+
         <h1 class="text-center">Autograd Login</h1>
-        <form class="container" id="login-form">
+        <form class="container" id="login-form" @keyup:enter="login">
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Email address</label>
                 <input v-model="email" name="email" type="email" class="form-control" id="exampleInputEmail1"
@@ -46,12 +56,28 @@
                 return {
                     email: 'example@email.com',
                     password: '',
+                    showSuccessAlert: false,
+                    showFailAlert: false,
                 }
             },
             methods: {
                 login(ev) {
                     ev.preventDefault()
                     login(this.email, this.password)
+                        .then(res => {
+                            this.showSuccessAlert = true
+                            setTimeout(() => {
+                                this.showSuccessAlert = false
+                            }, 3000)
+                            console.log(res)
+                        })
+                        .catch(err => {
+                            this.showFailAlert = true
+                            setTimeout(() => {
+                                this.showFailAlert = false
+                            }, 3000)
+                            console.error(err)
+                        })
                 },
             },
         }
@@ -69,15 +95,22 @@
                     password: pass,
                 })
             }
-            fetch("http://localhost:8080/api/v1/users/login", payload)
-                .then(res => res.json())
-                .then(res => {
-                    console.log(res)
-                    console.log(parseJWT(res.token))
-                })
-                .catch(err => {
-                    console.error(err)
-                })
+            return new Promise((resolve, reject) => {
+                fetch("http://localhost:8080/api/v1/users/login", payload)
+                    .then(res => {
+                        if (res.status == 200) {
+                            return res
+                        }
+                        reject(err)
+                    })
+                    .then(res => {
+                        resolve(res)
+                    })
+                    .catch(err => {
+                        console.log("reject")
+                        reject(err)
+                    })
+            }) 
         }
     </script>
 </body>
