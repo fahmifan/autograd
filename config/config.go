@@ -44,8 +44,8 @@ func JWTSecret() string {
 	return val
 }
 
-// BaseURL ..
-func BaseURL() string {
+// APIBaseURL ..
+func APIBaseURL() string {
 	if val, ok := os.LookupEnv("BASE_URL"); ok {
 		return val
 	}

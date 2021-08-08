@@ -68,7 +68,11 @@ func main() {
 	wrk := worker.NewWorker(redisPool, worker.WithGrader(graderUsecase))
 
 	debugMode := config.Env() == "development"
-	webServer := web.NewServer(config.WebPort(), debugMode)
+	webServer := web.NewServer(&web.Config{
+		Port:       config.WebPort(),
+		Debug:      debugMode,
+		APIBaseURL: config.APIBaseURL(),
+	})
 
 	go func() {
 		logrus.Info("run worker")

@@ -9,20 +9,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Config ..
+type Config struct {
+	echo       *echo.Echo
+	Port       int
+	Debug      bool
+	APIBaseURL string
+}
+
 // Server ..
 type Server struct {
-	echo  *echo.Echo
-	Port  int
-	Debug bool
+	*Config
 }
 
 // NewServer ..
-func NewServer(port int, debug bool) *Server {
-	return &Server{
-		echo:  echo.New(),
-		Port:  port,
-		Debug: debug,
-	}
+func NewServer(cfg *Config) *Server {
+	cfg.echo = echo.New()
+	return &Server{cfg}
 }
 
 // Run() ..
@@ -51,9 +54,24 @@ var _routes = struct {
 func (s *Server) route() {
 	s.echo.Renderer = NewRenderer("web/templates", s.Debug)
 
+	// static
 	s.echo.Static("/public", "web/public")
+	s.echo.GET("/public/js/config.js", s.webConfig())
+
 	s.echo.GET("", renderHTML("home.html")).Name = _routes.HomePage
 	s.echo.GET("/auth/login", renderHTML("auth/login.html")).Name = _routes.LoginPage
+}
+
+func (s *Server) webConfig() echo.HandlerFunc {
+	cfg := fmt.Sprintf(`
+		export const config = {
+			"API_URL": "%s",
+		}`,
+		s.APIBaseURL,
+	)
+	return func(c echo.Context) error {
+		return c.Blob(http.StatusOK, "application/javascript", []byte(cfg))
+	}
 }
 
 func renderHTML(file string) echo.HandlerFunc {
