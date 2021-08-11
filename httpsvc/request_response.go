@@ -102,14 +102,6 @@ func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
 	}
 }
 
-type uploadReq struct {
-	SourceCode string `json:"sourceCode"`
-}
-
-type uploadRes struct {
-	FileURL string `json:"fileURL"`
-}
-
 type submissionReq struct {
 	ID           string `json:"id,omitempty"`
 	AssignmentID string `json:"assignmentID"`

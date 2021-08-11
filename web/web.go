@@ -29,10 +29,15 @@ func NewServer(cfg *Config) *Server {
 }
 
 // Run() ..
-func (s *Server) Run() error {
+func (s *Server) Run() {
 	s.route()
 	logrus.Info(s.Port)
-	return s.echo.Start(fmt.Sprintf(":%d", s.Port))
+	err := s.echo.Start(fmt.Sprintf(":%d", s.Port))
+	if err != nil && err != http.ErrServerClosed {
+		logrus.Error(err)
+		return
+	}
+	logrus.Info("web server stopped gracefully")
 }
 
 // Stop ..

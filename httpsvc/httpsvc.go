@@ -40,7 +40,12 @@ func NewServer(port, staticMediaPath string, opts ...Option) *Server {
 // Run server
 func (s *Server) Run() {
 	s.routes()
-	logrus.Fatal(s.echo.Start(":" + s.port))
+	err := s.echo.Start(":" + s.port)
+	if err != nil && err != http.ErrServerClosed {
+		logrus.Error(err)
+		return
+	}
+	logrus.Info("api server stopped gracefully")
 }
 
 // Stop server gracefully

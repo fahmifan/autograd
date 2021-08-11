@@ -23,5 +23,5 @@ func (s *Server) handleUploadMedia(c echo.Context) error {
 	}
 
 	publicURL := fmt.Sprintf("%s/media/%s", config.APIBaseURL(), fileName)
-	return c.JSON(http.StatusCreated, map[string]string{"publicURL": publicURL})
+	return c.JSON(http.StatusCreated, echo.Map{"publicURL": publicURL})
 }
