@@ -12,4 +12,4 @@ db-migrate-up:
 	@go run cmd/migration/migration.go
 
 doc:
-	@swag init -d cmd/server 
+	@swag init -g cmd/server/main.go 

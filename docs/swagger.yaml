@@ -1,9 +1,191 @@
 basePath: /
+definitions:
+  LoginRequest:
+    properties:
+      email:
+        example: your@email.com
+        type: string
+      password:
+        type: string
+    type: object
+  httpsvc.Error:
+    properties:
+      error:
+        type: string
+    type: object
+  httpsvc.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      expiredIn:
+        type: integer
+      refreshToken:
+        type: string
+      tokenType:
+        type: string
+    type: object
+  httpsvc.SubmissionReq:
+    properties:
+      assignmentID:
+        type: string
+      fileURL:
+        type: string
+      id:
+        type: string
+      submittedBy:
+        type: string
+    type: object
+  httpsvc.SubmissionRes:
+    properties:
+      assignmentID:
+        type: string
+      createdAt:
+        type: string
+      feedback:
+        type: string
+      fileURL:
+        type: string
+      grade:
+        type: integer
+      id:
+        type: string
+      submittedBy:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  httpsvc.UserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        enum:
+        - ADMIN
+        - STUDENT
+        type: string
+    type: object
+  httpsvc.UserRes:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      updatedAt:
+        type: string
+    type: object
 info:
   contact: {}
   description: API documentation for Autograde
   termsOfService: http://swagger.io/terms/
   title: Autograde API
   version: "1.0"
-paths: {}
+paths:
+  /api/v1/submissions:
+    post:
+      consumes:
+      - application/json
+      operationId: CreateSubmission
+      parameters:
+      - description: submission request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/httpsvc.SubmissionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpsvc.SubmissionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpsvc.Error'
+      summary: create a user submission
+  /api/v1/submissions/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: DeleteSubmission
+      parameters:
+      - description: submission id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpsvc.SubmissionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpsvc.Error'
+        "404":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpsvc.Error'
+      summary: delete a submission
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: create a User
+      operationId: CreateUser
+      parameters:
+      - description: name
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/httpsvc.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpsvc.UserRes'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/httpsvc.Error'
+      summary: create (register) a User
+  /api/v1/users/login:
+    post:
+      consumes:
+      - application/json
+      operationId: Login
+      parameters:
+      - description: login request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpsvc.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpsvc.Error'
+      summary: login a User
 swagger: "2.0"

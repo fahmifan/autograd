@@ -40,7 +40,7 @@ func (c Claims) GetRoleModel() model.Role {
 }
 
 func createTokenExpiry() int64 {
-	expireTime := time.Now().Add(8 * time.Hour)
+	expireTime := time.Now().Add(1 * time.Hour)
 	tokenExpiry := expireTime.UnixNano() / 1000000
 	return tokenExpiry
 }

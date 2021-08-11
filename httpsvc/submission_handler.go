@@ -8,8 +8,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// CreateSubmission godoc
+// @Summary create a user submission
+// @ID CreateSubmission
+// @Accept json
+// @Produce json
+// @Param user body SubmissionReq true "submission request"
+// @Success 200 {object} SubmissionRes
+// @Failure 400 {object} Error
+// @Router /api/v1/submissions [post]
 func (s *Server) handleCreateSubmission(c echo.Context) error {
-	req := &submissionReq{}
+	req := &SubmissionReq{}
 	err := c.Bind(req)
 	if err != nil {
 		logrus.Error(err)
@@ -26,6 +35,15 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
+// DeleteSubmission godoc
+// @Summary delete a submission
+// @ID DeleteSubmission
+// @Accept json
+// @Produce json
+// @Param id path string true "submission id"
+// @Success 200 {object} SubmissionRes
+// @Failure 400,404 {object} Error
+// @Router /api/v1/submissions/{id} [delete]
 func (s *Server) handleDeleteSubmission(c echo.Context) error {
 	id := c.Param("id")
 	submission, err := s.submissionUsecase.DeleteByID(c.Request().Context(), id)
@@ -54,7 +72,7 @@ func (s *Server) handleGetSubmission(c echo.Context) error {
 }
 
 func (s *Server) handleUpdateSubmission(c echo.Context) error {
-	submissionReq := &submissionReq{}
+	submissionReq := &SubmissionReq{}
 	err := c.Bind(submissionReq)
 	if err != nil {
 		logrus.Error(err)

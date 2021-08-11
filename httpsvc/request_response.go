@@ -102,14 +102,14 @@ func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
 	}
 }
 
-type submissionReq struct {
+type SubmissionReq struct {
 	ID           string `json:"id,omitempty"`
 	AssignmentID string `json:"assignmentID"`
 	SubmittedBy  string `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
 }
 
-func submissionCreateReqToModel(s *submissionReq) *model.Submission {
+func submissionCreateReqToModel(s *SubmissionReq) *model.Submission {
 	return &model.Submission{
 		AssignmentID: s.AssignmentID,
 		SubmittedBy:  s.SubmittedBy,
@@ -117,7 +117,7 @@ func submissionCreateReqToModel(s *submissionReq) *model.Submission {
 	}
 }
 
-func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
+func submissionUpdateReqToModel(s *SubmissionReq) *model.Submission {
 	return &model.Submission{
 		Base:         model.Base{ID: s.ID},
 		AssignmentID: s.AssignmentID,
@@ -126,7 +126,7 @@ func submissionUpdateReqToModel(s *submissionReq) *model.Submission {
 	}
 }
 
-type submissionRes struct {
+type SubmissionRes struct {
 	ID           string `json:"id"`
 	AssignmentID string `json:"assignmentID"`
 	SubmittedBy  string `json:"submittedBy"`
@@ -137,8 +137,8 @@ type submissionRes struct {
 	UpdatedAt    string `json:"updatedAt"`
 }
 
-func submissionModelToRes(m *model.Submission) *submissionRes {
-	return &submissionRes{
+func submissionModelToRes(m *model.Submission) *SubmissionRes {
+	return &SubmissionRes{
 		ID:           m.ID,
 		AssignmentID: m.AssignmentID,
 		SubmittedBy:  m.SubmittedBy,
@@ -150,7 +150,7 @@ func submissionModelToRes(m *model.Submission) *submissionRes {
 	}
 }
 
-func newSubmissionResponses(submissions []*model.Submission) (submissionRes []*submissionRes) {
+func newSubmissionResponses(submissions []*model.Submission) (submissionRes []*SubmissionRes) {
 	for _, submission := range submissions {
 		submissionRes = append(submissionRes, submissionModelToRes(submission))
 	}
