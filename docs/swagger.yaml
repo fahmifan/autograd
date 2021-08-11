@@ -1,0 +1,9 @@
+basePath: /
+info:
+  contact: {}
+  description: API documentation for Autograde
+  termsOfService: http://swagger.io/terms/
+  title: Autograde API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

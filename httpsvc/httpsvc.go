@@ -6,9 +6,11 @@ import (
 
 	"github.com/fahmifan/autograd/model"
 
+	_ "github.com/fahmifan/autograd/docs"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 // Server ..
@@ -59,6 +61,7 @@ func (s *Server) routes() {
 	s.echo.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	s.echo.GET("/ping", s.handlePing)
+	s.echo.GET("/docs/swagger/*", echoSwagger.WrapHandler)
 
 	// TODO: add auth for private static
 	s.echo.Static("/storage", "submission")

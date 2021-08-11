@@ -10,3 +10,6 @@ run-server:
 
 db-migrate-up:
 	@go run cmd/migration/migration.go
+
+doc:
+	@swag init -d cmd/server 

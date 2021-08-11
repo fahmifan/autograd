@@ -11,14 +11,14 @@ import (
 
 const userInfoCtx = "userInfoCtx"
 
-type userRequest struct {
+type UserRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Role     string `json:"role"`
+	Role     string `json:"role" enums:"ADMIN,STUDENT"`
 }
 
-func (u *userRequest) toModel() *model.User {
+func (u *UserRequest) toModel() *model.User {
 	return &model.User{
 		Email:    u.Email,
 		Password: u.Password,
@@ -27,7 +27,7 @@ func (u *userRequest) toModel() *model.User {
 	}
 }
 
-type userRes struct {
+type UserRes struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
@@ -35,8 +35,8 @@ type userRes struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-func userResFromModel(m *model.User) *userRes {
-	return &userRes{
+func userResFromModel(m *model.User) *UserRes {
+	return &UserRes{
 		ID:        m.ID,
 		Email:     m.Email,
 		Role:      m.Role.ToString(),
@@ -45,8 +45,22 @@ func userResFromModel(m *model.User) *userRes {
 	}
 }
 
+type Error struct {
+	Error string `json:"error"`
+}
+
+// CreateUser godoc
+// @Summary create (register) a User
+// @Description create a User
+// @ID CreateUser
+// @Accept  json
+// @Produce  json
+// @Param user body UserRequest true "name"
+// @Success 200 {object} UserRes
+// @Failure default {object} Error
+// @Router /api/v1/users [post]
 func (s *Server) handleCreateUser(c echo.Context) error {
-	userReq := &userRequest{}
+	userReq := &UserRequest{}
 	err := c.Bind(userReq)
 	if err != nil {
 		logrus.Error(err)
@@ -64,7 +78,7 @@ func (s *Server) handleCreateUser(c echo.Context) error {
 }
 
 func (s *Server) handleLogin(c echo.Context) error {
-	userReq := &userRequest{}
+	userReq := &UserRequest{}
 	err := c.Bind(userReq)
 	if err != nil {
 		logrus.Error(err)
@@ -80,7 +94,7 @@ func (s *Server) handleLogin(c echo.Context) error {
 	token, err := generateToken(*user, createTokenExpiry())
 	if err != nil {
 		logrus.WithField("email", userReq.Email).Error(err)
-		return err
+		return responseError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"token": token})

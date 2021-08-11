@@ -41,6 +41,12 @@ func init() {
 	initLogger()
 }
 
+// @title Autograde API
+// @version 1.0
+// @description API documentation for Autograde
+// @termsOfService http://swagger.io/terms/
+
+// @BasePath /
 func main() {
 	redisPool := config.NewRedisPool(config.RedisWorkerHost())
 	postgres := db.MustPostgres()
