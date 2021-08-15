@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/fahmifan/autograd/config"
-	"github.com/fahmifan/autograd/worker"
+	"github.com/fahmifan/autograd/gocrafts"
 )
 
-// for testing wokrer & broker
+// for testing worker & broker
 func main() {
 	redisPool := config.NewRedisPool(config.RedisWorkerHost())
-	_ = worker.NewBroker(redisPool)
+	_ = gocrafts.NewBroker(config.WorkerNamespace(), redisPool)
 }

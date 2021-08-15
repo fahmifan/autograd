@@ -55,6 +55,8 @@ const (
 	CreateUser
 
 	CreateMedia
+	ViewMedia
+	ViewAnyMedia
 )
 
 var policy = map[Role]map[Permission]bool{
@@ -68,17 +70,33 @@ var policy = map[Role]map[Permission]bool{
 		ViewSubmission:     _ok,
 		ViewAnySubmissions: _ok,
 		CreateUser:         _ok,
+		CreateMedia:        _ok,
+		ViewAnyMedia:       _ok,
 	},
 	RoleStudent: {
 		ViewAssignment:   _ok,
 		UpdateSubmission: _ok,
 		DeleteSubmission: _ok,
 		UpdateUser:       _ok,
+		CreateMedia:      _ok,
+		CreateSubmission: _ok,
+		ViewMedia:        _ok,
+		ViewSubmission:   _ok,
 	},
 }
 
+func (r Role) Granted(perm ...Permission) bool {
+	for _, p := range perm {
+		if r.granted(p) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Granted check if role is granted with a permission
-func (r Role) Granted(perm Permission) bool {
+func (r Role) granted(perm Permission) bool {
 	role, ok := policy[r]
 	if !ok {
 		return false

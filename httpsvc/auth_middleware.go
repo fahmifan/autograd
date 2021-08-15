@@ -37,10 +37,8 @@ func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.Handler
 				return responseError(c, ErrUnauthorized)
 			}
 
-			for _, p := range perms {
-				if user.Role.Granted(p) {
-					return next(c)
-				}
+			if user.Role.Granted(perms...) {
+				return next(c)
 			}
 
 			return responseError(c, ErrUnauthorized)

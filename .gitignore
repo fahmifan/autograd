@@ -2,3 +2,4 @@
 submission/*.bin
 file_upload_path/*
 .env
+private/*

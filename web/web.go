@@ -11,6 +11,7 @@ import (
 
 // Config ..
 type Config struct {
+	_          string // enforce
 	echo       *echo.Echo
 	Port       int
 	Debug      bool

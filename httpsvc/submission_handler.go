@@ -18,6 +18,7 @@ import (
 // @Failure 400 {object} Error
 // @Router /api/v1/submissions [post]
 func (s *Server) handleCreateSubmission(c echo.Context) error {
+	user := getUserFromCtx(c)
 	req := &SubmissionReq{}
 	err := c.Bind(req)
 	if err != nil {
@@ -26,6 +27,7 @@ func (s *Server) handleCreateSubmission(c echo.Context) error {
 	}
 
 	submission := submissionCreateReqToModel(req)
+	submission.SubmittedBy = user.ID
 	err = s.submissionUsecase.Create(c.Request().Context(), submission)
 	if err != nil {
 		logrus.Error(err)
@@ -57,22 +59,25 @@ func (s *Server) handleDeleteSubmission(c echo.Context) error {
 
 func (s *Server) handleGetSubmission(c echo.Context) error {
 	id := c.Param("id")
-	submission, err := s.submissionUsecase.FindByID(c.Request().Context(), id)
+	user := getUserFromCtx(c)
+
+	var submission *model.Submission
+	var err error
+	if user.Role.Granted(model.ViewAnySubmissions) {
+		submission, err = s.submissionUsecase.FindByID(c.Request().Context(), id)
+	} else {
+		submission, err = s.submissionUsecase.FindByIDAndSubmitter(c.Request().Context(), id, user.ID)
+	}
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
-	}
-
-	user := getUserFromCtx(c)
-	if user.Role == model.RoleStudent && !submission.IsOwnedBy(*user) {
-		return responseError(c, ErrUnauthorized)
 	}
 
 	return c.JSON(http.StatusOK, submissionModelToRes(submission))
 }
 
 func (s *Server) handleUpdateSubmission(c echo.Context) error {
-	submissionReq := &SubmissionReq{}
+	submissionReq := &SubmissionUpdate{}
 	err := c.Bind(submissionReq)
 	if err != nil {
 		logrus.Error(err)
@@ -83,14 +88,10 @@ func (s *Server) handleUpdateSubmission(c echo.Context) error {
 	ctx := c.Request().Context()
 	user := getUserFromCtx(c)
 
-	oldSubm, err := s.submissionUsecase.FindByID(ctx, submission.ID)
+	_, err = s.submissionUsecase.FindByIDAndSubmitter(ctx, submission.ID, user.ID)
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)
-	}
-
-	if !oldSubm.IsOwnedBy(*user) {
-		return responseError(c, ErrUnauthorized)
 	}
 
 	err = s.submissionUsecase.Update(c.Request().Context(), submission)

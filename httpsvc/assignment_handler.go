@@ -15,9 +15,9 @@ func (s *Server) handleCreateAssignment(c echo.Context) error {
 		logrus.Error(err)
 		return responseError(c, err)
 	}
-	assignmentReq.AssignedBy = user.ID
 
 	assignment := assignmentCreateReqToModel(assignmentReq)
+	assignment.AssignedBy = user.ID
 	err = s.assignmentUsecase.Create(c.Request().Context(), assignment)
 	if err != nil {
 		logrus.Error(err)
@@ -49,7 +49,7 @@ func (s *Server) handleGetAssignment(c echo.Context) error {
 	return c.JSON(http.StatusOK, assignmentModelToRes(assignment))
 }
 
-func (s *Server) handleGetAssignments(c echo.Context) error {
+func (s *Server) handleGetAllAssignments(c echo.Context) error {
 	cursor := getCursorFromContext(c)
 	assignments, count, err := s.assignmentUsecase.FindAll(c.Request().Context(), cursor)
 	if err != nil {
@@ -60,6 +60,24 @@ func (s *Server) handleGetAssignments(c echo.Context) error {
 	assignmentResponses := newAssignmentResponses(assignments)
 
 	return c.JSON(http.StatusOK, newCursorRes(cursor, assignmentResponses, count))
+}
+
+func (s *Server) handleGetMyAssignments(c echo.Context) error {
+	cursor := getCursorFromContext(c)
+	assignments, count, err := s.assignmentUsecase.FindAll(c.Request().Context(), cursor)
+	if err != nil {
+		logrus.Error(err)
+		return responseError(c, err)
+	}
+
+	res := newAssignmentResponses(assignments)
+	for i := range res {
+		// redacted
+		res[i].CaseInputFileURL = ""
+		res[i].CaseOutputFileURL = ""
+	}
+
+	return c.JSON(http.StatusOK, newCursorRes(cursor, res, count))
 }
 
 func (s *Server) handleGetAssignmentSubmissions(c echo.Context) error {

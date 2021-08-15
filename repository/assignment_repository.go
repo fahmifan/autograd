@@ -68,6 +68,18 @@ func (a *assignmentRepo) DeleteByID(ctx context.Context, id string) error {
 	return nil
 }
 
+func scopeSorter(sorter model.Sort) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		switch sorter {
+		case model.SortCreatedAtAsc:
+			return db.Order("created_at asc")
+		case model.SortCreatedAtDesc:
+			return db.Order("created_at desc")
+		}
+		return db
+	}
+}
+
 func (a *assignmentRepo) FindAll(ctx context.Context, cursor model.Cursor) (assignments []*model.Assignment, count int64, err error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"ctx":    utils.Dump(ctx),
@@ -81,8 +93,11 @@ func (a *assignmentRepo) FindAll(ctx context.Context, cursor model.Cursor) (assi
 	}
 
 	// FIXME: cursor.GetSort() wrong output
-	err = a.db.Limit(int(cursor.GetSize())).Offset(int(cursor.GetOffset())).
-		Order("created_at " + cursor.GetSort()).Find(&assignments).Error
+	err = a.db.
+		Scopes(scopeSorter(cursor.GetSort())).
+		Limit(int(cursor.GetSize())).
+		Offset(int(cursor.GetOffset())).
+		Find(&assignments).Error
 	if err != nil {
 		logger.Error(err)
 		return nil, count, err

@@ -9,23 +9,30 @@ import (
 	"path"
 )
 
-// LocalStorer ..
-type LocalStorer struct{}
+type Config struct {
+	_       string // enfore
+	RootDir string
+}
 
-// NewLocalStorage ..
-func NewLocalStorage() *LocalStorer {
-	return &LocalStorer{}
+// LocalStorer ..
+type LocalStorer struct {
+	*Config
+}
+
+// NewLocalStorer ..
+func NewLocalStorer(cfg *Config) *LocalStorer {
+	return &LocalStorer{cfg}
 }
 
 // Store store file to local storage
-func (f *LocalStorer) Store(dst string, r io.Reader) error {
-	dir, _ := path.Split(dst)
-	err := os.MkdirAll(dir, os.ModePerm)
+func (f *LocalStorer) Store(dst, filename string, r io.Reader) error {
+	dst = path.Join(f.RootDir, dst)
+	err := os.MkdirAll(dst, os.ModePerm)
 	if err != nil && !errors.Is(err, os.ErrExist) {
-		return fmt.Errorf("unable to create dir %s : %v", dir, err)
+		return fmt.Errorf("unable to create dst %s : %v", dst, err)
 	}
 
-	osFile, err := os.Create(dst)
+	osFile, err := os.Create(path.Join(dst, filename))
 	if err != nil {
 		return fmt.Errorf("unable to create file %s : %v", dst, err)
 	}
@@ -40,5 +47,5 @@ func (f *LocalStorer) Store(dst string, r io.Reader) error {
 
 // Seek seek a file to local disk
 func (f *LocalStorer) Seek(dst string) (r io.ReadCloser, err error) {
-	return os.Open(dst)
+	return os.Open(path.Join(f.RootDir, dst))
 }

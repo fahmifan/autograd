@@ -28,9 +28,9 @@ func WithSubmissionUsecase(sub model.SubmissionUsecase) Option {
 	}
 }
 
-// WithMediaUsecase ..
-func WithMediaUsecase(med model.MediaUsecase) Option {
+// WithObjectStorer ..
+func WithObjectStorer(obs model.ObjectStorer) Option {
 	return func(s *Server) {
-		s.mediaUsecase = med
+		s.objectStorer = obs
 	}
 }

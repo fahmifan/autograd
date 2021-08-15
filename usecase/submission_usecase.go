@@ -12,16 +12,16 @@ import (
 
 type SubmissionUsecase struct {
 	submissionRepo repository.SubmissionRepository
-	broker         model.WorkerBroker
+	workerBroker   model.Broker
 }
 
 // SubmissionOption ..
 type SubmissionOption func(s *SubmissionUsecase)
 
 // SubmissionUsecaseWithBroker ..
-func SubmissionUsecaseWithBroker(b model.WorkerBroker) SubmissionOption {
+func SubmissionUsecaseWithBroker(b model.Broker) SubmissionOption {
 	return func(s *SubmissionUsecase) {
-		s.broker = b
+		s.workerBroker = b
 	}
 }
 
@@ -52,12 +52,10 @@ func (s *SubmissionUsecase) Create(ctx context.Context, submission *model.Submis
 		return err
 	}
 
-	go func(sbmID string) {
-		err := s.broker.EnqueueJobGradeSubmission(sbmID)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}(submission.ID)
+	err = s.workerBroker.GradeSubmission(submission.ID)
+	if err != nil {
+		logrus.Error(err)
+	}
 
 	return nil
 }
@@ -123,7 +121,7 @@ func (s *SubmissionUsecase) Update(ctx context.Context, submission *model.Submis
 	}
 
 	go func(submissionID string) {
-		err := s.broker.EnqueueJobGradeSubmission(submissionID)
+		err := s.workerBroker.GradeSubmission(submissionID)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -154,6 +152,7 @@ func (s *SubmissionUsecase) UpdateGradeByID(ctx context.Context, id string, grad
 			"id":    id,
 			"grade": grade,
 		}).Error(err)
+		return err
 	}
 
 	if sbm == nil {
@@ -161,4 +160,17 @@ func (s *SubmissionUsecase) UpdateGradeByID(ctx context.Context, id string, grad
 	}
 
 	return s.submissionRepo.UpdateGradeByID(ctx, id, grade)
+}
+
+// FindByIDAndSubmitter ..
+func (s *SubmissionUsecase) FindByIDAndSubmitter(ctx context.Context, id, submitterID string) (*model.Submission, error) {
+	sbm, err := s.submissionRepo.FindByIDAndSubmitter(ctx, id, submitterID)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	if sbm == nil {
+		return nil, ErrNotFound
+	}
+	return sbm, nil
 }

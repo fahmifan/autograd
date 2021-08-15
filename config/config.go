@@ -18,6 +18,9 @@ func init() {
 	}
 
 	logrus.SetReportCaller(true)
+	if Env() == EnvDevelopment {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 	logrus.Info("load .env file to os env")
 }
 
@@ -26,13 +29,16 @@ func Port() string {
 	return os.Getenv("PORT")
 }
 
+const EnvDevelopment = "development"
+const EnvProduction = "production"
+
 // Env ..
 func Env() string {
 	if val, ok := os.LookupEnv("ENV"); ok {
 		return val
 	}
 
-	return "development"
+	return EnvDevelopment
 }
 
 // JWTSecret ..

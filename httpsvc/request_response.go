@@ -8,7 +8,6 @@ import (
 )
 
 type assignmentReq struct {
-	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
 	Description       string `json:"description"`
 	CaseInputFileURL  string `json:"caseInputFileURL"`
@@ -17,7 +16,6 @@ type assignmentReq struct {
 
 func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
 	return &model.Assignment{
-		AssignedBy:        r.AssignedBy,
 		Name:              r.Name,
 		Description:       r.Description,
 		CaseInputFileURL:  r.CaseInputFileURL,
@@ -27,7 +25,6 @@ func assignmentCreateReqToModel(r *assignmentReq) *model.Assignment {
 
 func assigmentUpdateReqToModel(r *assignmentReq) *model.Assignment {
 	return &model.Assignment{
-		AssignedBy:        r.AssignedBy,
 		Name:              r.Name,
 		Description:       r.Description,
 		CaseInputFileURL:  r.CaseInputFileURL,
@@ -40,8 +37,8 @@ type assignmentRes struct {
 	AssignedBy        string `json:"assignedBy"`
 	Name              string `json:"name"`
 	Description       string `json:"description"`
-	CaseInputFileURL  string `json:"caseInputFileURL"`
-	CaseOutputFileURL string `json:"caseOutputFileURL"`
+	CaseInputFileURL  string `json:"caseInputFileURL,omitempty"`
+	CaseOutputFileURL string `json:"caseOutputFileURL,omitempty"`
 	CreatedAt         string `json:"createdAt"`
 	UpdatedAt         string `json:"updatedAt"`
 	DeletedAt         string `json:"deletedAt,omitempty"`
@@ -103,21 +100,25 @@ func newCursorRes(c model.Cursor, data interface{}, count int64) *cursorRes {
 }
 
 type SubmissionReq struct {
-	ID           string `json:"id,omitempty"`
 	AssignmentID string `json:"assignmentID"`
-	SubmittedBy  string `json:"submittedBy"`
 	FileURL      string `json:"fileURL"`
 }
 
 func submissionCreateReqToModel(s *SubmissionReq) *model.Submission {
 	return &model.Submission{
 		AssignmentID: s.AssignmentID,
-		SubmittedBy:  s.SubmittedBy,
 		FileURL:      s.FileURL,
 	}
 }
 
-func submissionUpdateReqToModel(s *SubmissionReq) *model.Submission {
+type SubmissionUpdate struct {
+	ID           string `json:"id"`
+	AssignmentID string `json:"assignmentID"`
+	SubmittedBy  string `json:"submittedBy"`
+	FileURL      string `json:"fileURL"`
+}
+
+func submissionUpdateReqToModel(s *SubmissionUpdate) *model.Submission {
 	return &model.Submission{
 		Base:         model.Base{ID: s.ID},
 		AssignmentID: s.AssignmentID,
