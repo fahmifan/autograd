@@ -18,7 +18,6 @@ var doc = `{
     "info": {
         "description": "{{.Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {},
         "version": "{{.Version}}"
     },
@@ -224,12 +223,6 @@ var doc = `{
                     "type": "string"
                 },
                 "fileURL": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "submittedBy": {
                     "type": "string"
                 }
             }

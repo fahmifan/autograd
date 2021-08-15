@@ -115,14 +115,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	subs, err := findSubmissionsInDir(path.Join(cwd, "submission"))
+	subs, err := findSubmissionsInDir(path.Join(cwd, "example/submission"))
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
 	// read input
-	inputDir := path.Join(cwd, "input")
+	inputDir := path.Join(cwd, "example/input")
 	mapInputs, err := findFilesInDir(inputDir)
 	if err != nil {
 		log.Error(err)
@@ -130,7 +130,7 @@ func main() {
 	}
 
 	// read output
-	outputDir := path.Join(cwd, "output")
+	outputDir := path.Join(cwd, "example/output")
 	outputs, err := findFilesInDir(outputDir)
 	if err != nil {
 		log.Error(err)

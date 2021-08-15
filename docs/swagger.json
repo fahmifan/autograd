@@ -3,7 +3,6 @@
     "info": {
         "description": "API documentation for Autograde",
         "title": "Autograde API",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {},
         "version": "1.0"
     },
@@ -208,12 +207,6 @@
                     "type": "string"
                 },
                 "fileURL": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "submittedBy": {
                     "type": "string"
                 }
             }

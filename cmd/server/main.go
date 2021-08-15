@@ -45,7 +45,6 @@ func init() {
 // @title Autograde API
 // @version 1.0
 // @description API documentation for Autograde
-// @termsOfService http://swagger.io/terms/
 
 // @BasePath /
 func main() {
@@ -75,10 +74,10 @@ func main() {
 		httpsvc.WithObjectStorer(localStorer),
 	)
 	workers := worker.New(&worker.Config{
-		Broker:     broker,
-		Grader:     graderUsecase,
-		Submission: submissionUsecase,
-		Assignment: assignmentUsecase,
+		Broker:            broker,
+		GraderUsecase:     graderUsecase,
+		SubmissionUsecase: submissionUsecase,
+		AssignmentUsecase: assignmentUsecase,
 	})
 	workerManager := gocrafts.NewWorkerManager(workerNamespace, config.WorkerConcurrency(), redisPool, workers)
 
