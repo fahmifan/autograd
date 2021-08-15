@@ -7,9 +7,9 @@ import (
 	"github.com/fahmifan/autograd/utils"
 	"github.com/labstack/echo/v4"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/fahmifan/autograd/config"
 	"github.com/fahmifan/autograd/model"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // Create the JWT key used to create the signature
@@ -39,10 +39,10 @@ func (c Claims) GetRoleModel() model.Role {
 	}
 }
 
+// millisecond
 func createTokenExpiry() int64 {
 	expireTime := time.Now().Add(1 * time.Hour)
-	tokenExpiry := expireTime.UnixNano() / 1000000
-	return tokenExpiry
+	return expireTime.Unix() / 1000000
 }
 
 func generateToken(user model.User, expiry int64) (string, error) {
@@ -52,6 +52,7 @@ func generateToken(user model.User, expiry int64) (string, error) {
 		Role:  user.Role.ToString(),
 		Name:  user.Name,
 		StandardClaims: jwt.StandardClaims{
+			IssuedAt: time.Now().Unix(),
 			// millisecond
 			ExpiresAt: expiry,
 		},
@@ -66,23 +67,19 @@ func generateToken(user model.User, expiry int64) (string, error) {
 	return tokenString, nil
 }
 
-func parseJWTToken(token string) (Claims, error) {
-	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+func parseJWTToken(token string) (claims Claims, err error) {
+	tkn, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
-
 	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return *claims, err
-		}
+		return claims, err
 	}
 
 	if tkn != nil && !tkn.Valid {
-		return *claims, ErrTokenInvalid
+		return claims, ErrTokenInvalid
 	}
 
-	return *claims, nil
+	return claims, nil
 }
 
 func auth(token string) (*model.User, bool) {

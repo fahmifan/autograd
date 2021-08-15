@@ -63,7 +63,7 @@ func (s *Server) handleGetSubmission(c echo.Context) error {
 
 	var submission *model.Submission
 	var err error
-	if user.Role.Granted(model.ViewAnySubmissions) {
+	if user.Role.GrantedAny(model.ViewAnySubmissions) {
 		submission, err = s.submissionUsecase.FindByID(c.Request().Context(), id)
 	} else {
 		submission, err = s.submissionUsecase.FindByIDAndSubmitter(c.Request().Context(), id, user.ID)

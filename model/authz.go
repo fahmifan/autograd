@@ -85,7 +85,12 @@ var policy = map[Role]map[Permission]bool{
 	},
 }
 
-func (r Role) Granted(perm ...Permission) bool {
+// GrantedAny check if the Role is granted any permissions.
+// If no permission given, it returns true
+func (r Role) GrantedAny(perm ...Permission) bool {
+	if len(perm) == 0 {
+		return true
+	}
 	for _, p := range perm {
 		if r.granted(p) {
 			return true

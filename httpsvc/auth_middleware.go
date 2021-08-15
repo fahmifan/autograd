@@ -37,11 +37,11 @@ func (s *Server) authorizedAny(perms ...model.Permission) func(next echo.Handler
 				return responseError(c, ErrUnauthorized)
 			}
 
-			if user.Role.Granted(perms...) {
-				return next(c)
+			if !user.Role.GrantedAny(perms...) {
+				return responseError(c, ErrUnauthorized)
 			}
 
-			return responseError(c, ErrUnauthorized)
+			return next(c)
 		}
 	}
 }

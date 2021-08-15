@@ -4,9 +4,9 @@ go 1.14
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gocraft/work v0.5.1
 	github.com/gofrs/uuid v3.2.0+incompatible
+	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/golang-migrate/migrate/v4 v4.13.0
 	github.com/gomodule/redigo v1.8.2
 	github.com/joho/godotenv v1.3.0
