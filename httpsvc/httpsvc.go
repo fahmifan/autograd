@@ -21,7 +21,6 @@ type Server struct {
 	userUsecase       model.UserUsecase
 	assignmentUsecase model.AssignmentUsecase
 	submissionUsecase model.SubmissionUsecase
-	mediaUsecase      model.MediaUsecase
 	objectStorer      model.ObjectStorer
 }
 
