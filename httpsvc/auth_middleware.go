@@ -16,7 +16,7 @@ var ErrUnauthorized = errors.New("unauthorized")
 // ErrMissingAuthorization error
 var ErrMissingAuthorization = errors.New("missing Authorization header")
 
-func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *Server) authorizedAny(perms ...model.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			token, err := parseTokenFromHeader(&c.Request().Header)
