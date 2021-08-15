@@ -63,10 +63,6 @@ func (s *Server) routes() {
 	s.echo.GET("/ping", s.handlePing)
 	s.echo.GET("/docs/swagger/*", echoSwagger.WrapHandler)
 
-	// TODO: add auth for private static
-	s.echo.Static("/storage", "submission")
-	// s.echo.Static("/media", s.staticMediaPath)
-
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/users", s.handleCreateUser)
 	apiV1.POST("/users/login", s.handleLogin)
