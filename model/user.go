@@ -7,10 +7,11 @@ import (
 // User ..
 type User struct {
 	Base
-	Name     string
-	Email    string
-	Password string
-	Role     Role
+	Name         string
+	Email        string
+	Password     string
+	Role         Role
+	RefreshToken string
 }
 
 // UserUsecase ..

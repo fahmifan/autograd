@@ -39,22 +39,15 @@ func (c Claims) GetRoleModel() model.Role {
 	}
 }
 
-// millisecond
-func createTokenExpiry() int64 {
-	expireTime := time.Now().Add(1 * time.Hour)
-	return expireTime.Unix() / 1000000
-}
-
-func generateToken(user model.User, expiry int64) (string, error) {
+func generateAccessToken(user *model.User, expiredAt time.Time) (string, error) {
 	claims := &Claims{
 		ID:    user.ID,
 		Email: user.Email,
 		Role:  user.Role.ToString(),
 		Name:  user.Name,
 		StandardClaims: jwt.StandardClaims{
-			IssuedAt: time.Now().Unix(),
-			// millisecond
-			ExpiresAt: expiry,
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: expiredAt.Unix(),
 		},
 	}
 
@@ -65,6 +58,39 @@ func generateToken(user model.User, expiry int64) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func generateRefreshToken(sess *model.Session) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": sess.ID,
+		"exp": sess.ExpiredAt.Unix(),
+	})
+	rt, err := token.SignedString(jwtKey)
+	if err != nil {
+		return "", err
+	}
+
+	return rt, nil
+}
+
+func parseRefreshToken(token string) (sessID string, err error) {
+	claims := jwt.MapClaims{}
+	tkn, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if tkn != nil && !tkn.Valid {
+		return "", ErrTokenInvalid
+	}
+
+	sessID, ok := claims["sub"].(string)
+	if !ok {
+		return "", ErrTokenInvalid
+	}
+	return sessID, nil
 }
 
 func parseJWTToken(token string) (claims Claims, err error) {

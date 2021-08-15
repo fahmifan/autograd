@@ -34,3 +34,10 @@ func WithObjectStorer(obs model.ObjectStorer) Option {
 		s.objectStorer = obs
 	}
 }
+
+// WithSessionRepository ..
+func WithSessionRepository(sr model.SessionRespository) Option {
+	return func(s *Server) {
+		s.sessionRepo = sr
+	}
+}

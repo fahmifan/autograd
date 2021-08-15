@@ -60,6 +60,7 @@ func main() {
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	submissionRepo := repository.NewSubmissionRepo(postgres)
 	assignmentRepo := repository.NewAssignmentRepository(postgres)
+	sessionRepo := repository.NewSessionRepository(postgres)
 
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
@@ -72,6 +73,7 @@ func main() {
 		httpsvc.WithAssignmentUsecase(assignmentUsecase),
 		httpsvc.WithSubmissionUsecase(submissionUsecase),
 		httpsvc.WithObjectStorer(localStorer),
+		httpsvc.WithSessionRepository(sessionRepo),
 	)
 	workers := worker.New(&worker.Config{
 		Broker:            broker,

@@ -22,6 +22,7 @@ type Server struct {
 	assignmentUsecase model.AssignmentUsecase
 	submissionUsecase model.SubmissionUsecase
 	objectStorer      model.ObjectStorer
+	sessionRepo       model.SessionRespository
 }
 
 // NewServer ..
@@ -64,8 +65,11 @@ func (s *Server) routes() {
 	s.echo.GET("/docs/swagger/*", echoSwagger.WrapHandler)
 
 	apiV1 := s.echo.Group("/api/v1")
+
+	apiV1.POST("/auth/login", s.handleLogin)
+	apiV1.POST("/auth/refresh", s.handleRefreshToken)
+
 	apiV1.POST("/users", s.handleCreateUser)
-	apiV1.POST("/users/login", s.handleLogin)
 
 	apiV1.POST("/assignments", s.handleCreateAssignment, s.authorizedAny(model.CreateAssignment))
 	apiV1.GET("/assignments", s.handleGetAllAssignments, s.authorizedAny(model.ViewAnyAssignments))

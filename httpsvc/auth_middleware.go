@@ -27,7 +27,6 @@ func (s *Server) authorizedAny(perms ...model.Permission) func(next echo.Handler
 
 			user, ok := auth(token)
 			if !ok {
-				log.Error(ErrUnauthorized)
 				return responseError(c, ErrUnauthorized)
 			}
 

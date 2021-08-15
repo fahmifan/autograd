@@ -17,6 +17,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/echo-swagger v1.1.2
 	github.com/swaggo/swag v1.7.0
+	github.com/volatiletech/authboss/v3 v3.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	gorm.io/driver/postgres v1.0.5
 	gorm.io/gorm v1.20.5
