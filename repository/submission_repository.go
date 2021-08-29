@@ -17,6 +17,7 @@ type SubmissionRepository interface {
 	Create(ctx context.Context, submission *model.Submission) error
 	DeleteByID(ctx context.Context, id string) error
 	FindAllByAssignmentID(ctx context.Context, cursor model.Cursor, assignmentID string) ([]*model.Submission, int64, error)
+	FindByAssignmentIDAndSubmitterID(ctx context.Context, assignmentID, submitterID string) ([]*model.Submission, error)
 	FindByIDAndSubmitter(ctx context.Context, id, submitterID string) (*model.Submission, error)
 	FindByID(ctx context.Context, id string) (*model.Submission, error)
 	Update(ctx context.Context, submission *model.Submission) error
@@ -146,4 +147,20 @@ func (s *submissionRepo) FindByIDAndSubmitter(ctx context.Context, id, userID st
 		return nil, err
 	}
 	return subm, nil
+}
+
+// FindByAssignmentIDAndSubmitterID ..
+func (s *submissionRepo) FindByAssignmentIDAndSubmitterID(ctx context.Context, assignmentID, submitterID string) ([]*model.Submission, error) {
+	subm := &model.Submission{}
+	err := s.db.Where("assignment_id = ? AND submitted_by = ?", assignmentID, submitterID).
+		Take(&subm).
+		Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	return []*model.Submission{subm}, nil
 }

@@ -3,6 +3,7 @@ package httpsvc
 import (
 	"net/http"
 
+	"github.com/fahmifan/autograd/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -50,20 +51,9 @@ func (s *Server) handleGetAssignment(c echo.Context) error {
 }
 
 func (s *Server) handleGetAllAssignments(c echo.Context) error {
+	user := getUserFromCtx(c)
 	cursor := getCursorFromContext(c)
-	assignments, count, err := s.assignmentUsecase.FindAll(c.Request().Context(), cursor)
-	if err != nil {
-		logrus.Error(err)
-		return responseError(c, err)
-	}
 
-	assignmentResponses := newAssignmentResponses(assignments)
-
-	return c.JSON(http.StatusOK, newCursorRes(cursor, assignmentResponses, count))
-}
-
-func (s *Server) handleGetMyAssignments(c echo.Context) error {
-	cursor := getCursorFromContext(c)
 	assignments, count, err := s.assignmentUsecase.FindAll(c.Request().Context(), cursor)
 	if err != nil {
 		logrus.Error(err)
@@ -71,10 +61,12 @@ func (s *Server) handleGetMyAssignments(c echo.Context) error {
 	}
 
 	res := newAssignmentResponses(assignments)
-	for i := range res {
-		// redacted
-		res[i].CaseInputFileURL = ""
-		res[i].CaseOutputFileURL = ""
+	if !user.Role.GrantedAny(model.ViewAnyAssignments) {
+		for i := range res {
+			// redacted
+			res[i].CaseInputFileURL = ""
+			res[i].CaseOutputFileURL = ""
+		}
 	}
 
 	return c.JSON(http.StatusOK, newCursorRes(cursor, res, count))
@@ -83,7 +75,16 @@ func (s *Server) handleGetMyAssignments(c echo.Context) error {
 func (s *Server) handleGetAssignmentSubmissions(c echo.Context) error {
 	id := c.Param("id")
 	cursor := getCursorFromContext(c)
-	submissions, count, err := s.assignmentUsecase.FindSubmissionsByID(c.Request().Context(), cursor, id)
+	user := getUserFromCtx(c)
+	var submissions []*model.Submission
+	var count int64
+	var err error
+	if user.Role.GrantedAny(model.ViewAnyAssignments) {
+		submissions, count, err = s.assignmentUsecase.FindSubmissionsByID(c.Request().Context(), cursor, id)
+	} else {
+		submissions, err = s.submissionUsecase.FindByAssignmentIDAndSubmitterID(c.Request().Context(), id, user.ID)
+		count = int64(len(submissions))
+	}
 	if err != nil {
 		logrus.Error(err)
 		return responseError(c, err)

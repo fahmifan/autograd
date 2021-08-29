@@ -28,4 +28,5 @@ type SubmissionUsecase interface {
 	Update(ctx context.Context, submission *Submission) error
 	FindAllByAssignmentID(ctx context.Context, cursor Cursor, assignmentID string) (submissions []*Submission, count int64, err error)
 	UpdateGradeByID(ctx context.Context, id string, grade int64) error
+	FindByAssignmentIDAndSubmitterID(ctx context.Context, assignmentID, submitterID string) ([]*Submission, error)
 }

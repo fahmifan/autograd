@@ -72,10 +72,9 @@ func (s *Server) routes() {
 	apiV1.POST("/users", s.handleCreateUser)
 
 	apiV1.POST("/assignments", s.handleCreateAssignment, s.authorizedAny(model.CreateAssignment))
-	apiV1.GET("/assignments", s.handleGetAllAssignments, s.authorizedAny(model.ViewAnyAssignments))
-	apiV1.GET("/assignments/me", s.handleGetMyAssignments, s.authorizedAny(model.ViewAssignment))
+	apiV1.GET("/assignments", s.handleGetAllAssignments, s.authorizedAny(model.ViewAnyAssignments, model.ViewAssignment))
 	apiV1.GET("/assignments/:id", s.handleGetAssignment, s.authorizedAny(model.ViewAssignment, model.ViewAnyAssignments))
-	apiV1.GET("/assignments/:id/submissions", s.handleGetAssignmentSubmissions, s.authorizedAny(model.ViewAnySubmissions))
+	apiV1.GET("/assignments/:id/submissions", s.handleGetAssignmentSubmissions, s.authorizedAny(model.ViewAnySubmissions, model.ViewSubmission))
 	apiV1.PUT("/assignments/:id", s.handleUpdateAssignment, s.authorizedAny(model.UpdateAssignment))
 	apiV1.DELETE("/assignments/:id", s.handleDeleteAssignment, s.authorizedAny(model.DeleteAssignment))
 

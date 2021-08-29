@@ -174,3 +174,16 @@ func (s *SubmissionUsecase) FindByIDAndSubmitter(ctx context.Context, id, submit
 	}
 	return sbm, nil
 }
+
+// FindByAssignmentIDAndSubmitterID ..
+func (s *SubmissionUsecase) FindByAssignmentIDAndSubmitterID(ctx context.Context, assignmentID, submitterID string) ([]*model.Submission, error) {
+	sbm, err := s.submissionRepo.FindByAssignmentIDAndSubmitterID(ctx, assignmentID, submitterID)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+	if sbm == nil {
+		return nil, ErrNotFound
+	}
+	return sbm, nil
+}
