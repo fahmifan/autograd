@@ -13,7 +13,6 @@ import (
 	"github.com/fahmifan/autograd/httpsvc"
 	"github.com/fahmifan/autograd/repository"
 	"github.com/fahmifan/autograd/usecase"
-	"github.com/fahmifan/autograd/web"
 	"github.com/fahmifan/autograd/worker"
 	"github.com/sirupsen/logrus"
 )
@@ -83,13 +82,6 @@ func main() {
 	})
 	workerManager := gocrafts.NewWorkerManager(workerNamespace, config.WorkerConcurrency(), redisPool, workers)
 
-	debugMode := config.Env() == config.EnvDevelopment
-	webServer := web.NewServer(&web.Config{
-		Port:       config.WebPort(),
-		Debug:      debugMode,
-		APIBaseURL: config.APIBaseURL(),
-	})
-
 	go func() {
 		logrus.Info("run worker")
 		workerManager.Start()
@@ -98,11 +90,6 @@ func main() {
 	go func() {
 		logrus.Info("run api server")
 		apiServer.Run()
-	}()
-
-	go func() {
-		logrus.Info("run web server")
-		webServer.Run()
 	}()
 
 	// gracefull shutdown
@@ -115,9 +102,6 @@ func main() {
 
 	logrus.Info("stopping api server")
 	apiServer.Stop(ctx)
-
-	logrus.Info("stopping web server")
-	webServer.Stop(ctx)
 
 	// if worker unable to stop after 1 minute, kill it
 	logrus.Info("stopping worker")
