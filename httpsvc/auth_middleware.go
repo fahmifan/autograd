@@ -31,11 +31,12 @@ func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.Handler
 				return responseError(c, ErrUnauthorized)
 			}
 
-			setUserToCtx(c, user)
 			if user == nil {
 				log.Warn("user nil")
 				return responseError(c, ErrUnauthorized)
 			}
+
+			setUserToCtx(c, user)
 
 			for _, p := range perms {
 				if user.Role.Granted(p) {
