@@ -3,8 +3,12 @@ package httpsvc
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
+	"github.com/fahmifan/autograd/pkg/service"
+	"gorm.io/gorm"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -13,6 +17,7 @@ import (
 // Server ..
 type Server struct {
 	echo              *echo.Echo
+	gormDB            *gorm.DB
 	port              string
 	staticMediaPath   string
 	userUsecase       model.UserUsecase
@@ -73,6 +78,24 @@ func (s *Server) routes() {
 	apiV1.DELETE("/submissions/:id", s.handleDeleteSubmission, s.authorizedOne(model.DeleteSubmission))
 
 	apiV1.POST("/media/upload", s.handleUploadMedia, s.authorizedOne(model.CreateMedia))
+
+	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
+		service.NewService(s.gormDB),
+	)
+	s.echo.Group("/grpc").Any(
+		grpHandlerName+"*",
+		echo.WrapHandler(grpcHandler),
+		trimPathGroup("/grpc"),
+	)
+}
+
+func trimPathGroup(groupPrefix string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Request().URL.Path = strings.TrimPrefix(c.Request().URL.Path, groupPrefix)
+			return next(c)
+		}
+	}
 }
 
 func (s *Server) handlePing(c echo.Context) error {

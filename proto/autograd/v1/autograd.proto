@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package shopper.v1;
+
+option go_package = "github.com/fahmifan/autograd/pkg/pb/autograd/v1;autogradv1";
+
+message Empty {}
+
+message CreateUserRequest {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+    string role = 4;
+}
+
+message CreatedResponse {
+    string id = 1;
+    string message = 2;
+}
+
+message PingResponse {
+    string message = 1;
+}
+
+service AutogradService {
+    rpc Ping(Empty) returns (PingResponse) {}
+    rpc CreateUser(CreateUserRequest) returns (CreatedResponse) {}
+}

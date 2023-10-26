@@ -2,6 +2,7 @@ package httpsvc
 
 import (
 	"github.com/fahmifan/autograd/model"
+	"gorm.io/gorm"
 )
 
 // Option ..
@@ -11,6 +12,12 @@ type Option func(*Server)
 func WithUserUsecase(u model.UserUsecase) Option {
 	return func(s *Server) {
 		s.userUsecase = u
+	}
+}
+
+func WithGormDB(db *gorm.DB) Option {
+	return func(s *Server) {
+		s.gormDB = db
 	}
 }
 

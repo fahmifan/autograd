@@ -9,7 +9,7 @@ import (
 
 // Base ..
 type Base struct {
-	ID        string `sql:"type:uuid;primary_key;default:uuid_generate_v4()"`
+	ID        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `sql:"index" json:"deleted_at"`

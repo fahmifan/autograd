@@ -42,14 +42,14 @@ func init() {
 
 func main() {
 	redisPool := config.NewRedisPool(config.RedisWorkerHost())
-	postgres := db.MustPostgres()
+	sqlite := db.MustSQLite()
 	broker := worker.NewBroker(redisPool)
 	localStorage := fs.NewLocalStorage()
 
-	userRepo := repository.NewUserRepository(postgres)
+	userRepo := repository.NewUserRepository(sqlite)
 	userUsecase := usecase.NewUserUsecase(userRepo)
-	submissionRepo := repository.NewSubmissionRepo(postgres)
-	assignmentRepo := repository.NewAssignmentRepository(postgres)
+	submissionRepo := repository.NewSubmissionRepo(sqlite)
+	assignmentRepo := repository.NewAssignmentRepository(sqlite)
 
 	assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
 	submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
@@ -63,6 +63,7 @@ func main() {
 		httpsvc.WithAssignmentUsecase(assignmentUsecase),
 		httpsvc.WithSubmissionUsecase(submissionUsecase),
 		httpsvc.WithMediaUsecase(mediaUsecase),
+		httpsvc.WithGormDB(sqlite),
 	)
 
 	wrk := worker.NewWorker(redisPool, worker.WithGrader(graderUsecase))

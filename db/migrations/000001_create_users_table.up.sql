@@ -1,12 +1,12 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS "users" (
-    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE "users" (
+    "id" TEXT PRIMARY KEY NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" SMALLINT NOT NULL,
-    "created_at" TIMESTAMPTZ NOT NULL,
-    "updated_at" TIMESTAMPTZ NOT NULL,
-    "deleted_at" TIMESTAMPTZ
+    "role" INT NOT NULL,
+    "created_at" DATETIMET NOT NULL,
+    "updated_at" DATETIMET NOT NULL,
+    "deleted_at" DATETIMET
 );
