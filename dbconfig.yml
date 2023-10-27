@@ -1,0 +1,4 @@
+development:
+  dialect: sqlite3
+  datasource: autograd.db
+  dir: db/migrations

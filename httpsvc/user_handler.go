@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -12,10 +13,10 @@ import (
 const userInfoCtx = "userInfoCtx"
 
 type userRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	Password string    `json:"password"`
+	Role     auth.Role `json:"role"`
 }
 
 func (u *userRequest) toModel() *model.User {
@@ -23,7 +24,7 @@ func (u *userRequest) toModel() *model.User {
 		Email:    u.Email,
 		Password: u.Password,
 		Name:     u.Name,
-		Role:     model.ParseRole(u.Role),
+		Role:     u.Role,
 	}
 }
 

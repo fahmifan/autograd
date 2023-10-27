@@ -80,3 +80,13 @@ func (r Role) Granted(perm Permission) bool {
 
 	return role[perm]
 }
+
+func (r Role) Can(perms ...Permission) bool {
+	for _, perm := range perms {
+		if !r.Granted(perm) {
+			return false
+		}
+	}
+
+	return true
+}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/utils"
 	"github.com/labstack/echo/v4"
 
@@ -25,18 +26,6 @@ type Claims struct {
 	Name  string `json:"name"`
 	Role  string `json:"role"`
 	jwt.StandardClaims
-}
-
-// GetRoleModel ..
-func (c Claims) GetRoleModel() model.Role {
-	switch c.Role {
-	case "ADMIN":
-		return model.RoleAdmin
-	case "STUDENT":
-		return model.RoleStudent
-	default:
-		return model.Role(-1)
-	}
 }
 
 func createTokenExpiry() int64 {
@@ -85,7 +74,7 @@ func parseJWTToken(token string) (Claims, error) {
 	return *claims, nil
 }
 
-func auth(token string) (*model.User, bool) {
+func parseToken(token string) (*model.User, bool) {
 	claims, err := parseJWTToken(token)
 	if err != nil {
 		return nil, false
@@ -94,7 +83,7 @@ func auth(token string) (*model.User, bool) {
 	user := &model.User{
 		Base:  model.Base{ID: claims.ID},
 		Email: claims.Email,
-		Role:  claims.GetRoleModel(),
+		Role:  auth.Role(claims.Role),
 	}
 
 	return user, true

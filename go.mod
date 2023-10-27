@@ -21,6 +21,7 @@ require (
 	github.com/sony/sonyflake v1.0.0
 	golang.org/x/crypto v0.14.0
 	google.golang.org/protobuf v1.31.0
+	gopkg.in/guregu/null.v4 v4.0.0
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.2-0.20230530020048-26663ab9bf55
 )

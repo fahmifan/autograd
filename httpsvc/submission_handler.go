@@ -3,7 +3,7 @@ package httpsvc
 import (
 	"net/http"
 
-	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -46,7 +46,7 @@ func (s *Server) handleGetSubmission(c echo.Context) error {
 	}
 
 	user := getUserFromCtx(c)
-	if user.Role == model.RoleStudent && !submission.IsOwnedBy(*user) {
+	if user.Role == auth.RoleStudent && !submission.IsOwnedBy(*user) {
 		return responseError(c, ErrUnauthorized)
 	}
 

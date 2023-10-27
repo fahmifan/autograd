@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+
+	"github.com/fahmifan/autograd/pkg/core/auth"
 )
 
 // User ..
@@ -10,7 +12,7 @@ type User struct {
 	Name     string
 	Email    string
 	Password string
-	Role     Role
+	Role     auth.Role
 }
 
 // UserUsecase ..

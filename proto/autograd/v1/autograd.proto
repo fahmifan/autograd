@@ -6,13 +6,6 @@ option go_package = "github.com/fahmifan/autograd/pkg/pb/autograd/v1;autogradv1"
 
 message Empty {}
 
-message CreateUserRequest {
-    string name = 1;
-    string email = 2;
-    string password = 3;
-    string role = 4;
-}
-
 message CreatedResponse {
     string id = 1;
     string message = 2;
@@ -22,7 +15,72 @@ message PingResponse {
     string message = 1;
 }
 
+message CreateUserRequest {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+    string role = 4;
+}
+
+message Metadata {
+    string created_at = 1;
+    string updated_at = 2;
+}
+
+message Assignment {
+    enum AssignmentType {
+        UNKNOWN = 0;
+        INPUT = 1;
+        OUTPUT = 2;
+    }
+
+    message AssignmentFile {
+        string id = 1;
+        string description = 2;
+        string url = 3;
+        Metadata metadata = 5;
+    }
+
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    AssignmentFile case_input_file = 4;
+    AssignmentFile case_output_file = 5;
+    Metadata metadata = 6;
+}
+
+message UpdateAssignmentRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string case_input_file_id = 4;
+    string case_output_file_id = 5;
+}
+
+message CreateAssignmentRequest {
+    string name = 1;
+    string description = 2;
+    string case_input_file_id = 3;
+    string case_output_file_id = 4;
+}
+
+message FindByIDRequest {
+    string id = 1;
+}
+
+message DeleteByIDRequest {
+    string id = 1;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
     rpc CreateUser(CreateUserRequest) returns (CreatedResponse) {}
+    
+    // Assignment
+    // Assignment Queries
+    rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
+    // Assignment Mutations
+    rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
+    rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}
+    rpc DeleteAssignment(DeleteByIDRequest) returns (Empty) {}
 }

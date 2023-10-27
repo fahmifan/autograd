@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/pkg/core/auth"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,27 +17,42 @@ var ErrUnauthorized = errors.New("unauthorized")
 // ErrMissingAuthorization error
 var ErrMissingAuthorization = errors.New("missing Authorization header")
 
-func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (server *Server) addUserToCtx(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token, err := parseTokenFromHeader(&c.Request().Header)
+		if err != nil {
+			log.Error(err)
+			return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
+		}
+
+		user, ok := parseToken(token)
+		if !ok || user == nil {
+			return next(c)
+		}
+
+		setUserToCtx(c, user)
+		userID, err := uuid.Parse(user.ID)
+
+		ctx := c.Request().Context()
+		authUser := auth.AuthUser{
+			UserID: userID,
+			Role:   auth.Role(string(user.Role)),
+		}
+		reqCtx := auth.CtxWithUser(ctx, authUser)
+		c.SetRequest(c.Request().WithContext(reqCtx))
+
+		return next(c)
+	}
+}
+
+func (s *Server) authz(perms ...auth.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			token, err := parseTokenFromHeader(&c.Request().Header)
-			if err != nil {
-				log.Error(err)
-				return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
-			}
-
-			user, ok := auth(token)
-			if !ok {
+			user := getUserFromCtx(c)
+			if user == nil {
 				log.Error(ErrUnauthorized)
 				return responseError(c, ErrUnauthorized)
 			}
-
-			if user == nil {
-				log.Warn("user nil")
-				return responseError(c, ErrUnauthorized)
-			}
-
-			setUserToCtx(c, user)
 
 			for _, p := range perms {
 				if user.Role.Granted(p) {
@@ -49,24 +65,26 @@ func (s *Server) authorizedOne(perms ...model.Permission) func(next echo.Handler
 	}
 }
 
+const authzHeader = "Authorization"
+
 func parseTokenFromHeader(header *http.Header) (string, error) {
 	var token string
 
-	authHeaders := strings.Split(header.Get("Authorization"), " ")
+	authHeaders := strings.Split(header.Get(authzHeader), " ")
 	if len(authHeaders) != 2 {
 		return "", ErrTokenInvalid
 	}
 
 	if authHeaders[0] != "Bearer" {
 		err := ErrMissingAuthorization
-		log.WithField("Authorization", header.Get("Authorization")).Error(err)
+		log.WithField(authzHeader, header.Get(authzHeader)).Error(err)
 		return token, err
 	}
 
 	token = strings.Trim(authHeaders[1], " ")
 	if token == "" {
 		err := ErrMissingAuthorization
-		log.WithField("Authorization", header.Get("Authorization")).Error(err)
+		log.WithField(authzHeader, header.Get(authzHeader)).Error(err)
 		return token, err
 	}
 

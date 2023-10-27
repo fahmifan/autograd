@@ -38,12 +38,31 @@ const (
 	// AutogradServiceCreateUserProcedure is the fully-qualified name of the AutogradService's
 	// CreateUser RPC.
 	AutogradServiceCreateUserProcedure = "/shopper.v1.AutogradService/CreateUser"
+	// AutogradServiceFindAssignmentProcedure is the fully-qualified name of the AutogradService's
+	// FindAssignment RPC.
+	AutogradServiceFindAssignmentProcedure = "/shopper.v1.AutogradService/FindAssignment"
+	// AutogradServiceCreateAssignmentProcedure is the fully-qualified name of the AutogradService's
+	// CreateAssignment RPC.
+	AutogradServiceCreateAssignmentProcedure = "/shopper.v1.AutogradService/CreateAssignment"
+	// AutogradServiceUpdateAssignmentProcedure is the fully-qualified name of the AutogradService's
+	// UpdateAssignment RPC.
+	AutogradServiceUpdateAssignmentProcedure = "/shopper.v1.AutogradService/UpdateAssignment"
+	// AutogradServiceDeleteAssignmentProcedure is the fully-qualified name of the AutogradService's
+	// DeleteAssignment RPC.
+	AutogradServiceDeleteAssignmentProcedure = "/shopper.v1.AutogradService/DeleteAssignment"
 )
 
 // AutogradServiceClient is a client for the shopper.v1.AutogradService service.
 type AutogradServiceClient interface {
 	Ping(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.PingResponse], error)
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreatedResponse], error)
+	// Assignment
+	// Assignment Queries
+	FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error)
+	// Assignment Mutations
+	CreateAssignment(context.Context, *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error)
+	UpdateAssignment(context.Context, *connect.Request[v1.UpdateAssignmentRequest]) (*connect.Response[v1.Empty], error)
+	DeleteAssignment(context.Context, *connect.Request[v1.DeleteByIDRequest]) (*connect.Response[v1.Empty], error)
 }
 
 // NewAutogradServiceClient constructs a client for the shopper.v1.AutogradService service. By
@@ -66,13 +85,37 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			baseURL+AutogradServiceCreateUserProcedure,
 			opts...,
 		),
+		findAssignment: connect.NewClient[v1.FindByIDRequest, v1.Assignment](
+			httpClient,
+			baseURL+AutogradServiceFindAssignmentProcedure,
+			opts...,
+		),
+		createAssignment: connect.NewClient[v1.CreateAssignmentRequest, v1.CreatedResponse](
+			httpClient,
+			baseURL+AutogradServiceCreateAssignmentProcedure,
+			opts...,
+		),
+		updateAssignment: connect.NewClient[v1.UpdateAssignmentRequest, v1.Empty](
+			httpClient,
+			baseURL+AutogradServiceUpdateAssignmentProcedure,
+			opts...,
+		),
+		deleteAssignment: connect.NewClient[v1.DeleteByIDRequest, v1.Empty](
+			httpClient,
+			baseURL+AutogradServiceDeleteAssignmentProcedure,
+			opts...,
+		),
 	}
 }
 
 // autogradServiceClient implements AutogradServiceClient.
 type autogradServiceClient struct {
-	ping       *connect.Client[v1.Empty, v1.PingResponse]
-	createUser *connect.Client[v1.CreateUserRequest, v1.CreatedResponse]
+	ping             *connect.Client[v1.Empty, v1.PingResponse]
+	createUser       *connect.Client[v1.CreateUserRequest, v1.CreatedResponse]
+	findAssignment   *connect.Client[v1.FindByIDRequest, v1.Assignment]
+	createAssignment *connect.Client[v1.CreateAssignmentRequest, v1.CreatedResponse]
+	updateAssignment *connect.Client[v1.UpdateAssignmentRequest, v1.Empty]
+	deleteAssignment *connect.Client[v1.DeleteByIDRequest, v1.Empty]
 }
 
 // Ping calls shopper.v1.AutogradService.Ping.
@@ -85,10 +128,37 @@ func (c *autogradServiceClient) CreateUser(ctx context.Context, req *connect.Req
 	return c.createUser.CallUnary(ctx, req)
 }
 
+// FindAssignment calls shopper.v1.AutogradService.FindAssignment.
+func (c *autogradServiceClient) FindAssignment(ctx context.Context, req *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error) {
+	return c.findAssignment.CallUnary(ctx, req)
+}
+
+// CreateAssignment calls shopper.v1.AutogradService.CreateAssignment.
+func (c *autogradServiceClient) CreateAssignment(ctx context.Context, req *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error) {
+	return c.createAssignment.CallUnary(ctx, req)
+}
+
+// UpdateAssignment calls shopper.v1.AutogradService.UpdateAssignment.
+func (c *autogradServiceClient) UpdateAssignment(ctx context.Context, req *connect.Request[v1.UpdateAssignmentRequest]) (*connect.Response[v1.Empty], error) {
+	return c.updateAssignment.CallUnary(ctx, req)
+}
+
+// DeleteAssignment calls shopper.v1.AutogradService.DeleteAssignment.
+func (c *autogradServiceClient) DeleteAssignment(ctx context.Context, req *connect.Request[v1.DeleteByIDRequest]) (*connect.Response[v1.Empty], error) {
+	return c.deleteAssignment.CallUnary(ctx, req)
+}
+
 // AutogradServiceHandler is an implementation of the shopper.v1.AutogradService service.
 type AutogradServiceHandler interface {
 	Ping(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.PingResponse], error)
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreatedResponse], error)
+	// Assignment
+	// Assignment Queries
+	FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error)
+	// Assignment Mutations
+	CreateAssignment(context.Context, *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error)
+	UpdateAssignment(context.Context, *connect.Request[v1.UpdateAssignmentRequest]) (*connect.Response[v1.Empty], error)
+	DeleteAssignment(context.Context, *connect.Request[v1.DeleteByIDRequest]) (*connect.Response[v1.Empty], error)
 }
 
 // NewAutogradServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -107,12 +177,40 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 		svc.CreateUser,
 		opts...,
 	)
+	autogradServiceFindAssignmentHandler := connect.NewUnaryHandler(
+		AutogradServiceFindAssignmentProcedure,
+		svc.FindAssignment,
+		opts...,
+	)
+	autogradServiceCreateAssignmentHandler := connect.NewUnaryHandler(
+		AutogradServiceCreateAssignmentProcedure,
+		svc.CreateAssignment,
+		opts...,
+	)
+	autogradServiceUpdateAssignmentHandler := connect.NewUnaryHandler(
+		AutogradServiceUpdateAssignmentProcedure,
+		svc.UpdateAssignment,
+		opts...,
+	)
+	autogradServiceDeleteAssignmentHandler := connect.NewUnaryHandler(
+		AutogradServiceDeleteAssignmentProcedure,
+		svc.DeleteAssignment,
+		opts...,
+	)
 	return "/shopper.v1.AutogradService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AutogradServicePingProcedure:
 			autogradServicePingHandler.ServeHTTP(w, r)
 		case AutogradServiceCreateUserProcedure:
 			autogradServiceCreateUserHandler.ServeHTTP(w, r)
+		case AutogradServiceFindAssignmentProcedure:
+			autogradServiceFindAssignmentHandler.ServeHTTP(w, r)
+		case AutogradServiceCreateAssignmentProcedure:
+			autogradServiceCreateAssignmentHandler.ServeHTTP(w, r)
+		case AutogradServiceUpdateAssignmentProcedure:
+			autogradServiceUpdateAssignmentHandler.ServeHTTP(w, r)
+		case AutogradServiceDeleteAssignmentProcedure:
+			autogradServiceDeleteAssignmentHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -128,4 +226,20 @@ func (UnimplementedAutogradServiceHandler) Ping(context.Context, *connect.Reques
 
 func (UnimplementedAutogradServiceHandler) CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreatedResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("shopper.v1.AutogradService.CreateUser is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("shopper.v1.AutogradService.FindAssignment is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) CreateAssignment(context.Context, *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("shopper.v1.AutogradService.CreateAssignment is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) UpdateAssignment(context.Context, *connect.Request[v1.UpdateAssignmentRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("shopper.v1.AutogradService.UpdateAssignment is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) DeleteAssignment(context.Context, *connect.Request[v1.DeleteByIDRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("shopper.v1.AutogradService.DeleteAssignment is not implemented"))
 }

@@ -12,5 +12,5 @@ Autograd is a CLI that run a c++ source code from `submission` and test it again
 
 - compatible os: *nix family should do
   - tested on: Mac OS Catalina version 10.15.4
-- you need `golang v1.14` & `g++` installed in your machine
+- you need `golang v1.21` & `g++` installed in your machine
 - to run the code: `make grade`

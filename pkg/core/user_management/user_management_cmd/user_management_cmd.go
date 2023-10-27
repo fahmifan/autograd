@@ -2,6 +2,7 @@ package user_management_cmd
 
 import (
 	"context"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
@@ -20,7 +21,10 @@ func (cmd *UserManagementCmd) CreateUser(
 	ctx context.Context,
 	req *connect.Request[autogradv1.CreateUserRequest],
 ) (*connect.Response[autogradv1.CreatedResponse], error) {
-	newUser, err := user_management.CreateUser(uuid.New(), user_management.CreateUserRequest{
+	now := time.Now()
+	newUser, err := user_management.CreateUser(user_management.CreateUserRequest{
+		NewID: uuid.New(),
+		Now:   now,
 		Name:  req.Msg.Name,
 		Email: req.Msg.Email,
 		Role:  auth.Role(req.Msg.Role),
