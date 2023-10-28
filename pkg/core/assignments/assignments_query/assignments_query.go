@@ -15,6 +15,31 @@ type AssignmentsQuery struct {
 	*core.Ctx
 }
 
+func (query *AssignmentsQuery) FindAllAssignments(
+	ctx context.Context,
+	req *connect.Request[autogradv1.FindAllAssignmentsRequest],
+) (*connect.Response[autogradv1.FindAllAssignmentsResponse], error) {
+	res, err := assignments.AssignmentReader{}.FindAll(ctx, query.GormDB, assignments.FindAllAssignmentsRequest{
+		Page:  req.Msg.GetPage(),
+		Limit: req.Msg.GetLimit(),
+	})
+	if err != nil {
+		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: FindAll")
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return &connect.Response[autogradv1.FindAllAssignmentsResponse]{
+		Msg: &autogradv1.FindAllAssignmentsResponse{
+			Assignments: toAssignmentProtos(res.Assignments),
+			PaginationMetadata: &autogradv1.PaginationMetadata{
+				Total: res.Count,
+				Page:  req.Msg.GetPage(),
+				Limit: req.Msg.GetLimit(),
+			},
+		},
+	}, nil
+}
+
 func (query *AssignmentsQuery) FindAssignment(
 	ctx context.Context,
 	req *connect.Request[autogradv1.FindByIDRequest],
@@ -72,7 +97,7 @@ func toSubmissionProto(submission assignments.Submission) *autogradv1.Submission
 			Id:  submission.SourceFile.ID.String(),
 			Url: submission.SourceFile.URL,
 		},
-		Metadata: submission.ProtoMetadata(),
+		TimestampMetadata: submission.ProtoTimestampMetadata(),
 	}
 }
 
@@ -83,21 +108,29 @@ func toSubmitterProto(submitter assignments.Submitter) *autogradv1.Submitter {
 	}
 }
 
+func toAssignmentProtos(assignments []assignments.Assignment) []*autogradv1.Assignment {
+	var result []*autogradv1.Assignment
+	for _, assignment := range assignments {
+		result = append(result, toAssignmentProto(assignment))
+	}
+	return result
+}
+
 func toAssignmentProto(assignment assignments.Assignment) *autogradv1.Assignment {
 	return &autogradv1.Assignment{
-		Id:          assignment.ID.String(),
-		Name:        assignment.Name,
-		Description: assignment.Description,
-		Metadata:    assignment.ProtoMetadata(),
+		Id:                assignment.ID.String(),
+		Name:              assignment.Name,
+		Description:       assignment.Description,
+		TimestampMetadata: assignment.ProtoTimestampMetadata(),
 		CaseInputFile: &autogradv1.AssignmentFile{
-			Id:       assignment.CaseInputFile.ID.String(),
-			Url:      assignment.CaseInputFile.URL,
-			Metadata: assignment.CaseInputFile.ProtoMetadata(),
+			Id:                assignment.CaseInputFile.ID.String(),
+			Url:               assignment.CaseInputFile.URL,
+			TimestampMetadata: assignment.CaseInputFile.ProtoTimestampMetadata(),
 		},
 		CaseOutputFile: &autogradv1.AssignmentFile{
-			Id:       assignment.CaseOutputFile.ID.String(),
-			Url:      assignment.CaseOutputFile.URL,
-			Metadata: assignment.CaseInputFile.ProtoMetadata(),
+			Id:                assignment.CaseOutputFile.ID.String(),
+			Url:               assignment.CaseOutputFile.URL,
+			TimestampMetadata: assignment.CaseInputFile.ProtoTimestampMetadata(),
 		},
 	}
 }

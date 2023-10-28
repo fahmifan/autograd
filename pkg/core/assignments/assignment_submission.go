@@ -21,7 +21,7 @@ type CaseFile struct {
 	ID   uuid.UUID
 	URL  string
 	Type dbmodel.FileType
-	core.EntityMeta
+	core.TimestampMetadata
 }
 
 type Assignment struct {
@@ -33,7 +33,7 @@ type Assignment struct {
 	CaseOutputFile CaseFile
 	DeadlineAt     time.Time
 
-	core.EntityMeta
+	core.TimestampMetadata
 }
 
 type CreateAssignmentRequest struct {
@@ -60,12 +60,12 @@ func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
 	}
 
 	return Assignment{
-		EntityMeta:     core.NewEntityMeta(req.Now),
-		Name:           req.Name,
-		Description:    req.Description,
-		CaseInputFile:  req.CaseInputFile,
-		CaseOutputFile: req.CaseOutputFile,
-		Assigner:       req.Assigner,
+		TimestampMetadata: core.NewEntityMeta(req.Now),
+		Name:              req.Name,
+		Description:       req.Description,
+		CaseInputFile:     req.CaseInputFile,
+		CaseOutputFile:    req.CaseOutputFile,
+		Assigner:          req.Assigner,
 	}, nil
 }
 
@@ -118,7 +118,7 @@ type Submission struct {
 	SourceFile SubmissionFile
 	Grade      int64
 	Feedback   string
-	core.EntityMeta
+	core.TimestampMetadata
 }
 
 type Submitter struct {
@@ -145,13 +145,13 @@ func CreateSubmission(req CreateSubmissionRequest) (Submission, error) {
 	}
 
 	subm := Submission{
-		ID:         req.NewID,
-		Assignment: req.Assignment,
-		Submitter:  req.Submitter,
-		SourceFile: req.SubmissionFile,
-		Grade:      0,
-		Feedback:   "",
-		EntityMeta: core.NewEntityMeta(req.Now),
+		ID:                req.NewID,
+		Assignment:        req.Assignment,
+		Submitter:         req.Submitter,
+		SourceFile:        req.SubmissionFile,
+		Grade:             0,
+		Feedback:          "",
+		TimestampMetadata: core.NewEntityMeta(req.Now),
 	}
 
 	return subm, nil

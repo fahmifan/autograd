@@ -23,13 +23,13 @@ message DeleteByIDRequest {
     string id = 1;
 }
 
-message CreateUserRequest {
+message CreateManagedUserRequest {
     string name = 1;
     string email = 2;
     string role = 3;
 }
 
-message Metadata {
+message TimestampMetadata {
     string created_at = 1;
     string updated_at = 2;
 }
@@ -44,13 +44,13 @@ message AssignmentFile {
     string id = 1;
     string description = 2;
     string url = 3;
-    Metadata metadata = 5;
+    TimestampMetadata timestamp_metadata = 5;
 }
 
 message SubmissionFile {
     string id = 1;
     string url = 2;
-    Metadata metadata = 3;
+    TimestampMetadata timestamp_metadata = 3;
 }
 
 message Submitter {
@@ -70,7 +70,7 @@ message Assignment {
     Assigner assigner = 4;
     AssignmentFile case_input_file = 5;
     AssignmentFile case_output_file = 6;
-    Metadata metadata = 7;
+    TimestampMetadata timestamp_metadata = 7;
 }
 
 message Submission {
@@ -78,7 +78,7 @@ message Submission {
     Assignment assignment = 2;
     Submitter submitter = 3;
     SubmissionFile submission_file = 4;
-    Metadata metadata = 5;
+    TimestampMetadata timestamp_metadata = 5;
 }
 
 message UpdateAssignmentRequest {
@@ -108,13 +108,60 @@ message UpdateSubmissionRequest {
     string source_file_id = 3;
 }
 
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string token = 1;
+}
+
+message FindAllAssignmentsRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
+
+message PaginationMetadata {
+    int32 page = 1;
+    int32 limit = 2;
+    int32 total = 3;
+}
+
+message FindAllAssignmentsResponse {
+    repeated Assignment assignments = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
+message ManagedUser {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string role = 4;
+    TimestampMetadata timestamp_metadata = 5;
+}
+
+message FindAllManagedUsersRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
+
+message FindAllManagedUsersResponse {
+    repeated ManagedUser managed_users = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
-    rpc CreateUser(CreateUserRequest) returns (CreatedResponse) {}
+
+    // User Management
+    rpc CreateManagedUser(CreateManagedUserRequest) returns (CreatedResponse) {}
+    rpc FindAllManagedUsers(FindAllManagedUsersRequest) returns (FindAllManagedUsersResponse) {}
     
     // Assignment Submission
     // Assignment Queries
     rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
+    rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
     rpc FindSubmission(FindByIDRequest) returns (Submission) {}
     // Assignment Mutations
     rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
@@ -123,4 +170,8 @@ service AutogradService {
     rpc CreateSubmission(CreateSubmissionRequest) returns (CreatedResponse) {}
     rpc UpdateSubmission(UpdateSubmissionRequest) returns (Empty) {}
     rpc DeleteSubmission(DeleteByIDRequest) returns (Empty) {}
+
+    // Auth
+    // Auth Queries
+    rpc Login(LoginRequest) returns (LoginResponse) {}
 }

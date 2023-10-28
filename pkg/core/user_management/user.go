@@ -15,12 +15,12 @@ var (
 	ErrInvalidEmail = errors.New("invalid email")
 )
 
-type User struct {
+type ManagedUser struct {
 	ID    uuid.UUID
 	Name  string
 	Email string
 	Role  auth.Role
-	core.EntityMeta
+	core.TimestampMetadata
 }
 
 type CreateUserRequest struct {
@@ -31,26 +31,26 @@ type CreateUserRequest struct {
 	Role  auth.Role
 }
 
-func CreateUser(req CreateUserRequest) (User, error) {
+func CreateUser(req CreateUserRequest) (ManagedUser, error) {
 	_, err := mail.ParseAddress(req.Email)
 	if err != nil {
-		return User{}, ErrInvalidEmail
+		return ManagedUser{}, ErrInvalidEmail
 	}
 
 	if !auth.ValidRole(req.Role) {
-		return User{}, errors.New("invalid role")
+		return ManagedUser{}, errors.New("invalid role")
 	}
 
 	if len(strings.TrimSpace(req.Name)) < 3 {
-		return User{}, errors.New("name must be at least 3 characters long")
+		return ManagedUser{}, errors.New("name must be at least 3 characters long")
 	}
 
-	return User{
-		ID:         req.NewID,
-		Name:       req.Name,
-		Email:      req.Email,
-		Role:       req.Role,
-		EntityMeta: core.NewEntityMeta(req.Now),
+	return ManagedUser{
+		ID:                req.NewID,
+		Name:              req.Name,
+		Email:             req.Email,
+		Role:              req.Role,
+		TimestampMetadata: core.NewEntityMeta(req.Now),
 	}, nil
 }
 
@@ -61,21 +61,21 @@ type CreateAdminUserRequest struct {
 	Email string
 }
 
-func CreateAdminUser(req CreateAdminUserRequest) (User, error) {
+func CreateAdminUser(req CreateAdminUserRequest) (ManagedUser, error) {
 	_, err := mail.ParseAddress(req.Email)
 	if err != nil {
-		return User{}, ErrInvalidEmail
+		return ManagedUser{}, ErrInvalidEmail
 	}
 
 	if len(strings.TrimSpace(req.Name)) < 3 {
-		return User{}, errors.New("name must be at least 3 characters long")
+		return ManagedUser{}, errors.New("name must be at least 3 characters long")
 	}
 
-	return User{
-		ID:         req.NewID,
-		Name:       req.Name,
-		Email:      req.Email,
-		Role:       auth.RoleAdmin,
-		EntityMeta: core.NewEntityMeta(req.Now),
+	return ManagedUser{
+		ID:                req.NewID,
+		Name:              req.Name,
+		Email:             req.Email,
+		Role:              auth.RoleAdmin,
+		TimestampMetadata: core.NewEntityMeta(req.Now),
 	}, nil
 }

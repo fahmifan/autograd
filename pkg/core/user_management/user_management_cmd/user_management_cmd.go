@@ -17,9 +17,9 @@ type UserManagementCmd struct {
 	*core.Ctx
 }
 
-func (cmd *UserManagementCmd) CreateUser(
+func (cmd *UserManagementCmd) CreateManagedUser(
 	ctx context.Context,
-	req *connect.Request[autogradv1.CreateUserRequest],
+	req *connect.Request[autogradv1.CreateManagedUserRequest],
 ) (*connect.Response[autogradv1.CreatedResponse], error) {
 	now := time.Now()
 	newUser, err := user_management.CreateUser(user_management.CreateUserRequest{
@@ -45,7 +45,7 @@ func (cmd *UserManagementCmd) CreateUser(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	err = user_management.UserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newUser, cipherPassword)
+	err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newUser, cipherPassword)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "UserManagementCmd: CreateUser: SaveUserWithPassword")
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -85,7 +85,7 @@ func (cmd *UserManagementCmd) InternalCreateAdminUser(
 		return uuid.Nil, err
 	}
 
-	err = user_management.UserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newAdmin, cipher)
+	err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newAdmin, cipher)
 	if err != nil {
 		return uuid.Nil, err
 	}

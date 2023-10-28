@@ -71,6 +71,58 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 	return toAssignment(assignment, user, caseInputFile, caseOutputFile), err
 }
 
+type FindAllAssignmentsRequest struct {
+	Page  int32
+	Limit int32
+}
+
+type FindAllAssignmentsResponse struct {
+	Assignments []Assignment
+	Count       int32
+}
+
+func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAssignmentsRequest) (FindAllAssignmentsResponse, error) {
+	assignments := []dbmodel.Assignment{}
+	err := tx.Table("assignments").Find(&assignments).Error
+	if err != nil {
+		return FindAllAssignmentsResponse{}, err
+	}
+
+	userIDs := []uuid.UUID{}
+	for _, assignment := range assignments {
+		userIDs = append(userIDs, assignment.AssignedBy)
+	}
+
+	users := []dbmodel.User{}
+	err = tx.Table("users").Where("id IN (?)", userIDs).Find(&users).Error
+	if err != nil {
+		return FindAllAssignmentsResponse{}, err
+	}
+
+	fileIDs := []uuid.UUID{}
+	for _, assignment := range assignments {
+		fileIDs = append(fileIDs, assignment.CaseInputFileID, assignment.CaseOutputFileID)
+	}
+
+	files := []dbmodel.File{}
+	err = tx.Table("files").Where("id IN (?)", fileIDs).Find(&files).Error
+	if err != nil {
+		return FindAllAssignmentsResponse{}, err
+	}
+
+	assignmentMap := map[uuid.UUID]Assignment{}
+	for _, assignment := range assignments {
+		assignmentMap[assignment.ID] = toAssignment(assignment, users[0], files[0], files[1])
+	}
+
+	result := FindAllAssignmentsResponse{}
+	for _, assignment := range assignments {
+		result.Assignments = append(result.Assignments, assignmentMap[assignment.ID])
+	}
+
+	return result, nil
+}
+
 type AssignerReader struct{}
 
 func (AssignerReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID) (Assigner, error) {
@@ -102,18 +154,18 @@ func toAssignment(
 	outputFile dbmodel.File,
 ) Assignment {
 	return Assignment{
-		ID:             model.ID,
-		Name:           model.Name,
-		Description:    model.Description,
-		Assigner:       toAssigner(user),
-		CaseInputFile:  toCaseFile(inputFile),
-		CaseOutputFile: toCaseFile(outputFile),
-		EntityMeta:     toEntityMeta(model.Base),
+		ID:                model.ID,
+		Name:              model.Name,
+		Description:       model.Description,
+		Assigner:          toAssigner(user),
+		CaseInputFile:     toCaseFile(inputFile),
+		CaseOutputFile:    toCaseFile(outputFile),
+		TimestampMetadata: toEntityMeta(model.Base),
 	}
 }
 
-func toEntityMeta(base dbmodel.Base) core.EntityMeta {
-	return core.EntityMeta{
+func toEntityMeta(base dbmodel.Base) core.TimestampMetadata {
+	return core.TimestampMetadata{
 		CreatedAt: base.CreatedAt.Time,
 		UpdatedAt: base.UpdatedAt.Time,
 	}

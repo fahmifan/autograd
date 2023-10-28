@@ -61,6 +61,7 @@ func (s *Server) Stop(ctx context.Context) {
 
 func (s *Server) routes() {
 	s.echo.Use(
+		middleware.CORS(),
 		s.addUserToCtx,
 		middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 			LogValuesFunc: logs.EchoRequestLogger(true),
@@ -70,6 +71,7 @@ func (s *Server) routes() {
 			LogError:      true,
 			HandleError:   true,
 		}),
+		// FIXME: debug mode
 	)
 
 	s.echo.GET("/ping", s.handlePing)

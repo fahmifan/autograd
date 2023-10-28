@@ -9,6 +9,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_query"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
+	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_query"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
 	"gorm.io/gorm"
@@ -16,6 +17,7 @@ import (
 
 type Service struct {
 	*auth_cmd.AuthCmd
+	*user_management_query.UserManagementQuery
 	*user_management_cmd.UserManagementCmd
 	*assignments_cmd.AssignmentCmd
 	*assignments_query.AssignmentsQuery
@@ -29,10 +31,11 @@ func NewService(gormDB *gorm.DB, jwtKey string) *Service {
 		JWTKey: jwtKey,
 	}
 	return &Service{
-		AuthCmd:           &auth_cmd.AuthCmd{Ctx: coreCtx},
-		UserManagementCmd: &user_management_cmd.UserManagementCmd{Ctx: coreCtx},
-		AssignmentCmd:     &assignments_cmd.AssignmentCmd{Ctx: coreCtx},
-		AssignmentsQuery:  &assignments_query.AssignmentsQuery{Ctx: coreCtx},
+		AuthCmd:             &auth_cmd.AuthCmd{Ctx: coreCtx},
+		UserManagementCmd:   &user_management_cmd.UserManagementCmd{Ctx: coreCtx},
+		UserManagementQuery: &user_management_query.UserManagementQuery{Ctx: coreCtx},
+		AssignmentCmd:       &assignments_cmd.AssignmentCmd{Ctx: coreCtx},
+		AssignmentsQuery:    &assignments_query.AssignmentsQuery{Ctx: coreCtx},
 	}
 }
 

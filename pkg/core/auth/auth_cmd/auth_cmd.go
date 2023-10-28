@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
+	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 )
 
 type AuthCmd struct {
@@ -18,11 +20,11 @@ type InternalLoginRequest struct {
 	Password string `json:"password"`
 }
 
-func (c *AuthCmd) InternalLogin(
+func (cmd *AuthCmd) InternalLogin(
 	ctx context.Context,
 	req InternalLoginRequest,
 ) (auth.AuthUser, auth.JWTToken, error) {
-	authUser, cipherPassword, err := auth.AuthReader{}.FindUserByEmail(ctx, c.GormDB, req.Email)
+	authUser, cipherPassword, err := auth.AuthReader{}.FindUserByEmail(ctx, cmd.GormDB, req.Email)
 	if err != nil {
 		return auth.AuthUser{}, "", fmt.Errorf("InternalLogin: FindUserByEmail: %w", err)
 	}
@@ -31,10 +33,27 @@ func (c *AuthCmd) InternalLogin(
 		return auth.AuthUser{}, "", errors.New("invalid password")
 	}
 
-	token, err := auth.GenerateJWTToken(c.JWTKey, authUser, auth.CreateTokenExpiry())
+	token, err := auth.GenerateJWTToken(cmd.JWTKey, authUser, auth.CreateTokenExpiry())
 	if err != nil {
 		return auth.AuthUser{}, "", fmt.Errorf("InternalLogin: GenerateJWTToken: %w", err)
 	}
 
 	return authUser, token, nil
+}
+
+func (cmd *AuthCmd) Login(ctx context.Context, req *connect.Request[autogradv1.LoginRequest]) (*connect.Response[autogradv1.LoginResponse], error) {
+	_, token, err := cmd.InternalLogin(ctx, InternalLoginRequest{
+		Email:    req.Msg.Email,
+		Password: req.Msg.Password,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &connect.Response[autogradv1.LoginResponse]{
+		Msg: &autogradv1.LoginResponse{
+			Token: string(token),
+		},
+	}, nil
 }

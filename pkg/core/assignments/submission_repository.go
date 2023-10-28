@@ -58,7 +58,7 @@ func (SubmissionWriter) SaveNew(ctx context.Context, tx *gorm.DB, submission *Su
 	model := dbmodel.Submission{
 		Base: dbmodel.Base{
 			ID:       submission.ID,
-			Metadata: core.NewModelMetadata(submission.EntityMeta),
+			Metadata: core.NewModelMetadata(submission.TimestampMetadata),
 		},
 		AssignmentID: submission.Assignment.ID,
 		FileID:       submission.SourceFile.ID,
@@ -73,7 +73,7 @@ func (SubmissionWriter) Save(ctx context.Context, tx *gorm.DB, submission *Submi
 	model := dbmodel.Submission{
 		Base: dbmodel.Base{
 			ID:       submission.ID,
-			Metadata: core.NewModelMetadata(submission.EntityMeta),
+			Metadata: core.NewModelMetadata(submission.TimestampMetadata),
 		},
 		AssignmentID: submission.Assignment.ID,
 		FileID:       submission.SourceFile.ID,

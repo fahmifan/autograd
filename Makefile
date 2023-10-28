@@ -10,3 +10,6 @@ run-server:
 
 db-migrate-up:
 	@go run cmd/migration/migration.go
+
+buf-generate:
+	PATH=$$PATH:./node_modules/.bin buf generate && pnpm buf generate

@@ -21,8 +21,7 @@ func (server *Server) addUserToCtx(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token, err := parseTokenFromHeader(&c.Request().Header)
 		if err != nil {
-			log.Error(err)
-			return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
+			return next(c)
 		}
 
 		authUser, ok := auth.ParseToken(server.jwtKey, token)

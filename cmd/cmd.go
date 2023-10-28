@@ -196,7 +196,7 @@ func runAdminCreateUser() *cobra.Command {
 		Short: "Create a new user",
 	}
 
-	req := &autogradv1.CreateUserRequest{}
+	req := &autogradv1.CreateManagedUserRequest{}
 	cmd.Flags().StringVar(&req.Name, "name", "", "user name")
 	cmd.Flags().StringVar(&req.Email, "email", "", "user email")
 	cmd.Flags().StringVar(&req.Role, "role", "", "user role")
@@ -209,7 +209,7 @@ func runAdminCreateUser() *cobra.Command {
 	client := initServiceClient()
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		res, err := client.CreateUser(cmd.Context(), &connect.Request[autogradv1.CreateUserRequest]{
+		res, err := client.CreateManagedUser(cmd.Context(), &connect.Request[autogradv1.CreateManagedUserRequest]{
 			Msg: req,
 		})
 		if err != nil {
