@@ -1,14 +1,21 @@
+import { MantineProvider } from '@mantine/core';
+import "@mantine/core/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import Login, { loginAction } from "./routes/Login.tsx";
-import UserManagement, { CreateManagedUser, ListManagedUsers, actionCreateManagedUser, loaderUserManagement } from "./routes/UserManagement.tsx";
+import UserManagementLayout, {
+	CreateManagedUser,
+	ListManagedUsers,
+	actionCreateManagedUser,
+	loaderUserManagement,
+} from "./routes/UserManagement.tsx";
 
 const router = createBrowserRouter([
-	{ 
-		path: "/", 
-		element: <App />
+	{
+		path: "/",
+		element: <App />,
 	},
 	{
 		path: "/login",
@@ -17,24 +24,27 @@ const router = createBrowserRouter([
 	},
 	{
 		path: "/user-management",
-		element: <UserManagement />,
+		element: <UserManagementLayout />,
 		children: [
 			{
 				path: "",
+				index: true,
 				element: <ListManagedUsers />,
 				loader: loaderUserManagement,
 			},
-		]
-	},
-	{
-		path: "/user-management/create",
-		element: <CreateManagedUser />,
-		action: actionCreateManagedUser,
+			{
+				path: "create",
+				element: <CreateManagedUser />,
+				action: actionCreateManagedUser,
+			},
+		],
 	},
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<React.StrictMode>
-		<RouterProvider router={router} />
+		<MantineProvider>
+			<RouterProvider router={router} />
+		</MantineProvider>
 	</React.StrictMode>,
 );

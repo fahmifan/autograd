@@ -14,7 +14,7 @@ export function useAutogradClient(): PromiseClient<typeof AutogradService> {
 }
 
 const csrfInterceptor: Interceptor = (next) => async (req) => {
-	const token = localStorage.getItem("token")
+	const token = localStorage.getItem("token");
 	req.header.set("Authorization", `Bearer ${token}`);
 	return await next(req);
 };

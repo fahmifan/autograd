@@ -1,103 +1,131 @@
-import { ActionFunctionArgs, Form, Outlet, redirect, useLoaderData } from "react-router-dom";
+import { Button, Container, Group, Input, Select, Table, Title } from '@mantine/core';
+import {
+	ActionFunctionArgs,
+	Form,
+	Outlet,
+	redirect,
+	useLoaderData,
+} from "react-router-dom";
 import { ManagedUser } from "../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../service";
 
-export function ListManagedUsers() {
-    const { managedUsers } =  useLoaderData() as LoaderResponse;
-
-    if (!managedUsers || managedUsers.length === 0) {
-        return <>
-            <h2>List Users</h2>
-            <p><i>No Users</i></p>
-        </>
-    }
-
-    return <>
-        <h2>List Users</h2>
-        {
-            managedUsers.map((user) => {
-                return (
-                    <div key={user.id}>
-                        <p>{user.name}</p>
-                        <p>{user.email}</p>
-                    </div>
-                )
-            })
-        }
-    </>
+export default function UserManagementLayout() {
+	return (
+		<Container>
+			<Title order={1}>User Management</Title>
+			<Outlet />
+		</Container>
+	);
 }
 
-export default function UserManagement() {
-  return (
-    <div>
-        <h1>User Management</h1>
-        <Form action="create">
-            <button type="submit">Create</button>
-        </Form>
+export function ListManagedUsers() {
+	const { managedUsers } = useLoaderData() as LoaderResponse;
 
-        <Outlet />
-    </div>
-  );
+	if (!managedUsers || managedUsers.length === 0) {
+		return (
+			<>
+				<h2>List Users</h2>
+				<p>
+					<i>No Users</i>
+				</p>
+			</>
+		);
+	}
+
+	return (
+		<>
+			<Form action="create">
+				<Button type="submit">Add User</Button>
+			</Form>
+
+			<h2>List Users</h2>
+			<Table striped highlightOnHover>
+				<Table.Thead>
+					<Table.Tr>
+						<Table.Th>Name</Table.Th>
+						<Table.Th>Email</Table.Th>
+						<Table.Th>Role</Table.Th>
+					</Table.Tr>
+				</Table.Thead>
+
+				<Table.Tbody>
+					{managedUsers.map((user) => {
+						return (
+							<Table.Tr key={user.id}>
+								<Table.Td>{user.name}</Table.Td>
+								<Table.Td>{user.email}</Table.Td>
+								<Table.Td>{user.role}</Table.Td>
+							</Table.Tr>
+						);
+					})}
+				</Table.Tbody>
+			</Table>
+		</>
+	);
 }
 
 type LoaderResponse = {
-    managedUsers: ManagedUser[];
-}
+	managedUsers: ManagedUser[];
+};
 
 export async function loaderUserManagement(): Promise<LoaderResponse> {
-    const res = await AutogradServiceClient.findAllManagedUsers({
-        limit: 10,
-        page: 1,
-    })
+	const res = await AutogradServiceClient.findAllManagedUsers({
+		limit: 10,
+		page: 1,
+	});
 
-    return res
+	return res;
 }
 
 export function CreateManagedUser() {
-    return <>
-        <h1>User Management</h1>
-        <h2>Create User</h2>
-        <section>
-            <Form method="post" id="create-managed-user">
-                <p>
-                    <label htmlFor="name">Name</label>
-                    <input type="text" name="name" id="name" />
-                </p>
-                <p>
-                    <label htmlFor="email">Email</label>
-                    <input type="email" name="email" id="email" />
-                </p>
-                <p>
-                    <label htmlFor="role">Role</label>
-                    <select name="role" id="role" placeholder="Select role">
-                        <option value="admin">Admin</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="student">Student</option>
-                    </select>
-                </p>
+	return (
+		<>
+			<Title order={2}>Create User</Title>
+			<Group>
+				<Form method="post" id="create-managed-user">
+					<p>
+						<label htmlFor="name">Name</label>
+						<Input type="text" name="name" id="name" />
+					</p>
+					<p>
+						<label htmlFor="email">Email</label>
+						<Input type="email" name="email" id="email" />
+					</p>
+					<p>
+						<label htmlFor="role">Role</label>
+						<Select
+							name='role'
+							id='role'
+							placeholder="Choose a role"
+							data={['admin', 'student']}
+						/>
+					</p>
 
-                <button type="submit">Create User</button>
-            </Form>
-        </section>
-    </>
+					<Button type="submit">Create User</Button>
+				</Form>
+			</Group>
+		</>
+	);
 }
 
-export async function actionCreateManagedUser({ request }: ActionFunctionArgs): Promise<Response | null> {
-    const formData = await request.formData()
-    
-    const name = formData.get("name") as string
-    const email = formData.get("email") as string
-    const role = formData.get("role") as string
+export async function actionCreateManagedUser({
+	request,
+}: ActionFunctionArgs): Promise<Response | null> {
+	const formData = await request.formData();
 
-    const res = await AutogradServiceClient.createManagedUser({
-        email,
-        name,
-        role,
-    })
+	const name = formData.get("name") as string;
+	const email = formData.get("email") as string;
+	const role = formData.get("role") as string;
 
-    if (res) {
-        return redirect("/user-management")
-    }
+	const res = await AutogradServiceClient.createManagedUser({
+		email,
+		name,
+		role,
+	});
 
-    return null;
+	if (res) {
+		return redirect("/user-management");
+	}
+
+	return null;
 }
