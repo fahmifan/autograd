@@ -1,68 +1,12 @@
-import { AppShell, Box, Burger, Button, Container, Group, Input, NavLink, Select, Table, Text, Title } from '@mantine/core';
+import { Button, Group, Input, Select, Table, Title } from '@mantine/core';
 import {
 	ActionFunctionArgs,
 	Form,
-	Link,
-	Outlet,
 	redirect,
 	useLoaderData,
-	useLocation,
 } from "react-router-dom";
-import { ManagedUser } from "../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../service";
-
-export default function UserManagementLayout() {
-	const location = useLocation()
-	console.log(location.pathname)
-	
-	const navitems = [
-		{
-			label: 'List Users',
-			to: '/user-management',
-		},
-		{
-			label: 'Create User',
-			to: '/user-management/create',
-		},
-	]
-
-	function navItemActive(path: string): boolean {
-		return location.pathname === path
-	}
-
-	return (
-		<AppShell
-			header={{ height: 60 }}
-			navbar={{ width: 300, breakpoint: 'sm'}}
-			padding="md"
-			>
-			<AppShell.Header>
-				<Text py="sm" px="sm" size="lg">User Management</Text>
-			</AppShell.Header>
-
-			<AppShell.Navbar p="md">
-				{
-					navitems.map((item) => {
-						return (
-							<NavLink
-								key={item.to}
-								label={item.label}
-								component={Link}
-								to={item.to}
-								active={navItemActive(item.to)}
-							/>
-						)
-					})
-				}
-			</AppShell.Navbar>
-
-			<AppShell.Main>
-				<Outlet />
-			</AppShell.Main>
-
-		</AppShell>
-	);
-}
+import { ManagedUser } from "../../pb/autograd/v1/autograd_pb";
+import { AutogradServiceClient } from "../../service";
 
 export function ListManagedUsers() {
 	const { managedUsers } = useLoaderData() as LoaderResponse;

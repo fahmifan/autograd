@@ -5,12 +5,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import Login, { loginAction } from "./routes/Login.tsx";
-import UserManagementLayout, {
-	CreateManagedUser,
-	ListManagedUsers,
-	actionCreateManagedUser,
-	loaderUserManagement,
-} from "./routes/UserManagement.tsx";
+import * as backoffice from "./routes/backoffice";
 
 const router = createBrowserRouter([
 	{
@@ -22,23 +17,7 @@ const router = createBrowserRouter([
 		element: <Login />,
 		action: loginAction,
 	},
-	{
-		path: "/user-management",
-		element: <UserManagementLayout />,
-		children: [
-			{
-				path: "",
-				index: true,
-				element: <ListManagedUsers />,
-				loader: loaderUserManagement,
-			},
-			{
-				path: "create",
-				element: <CreateManagedUser />,
-				action: actionCreateManagedUser,
-			},
-		],
-	},
+	...backoffice.router
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
