@@ -1,20 +1,66 @@
-import { Button, Container, Group, Input, Select, Table, Title } from '@mantine/core';
+import { AppShell, Box, Burger, Button, Container, Group, Input, NavLink, Select, Table, Text, Title } from '@mantine/core';
 import {
 	ActionFunctionArgs,
 	Form,
+	Link,
 	Outlet,
 	redirect,
 	useLoaderData,
+	useLocation,
 } from "react-router-dom";
 import { ManagedUser } from "../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../service";
 
 export default function UserManagementLayout() {
+	const location = useLocation()
+	console.log(location.pathname)
+	
+	const navitems = [
+		{
+			label: 'List Users',
+			to: '/user-management',
+		},
+		{
+			label: 'Create User',
+			to: '/user-management/create',
+		},
+	]
+
+	function navItemActive(path: string): boolean {
+		return location.pathname === path
+	}
+
 	return (
-		<Container>
-			<Title order={1}>User Management</Title>
-			<Outlet />
-		</Container>
+		<AppShell
+			header={{ height: 60 }}
+			navbar={{ width: 300, breakpoint: 'sm'}}
+			padding="md"
+			>
+			<AppShell.Header>
+				<Text py="sm" px="sm" size="lg">User Management</Text>
+			</AppShell.Header>
+
+			<AppShell.Navbar p="md">
+				{
+					navitems.map((item) => {
+						return (
+							<NavLink
+								key={item.to}
+								label={item.label}
+								component={Link}
+								to={item.to}
+								active={navItemActive(item.to)}
+							/>
+						)
+					})
+				}
+			</AppShell.Navbar>
+
+			<AppShell.Main>
+				<Outlet />
+			</AppShell.Main>
+
+		</AppShell>
 	);
 }
 
@@ -34,11 +80,7 @@ export function ListManagedUsers() {
 
 	return (
 		<>
-			<Form action="create">
-				<Button type="submit">Add User</Button>
-			</Form>
-
-			<h2>List Users</h2>
+			<Title order={3}>List Users</Title>
 			<Table striped highlightOnHover>
 				<Table.Thead>
 					<Table.Tr>
@@ -78,9 +120,20 @@ export async function loaderUserManagement(): Promise<LoaderResponse> {
 }
 
 export function CreateManagedUser() {
+	const roleSelection = [
+		{
+			value: 'admin',
+			label: 'Admin',
+		},
+		{
+			value: 'student',
+			label: 'Student',
+		}
+	]
+
 	return (
 		<>
-			<Title order={2}>Create User</Title>
+			<Title order={3}>Create User</Title>
 			<Group>
 				<Form method="post" id="create-managed-user">
 					<p>
@@ -97,7 +150,7 @@ export function CreateManagedUser() {
 							name='role'
 							id='role'
 							placeholder="Choose a role"
-							data={['admin', 'student']}
+							data={roleSelection}
 						/>
 					</p>
 
