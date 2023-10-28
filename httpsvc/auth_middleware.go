@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/fahmifan/autograd/model"
 	"github.com/fahmifan/autograd/pkg/core/auth"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -25,19 +25,21 @@ func (server *Server) addUserToCtx(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid token"})
 		}
 
-		user, ok := parseToken(token)
-		if !ok || user == nil {
+		authUser, ok := auth.ParseToken(server.jwtKey, token)
+		if !ok {
 			return next(c)
 		}
 
-		setUserToCtx(c, user)
-		userID, err := uuid.Parse(user.ID)
+		setUserToCtx(c, &model.User{
+			Base: model.Base{
+				ID: authUser.UserID.String(),
+			},
+			Email: authUser.Email,
+			Role:  authUser.Role,
+			Name:  authUser.Name,
+		})
 
 		ctx := c.Request().Context()
-		authUser := auth.AuthUser{
-			UserID: userID,
-			Role:   auth.Role(string(user.Role)),
-		}
 		reqCtx := auth.CtxWithUser(ctx, authUser)
 		c.SetRequest(c.Request().WithContext(reqCtx))
 
@@ -48,14 +50,13 @@ func (server *Server) addUserToCtx(next echo.HandlerFunc) echo.HandlerFunc {
 func (s *Server) authz(perms ...auth.Permission) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			user := getUserFromCtx(c)
-			if user == nil {
-				log.Error(ErrUnauthorized)
+			authUser, ok := auth.GetUserFromCtx(c.Request().Context())
+			if !ok {
 				return responseError(c, ErrUnauthorized)
 			}
 
 			for _, p := range perms {
-				if user.Role.Granted(p) {
+				if authUser.Role.Granted(p) {
 					return next(c)
 				}
 			}
@@ -67,7 +68,7 @@ func (s *Server) authz(perms ...auth.Permission) func(next echo.HandlerFunc) ech
 
 const authzHeader = "Authorization"
 
-func parseTokenFromHeader(header *http.Header) (string, error) {
+func parseTokenFromHeader(header *http.Header) (auth.JWTToken, error) {
 	var token string
 
 	authHeaders := strings.Split(header.Get(authzHeader), " ")
@@ -78,15 +79,15 @@ func parseTokenFromHeader(header *http.Header) (string, error) {
 	if authHeaders[0] != "Bearer" {
 		err := ErrMissingAuthorization
 		log.WithField(authzHeader, header.Get(authzHeader)).Error(err)
-		return token, err
+		return auth.JWTToken(token), err
 	}
 
 	token = strings.Trim(authHeaders[1], " ")
 	if token == "" {
 		err := ErrMissingAuthorization
 		log.WithField(authzHeader, header.Get(authzHeader)).Error(err)
-		return token, err
+		return auth.JWTToken(token), err
 	}
 
-	return token, nil
+	return auth.JWTToken(token), nil
 }

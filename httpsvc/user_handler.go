@@ -6,6 +6,7 @@ import (
 
 	"github.com/fahmifan/autograd/model"
 	"github.com/fahmifan/autograd/pkg/core/auth"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -78,7 +79,20 @@ func (s *Server) handleLogin(c echo.Context) error {
 		return responseError(c, err)
 	}
 
-	token, err := generateToken(*user, createTokenExpiry())
+	userID, err := uuid.Parse(user.ID)
+	if err != nil {
+		logrus.WithField("uuid", user.ID).Error(err)
+		return responseError(c, err)
+	}
+
+	token, err := auth.GenerateJWTToken(
+		s.jwtKey,
+		auth.AuthUser{
+			UserID: userID,
+			Email:  user.Email,
+			Role:   user.Role,
+			Name:   user.Name,
+		}, auth.CreateTokenExpiry())
 	if err != nil {
 		logrus.WithField("email", userReq.Email).Error(err)
 		return err

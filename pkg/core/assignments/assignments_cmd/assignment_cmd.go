@@ -73,11 +73,6 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 }
 
 func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Request[autogradv1.UpdateAssignmentRequest]) (*connect.Response[autogradv1.Empty], error) {
-	assignmentID, err := uuid.Parse(req.Msg.GetId())
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
-	}
-
 	authUser, ok := auth.GetUserFromCtx(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
@@ -85,6 +80,11 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 
 	if !authUser.Role.Can(auth.UpdateAssignment) {
 		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	assignmentID, err := uuid.Parse(req.Msg.GetId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	now := time.Now()
@@ -152,22 +152,23 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 		return nil, err
 	}
 
-	return core.EmptyResponse, nil
+	return core.ProtoEmptyResponse, nil
 }
 
 func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Request[autogradv1.DeleteByIDRequest]) (*connect.Response[autogradv1.Empty], error) {
-	assignmentID, err := uuid.Parse(req.Msg.GetId())
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
-	}
 
 	authUser, ok := auth.GetUserFromCtx(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
 	}
 
-	if !authUser.Role.Can(auth.CreateAssignment) {
+	if !authUser.Role.Can(auth.DeleteAssignment) {
 		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	assignmentID, err := uuid.Parse(req.Msg.GetId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	assignmentReader := assignments.AssignmentReader{}
@@ -198,5 +199,219 @@ func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Req
 		return nil, err
 	}
 
-	return core.EmptyResponse, nil
+	return core.ProtoEmptyResponse, nil
+}
+
+func (cmd *AssignmentCmd) CreateSubmission(ctx context.Context, req *connect.Request[autogradv1.CreateSubmissionRequest]) (*connect.Response[autogradv1.CreatedResponse], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
+	}
+
+	isCreateForOther := req.Msg.GetSubmitterId() != authUser.UserID.String()
+	isAllowCreateForOther := authUser.Role.Can(auth.CreateSubmissionForOther)
+	if isCreateForOther && !isAllowCreateForOther {
+		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	if !authUser.Role.Can(auth.CreateSubmission) {
+		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	assignmentID, err := uuid.Parse(req.Msg.GetAssignmentId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	submitterID, err := uuid.Parse(req.Msg.GetSubmitterId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	submissionFileID, err := uuid.Parse(req.Msg.GetSourceFileId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	now := time.Now()
+	submission := assignments.Submission{}
+
+	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) (err error) {
+		assignment, err := assignments.AssignmentReader{}.FindByID(ctx, cmd.GormDB, assignmentID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		submitter, err := assignments.SubmitterReader{}.FindByID(ctx, cmd.GormDB, submitterID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmitterReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		submissionFile, err := assignments.SubmissionFileReader{}.FindByID(ctx, cmd.GormDB, submissionFileID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionFileReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		submission, err = assignments.CreateSubmission(assignments.CreateSubmissionRequest{
+			NewID:          uuid.New(),
+			Now:            now,
+			Assignment:     assignment,
+			Submitter:      submitter,
+			SubmissionFile: submissionFile,
+		})
+		if err != nil {
+			return connect.NewError(connect.CodeInvalidArgument, err)
+		}
+
+		err = assignments.SubmissionWriter{}.SaveNew(ctx, cmd.GormDB, &submission)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionWriter{}.Save")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := &connect.Response[autogradv1.CreatedResponse]{
+		Msg: &autogradv1.CreatedResponse{
+			Id:      submission.ID.String(),
+			Message: "submission created",
+		},
+	}
+
+	return res, nil
+}
+
+func (cmd *AssignmentCmd) UpdateSubmission(ctx context.Context, req *connect.Request[autogradv1.UpdateSubmissionRequest]) (*connect.Response[autogradv1.Empty], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
+	}
+
+	isUpdateForOther := req.Msg.GetSubmitterId() != authUser.UserID.String()
+	isAllowCreateForOther := authUser.Role.Can(auth.CreateSubmissionForOther)
+	if isUpdateForOther && !isAllowCreateForOther {
+		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	if !authUser.Role.Can(auth.CreateSubmission) {
+		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	submitterID, err := uuid.Parse(req.Msg.GetSubmitterId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	submissionID, err := uuid.Parse(req.Msg.GetId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	submissionFileID, err := uuid.Parse(req.Msg.GetSourceFileId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	now := time.Now()
+	submission := assignments.Submission{}
+
+	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) (err error) {
+		submission, err = assignments.SubmissionReader{}.FindByID(ctx, cmd.GormDB, submissionID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		submitter, err := assignments.SubmitterReader{}.FindByID(ctx, cmd.GormDB, submitterID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmitterReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		submissionFile, err := assignments.SubmissionFileReader{}.FindByID(ctx, cmd.GormDB, submissionFileID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionFileReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		submission, err = submission.Update(assignments.UpdateSubmissionRequest{
+			Now:            now,
+			SubmissionFile: submissionFile,
+			Submitter:      submitter,
+		})
+		if err != nil {
+			return connect.NewError(connect.CodeInvalidArgument, err)
+		}
+
+		err = assignments.SubmissionWriter{}.Save(ctx, cmd.GormDB, &submission)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionWriter{}.Save")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return core.ProtoEmptyResponse, nil
+}
+
+func (cmd *AssignmentCmd) DeleteSubmission(ctx context.Context, req *connect.Request[autogradv1.DeleteByIDRequest]) (*connect.Response[autogradv1.Empty], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
+	}
+
+	if !authUser.Role.Can(auth.DeleteSubmission) {
+		return nil, connect.NewError(connect.CodePermissionDenied, nil)
+	}
+
+	submissionID, err := uuid.Parse(req.Msg.GetId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	now := time.Now()
+	submission := assignments.Submission{}
+
+	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) (err error) {
+		submission, err = assignments.SubmissionReader{}.FindByID(ctx, cmd.GormDB, submissionID)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		isDeleteForOther := !submission.IsOwner(authUser.UserID)
+		isAllowDeleteForOther := authUser.Role.Can(auth.DeleteSubmissionForOther)
+		if isDeleteForOther && !isAllowDeleteForOther {
+			return connect.NewError(connect.CodePermissionDenied, nil)
+		}
+
+		submission, err = submission.Delete(now)
+		if err != nil {
+			return connect.NewError(connect.CodeInvalidArgument, err)
+		}
+
+		err = assignments.SubmissionWriter{}.Delete(ctx, cmd.GormDB, &submission)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionWriter{}.Save")
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return core.ProtoEmptyResponse, nil
 }

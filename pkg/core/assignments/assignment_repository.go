@@ -114,7 +114,7 @@ func toAssignment(
 
 func toEntityMeta(base dbmodel.Base) core.EntityMeta {
 	return core.EntityMeta{
-		CreatedAt: base.CreatedAt,
-		UpdatedAt: base.UpdatedAt,
+		CreatedAt: base.CreatedAt.Time,
+		UpdatedAt: base.UpdatedAt.Time,
 	}
 }

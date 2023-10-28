@@ -33,13 +33,19 @@ func (cmd *UserManagementCmd) CreateUser(
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	password, err := user_management.GenerateRandomPassword()
+	password, err := auth.GenerateRandomPlainPassword()
 	if err != nil {
 		logs.ErrCtx(ctx, err, "UserManagementCmd: CreateUser: GenerateRandomPassword")
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	err = user_management.UserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newUser, password)
+	cipherPassword, err := auth.EncryptPassword(password)
+	if err != nil {
+		logs.ErrCtx(ctx, err, "UserManagementCmd: CreateUser: EncryptPassword")
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	err = user_management.UserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newUser, cipherPassword)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "UserManagementCmd: CreateUser: SaveUserWithPassword")
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -51,4 +57,38 @@ func (cmd *UserManagementCmd) CreateUser(
 			Message: "user created",
 		},
 	}, nil
+}
+
+type CreateAdminUserRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (cmd *UserManagementCmd) InternalCreateAdminUser(
+	ctx context.Context,
+	req CreateAdminUserRequest,
+) (id uuid.UUID, err error) {
+	now := time.Now()
+	newAdmin, err := user_management.CreateAdminUser(user_management.CreateAdminUserRequest{
+		NewID: uuid.New(),
+		Now:   now,
+		Email: req.Email,
+		Name:  req.Name,
+	})
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	cipher, err := auth.EncryptPassword(req.Password)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	err = user_management.UserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newAdmin, cipher)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return newAdmin.ID, nil
 }

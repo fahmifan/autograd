@@ -9,7 +9,6 @@ import (
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/google/uuid"
-	passwordgen "github.com/sethvargo/go-password/password"
 )
 
 var (
@@ -55,6 +54,28 @@ func CreateUser(req CreateUserRequest) (User, error) {
 	}, nil
 }
 
-func GenerateRandomPassword() (string, error) {
-	return passwordgen.Generate(12, 8, 4, false, false)
+type CreateAdminUserRequest struct {
+	NewID uuid.UUID
+	Now   time.Time
+	Name  string
+	Email string
+}
+
+func CreateAdminUser(req CreateAdminUserRequest) (User, error) {
+	_, err := mail.ParseAddress(req.Email)
+	if err != nil {
+		return User{}, ErrInvalidEmail
+	}
+
+	if len(strings.TrimSpace(req.Name)) < 3 {
+		return User{}, errors.New("name must be at least 3 characters long")
+	}
+
+	return User{
+		ID:         req.NewID,
+		Name:       req.Name,
+		Email:      req.Email,
+		Role:       auth.RoleAdmin,
+		EntityMeta: core.NewEntityMeta(req.Now),
+	}, nil
 }

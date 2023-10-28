@@ -39,21 +39,65 @@ func (query *AssignmentsQuery) FindAssignment(
 	}, nil
 }
 
+func (query *AssignmentsQuery) FindSubmission(
+	ctx context.Context,
+	req *connect.Request[autogradv1.FindByIDRequest],
+) (*connect.Response[autogradv1.Submission], error) {
+	submissionID, err := uuid.Parse(req.Msg.GetId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	submReader := assignments.SubmissionReader{}
+	submission, err := submReader.FindByID(ctx, query.GormDB, submissionID)
+	if core.IsDBNotFoundErr(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+	if err != nil {
+		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindSubmission: FindByID")
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return &connect.Response[autogradv1.Submission]{
+		Msg: toSubmissionProto(submission),
+	}, nil
+}
+
+func toSubmissionProto(submission assignments.Submission) *autogradv1.Submission {
+	return &autogradv1.Submission{
+		Id:         submission.ID.String(),
+		Assignment: toAssignmentProto(submission.Assignment),
+		Submitter:  toSubmitterProto(submission.Submitter),
+		SubmissionFile: &autogradv1.SubmissionFile{
+			Id:  submission.SourceFile.ID.String(),
+			Url: submission.SourceFile.URL,
+		},
+		Metadata: submission.ProtoMetadata(),
+	}
+}
+
+func toSubmitterProto(submitter assignments.Submitter) *autogradv1.Submitter {
+	return &autogradv1.Submitter{
+		Id:   submitter.ID.String(),
+		Name: submitter.Name,
+	}
+}
+
 func toAssignmentProto(assignment assignments.Assignment) *autogradv1.Assignment {
 	return &autogradv1.Assignment{
 		Id:          assignment.ID.String(),
 		Name:        assignment.Name,
 		Description: assignment.Description,
-		Metadata:    assignment.ProtoMeta(),
-		CaseInputFile: &autogradv1.Assignment_AssignmentFile{
+		Metadata:    assignment.ProtoMetadata(),
+		CaseInputFile: &autogradv1.AssignmentFile{
 			Id:       assignment.CaseInputFile.ID.String(),
 			Url:      assignment.CaseInputFile.URL,
-			Metadata: assignment.CaseInputFile.ProtoMeta(),
+			Metadata: assignment.CaseInputFile.ProtoMetadata(),
 		},
-		CaseOutputFile: &autogradv1.Assignment_AssignmentFile{
+		CaseOutputFile: &autogradv1.AssignmentFile{
 			Id:       assignment.CaseOutputFile.ID.String(),
 			Url:      assignment.CaseOutputFile.URL,
-			Metadata: assignment.CaseInputFile.ProtoMeta(),
+			Metadata: assignment.CaseInputFile.ProtoMetadata(),
 		},
 	}
 }

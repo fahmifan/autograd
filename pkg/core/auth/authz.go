@@ -41,9 +41,11 @@ const (
 	ViewAnySubmissions
 
 	CreateSubmission
+	CreateSubmissionForOther
 	UpdateSubmission
 	ViewSubmission
 	DeleteSubmission
+	DeleteSubmissionForOther
 
 	UpdateUser
 	CreateUser
@@ -53,15 +55,16 @@ const (
 
 var policy = map[Role]map[Permission]bool{
 	RoleAdmin: {
-		CreateAssignment:   _ok,
-		UpdateAssignment:   _ok,
-		ViewAssignment:     _ok,
-		ViewAnyAssignments: _ok,
-		DeleteAssignment:   _ok,
-		GradeAssignment:    _ok,
-		ViewSubmission:     _ok,
-		ViewAnySubmissions: _ok,
-		CreateUser:         _ok,
+		CreateAssignment:         _ok,
+		UpdateAssignment:         _ok,
+		ViewAssignment:           _ok,
+		ViewAnyAssignments:       _ok,
+		DeleteAssignment:         _ok,
+		GradeAssignment:          _ok,
+		ViewSubmission:           _ok,
+		ViewAnySubmissions:       _ok,
+		CreateUser:               _ok,
+		CreateSubmissionForOther: _ok,
 	},
 	RoleStudent: {
 		ViewAssignment:   _ok,

@@ -4,4 +4,5 @@ breaking:
     - FILE
 lint:
   use:
-    - DEFAULT
+    - BASIC
+    - FILE_LOWER_SNAKE_CASE

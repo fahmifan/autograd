@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package shopper.v1;
+package autograd.v1;
 
 option go_package = "github.com/fahmifan/autograd/pkg/pb/autograd/v1;autogradv1";
 
@@ -15,11 +15,18 @@ message PingResponse {
     string message = 1;
 }
 
+message FindByIDRequest {
+    string id = 1;
+}
+
+message DeleteByIDRequest {
+    string id = 1;
+}
+
 message CreateUserRequest {
     string name = 1;
     string email = 2;
-    string password = 3;
-    string role = 4;
+    string role = 3;
 }
 
 message Metadata {
@@ -27,26 +34,51 @@ message Metadata {
     string updated_at = 2;
 }
 
+enum AssignmentType {
+    ASSIGNMENT_TYPE_UNKNOWN = 0;
+    ASSIGNMENT_TYPE_INPUT = 1;
+    ASSIGNMENT_TYPE_OUTPUT = 2;
+}
+
+message AssignmentFile {
+    string id = 1;
+    string description = 2;
+    string url = 3;
+    Metadata metadata = 5;
+}
+
+message SubmissionFile {
+    string id = 1;
+    string url = 2;
+    Metadata metadata = 3;
+}
+
+message Submitter {
+    string id = 1;
+    string name = 2;
+}
+
+message Assigner {
+    string id = 1;
+    string name = 2;
+}
+
 message Assignment {
-    enum AssignmentType {
-        UNKNOWN = 0;
-        INPUT = 1;
-        OUTPUT = 2;
-    }
-
-    message AssignmentFile {
-        string id = 1;
-        string description = 2;
-        string url = 3;
-        Metadata metadata = 5;
-    }
-
     string id = 1;
     string name = 2;
     string description = 3;
-    AssignmentFile case_input_file = 4;
-    AssignmentFile case_output_file = 5;
-    Metadata metadata = 6;
+    Assigner assigner = 4;
+    AssignmentFile case_input_file = 5;
+    AssignmentFile case_output_file = 6;
+    Metadata metadata = 7;
+}
+
+message Submission {
+    string id = 1;
+    Assignment assignment = 2;
+    Submitter submitter = 3;
+    SubmissionFile submission_file = 4;
+    Metadata metadata = 5;
 }
 
 message UpdateAssignmentRequest {
@@ -64,23 +96,31 @@ message CreateAssignmentRequest {
     string case_output_file_id = 4;
 }
 
-message FindByIDRequest {
-    string id = 1;
+message CreateSubmissionRequest {
+    string assignment_id = 1;
+    string submitter_id = 2;
+    string source_file_id = 3;
 }
 
-message DeleteByIDRequest {
+message UpdateSubmissionRequest {
     string id = 1;
+    string submitter_id = 2;
+    string source_file_id = 3;
 }
 
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
     rpc CreateUser(CreateUserRequest) returns (CreatedResponse) {}
     
-    // Assignment
+    // Assignment Submission
     // Assignment Queries
     rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
+    rpc FindSubmission(FindByIDRequest) returns (Submission) {}
     // Assignment Mutations
     rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
     rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}
     rpc DeleteAssignment(DeleteByIDRequest) returns (Empty) {}
+    rpc CreateSubmission(CreateSubmissionRequest) returns (CreatedResponse) {}
+    rpc UpdateSubmission(UpdateSubmissionRequest) returns (Empty) {}
+    rpc DeleteSubmission(DeleteByIDRequest) returns (Empty) {}
 }

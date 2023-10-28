@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -17,10 +17,6 @@ type Base struct {
 
 // BeforeCreate ..
 func (base *Base) BeforeCreate(tx *gorm.DB) error {
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return err
-	}
-	base.ID = uuid.String()
+	base.ID = uuid.New().String()
 	return nil
 }

@@ -27,6 +27,8 @@ type Server struct {
 	assignmentUsecase model.AssignmentUsecase
 	submissionUsecase model.SubmissionUsecase
 	mediaUsecase      model.MediaUsecase
+	service           *service.Service
+	jwtKey            string
 }
 
 // NewServer ..
@@ -95,7 +97,7 @@ func (s *Server) routes() {
 	apiV1.POST("/media/upload", s.handleUploadMedia, s.authz(auth.CreateMedia))
 
 	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
-		service.NewService(s.gormDB),
+		s.service,
 	)
 	s.echo.Group("/grpc").Any(
 		grpHandlerName+"*",

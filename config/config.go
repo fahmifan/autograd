@@ -34,8 +34,8 @@ func Env() string {
 	return "development"
 }
 
-// JWTSecret ..
-func JWTSecret() string {
+// JWTKey ..
+func JWTKey() string {
 	val, ok := os.LookupEnv("JWT_SECRET")
 	if !ok {
 		logrus.Fatal("JWT_SECRET not provided")
@@ -106,4 +106,14 @@ func FileUploadPath() string {
 	}
 
 	return "file_upload_path"
+}
+
+func AutogradAuthToken() string {
+	val, _ := os.LookupEnv("AUTOGRAD_AUTH_TOKEN")
+	return val
+}
+
+func AutogradServerURL() string {
+	val, _ := os.LookupEnv("AUTOGRAD_SERVER_URL")
+	return val
 }

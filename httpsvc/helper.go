@@ -14,7 +14,7 @@ import (
 )
 
 // Create the JWT key used to create the signature
-var jwtKey = []byte(config.JWTSecret())
+var jwtKey = []byte(config.JWTKey())
 
 // ErrTokenInvalid error
 var ErrTokenInvalid = errors.New("token invalid")

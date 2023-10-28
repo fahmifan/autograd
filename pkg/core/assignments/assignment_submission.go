@@ -31,6 +31,7 @@ type Assignment struct {
 	Assigner       Assigner
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
+	DeadlineAt     time.Time
 
 	core.EntityMeta
 }
@@ -113,8 +114,72 @@ type SubmissionFile struct {
 type Submission struct {
 	ID         uuid.UUID
 	Assignment Assignment
-	Submitter  Assigner
+	Submitter  Submitter
 	SourceFile SubmissionFile
 	Grade      int64
 	Feedback   string
+	core.EntityMeta
+}
+
+type Submitter struct {
+	ID     uuid.UUID
+	Name   string
+	Active bool
+}
+
+type CreateSubmissionRequest struct {
+	NewID          uuid.UUID
+	Now            time.Time
+	Assignment     Assignment
+	Submitter      Submitter
+	SubmissionFile SubmissionFile
+}
+
+func CreateSubmission(req CreateSubmissionRequest) (Submission, error) {
+	if req.Now.After(req.Assignment.DeadlineAt) {
+		return Submission{}, errors.New("assignment is already closed")
+	}
+
+	if !req.Submitter.Active {
+		return Submission{}, errors.New("submitter must active")
+	}
+
+	subm := Submission{
+		ID:         req.NewID,
+		Assignment: req.Assignment,
+		Submitter:  req.Submitter,
+		SourceFile: req.SubmissionFile,
+		Grade:      0,
+		Feedback:   "",
+		EntityMeta: core.NewEntityMeta(req.Now),
+	}
+
+	return subm, nil
+}
+
+type UpdateSubmissionRequest struct {
+	Now            time.Time
+	Submitter      Submitter
+	SubmissionFile SubmissionFile
+}
+
+func (submission Submission) Update(req UpdateSubmissionRequest) (Submission, error) {
+	if req.Now.After(submission.Assignment.DeadlineAt) {
+		return Submission{}, errors.New("assignment is already closed")
+	}
+
+	submission.SourceFile = req.SubmissionFile
+	submission.UpdatedAt = req.Now
+	submission.Submitter = req.Submitter
+
+	return submission, nil
+}
+
+func (submission Submission) IsOwner(userID uuid.UUID) bool {
+	return submission.Submitter.ID == userID
+}
+
+func (submission Submission) Delete(now time.Time) (Submission, error) {
+	submission.DeletedAt = null.TimeFrom(now)
+	return submission, nil
 }

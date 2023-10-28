@@ -1,17 +1,19 @@
 package dbmodel
 
 import (
-	"time"
-
-	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/google/uuid"
+	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 )
 
 type Base struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID uuid.UUID `gorm:"type:uuid;primary_key;"`
+	Metadata
+}
+
+type Metadata struct {
+	CreatedAt null.Time
+	UpdatedAt null.Time
 	DeletedAt gorm.DeletedAt `sql:"index" json:"deleted_at"`
 }
 
@@ -20,7 +22,7 @@ type User struct {
 	Name     string
 	Email    string
 	Password string
-	Role     auth.Role
+	Role     string
 	Active   int
 }
 
