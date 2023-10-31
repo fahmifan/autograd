@@ -13,7 +13,7 @@ import (
 
 type AssignmentWriter struct{}
 
-func (AssignmentWriter) Save(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
+func (AssignmentWriter) Create(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
 	model := dbmodel.Assignment{
 		Base: dbmodel.Base{
 			ID: assignment.ID,
@@ -23,6 +23,7 @@ func (AssignmentWriter) Save(ctx context.Context, tx *gorm.DB, assignment Assign
 		Description:      assignment.Description,
 		CaseInputFileID:  assignment.CaseInputFile.ID,
 		CaseOutputFileID: assignment.CaseOutputFile.ID,
+		DeadlineAt:       assignment.DeadlineAt,
 	}
 
 	return tx.Table("assignments").Create(&model).Error

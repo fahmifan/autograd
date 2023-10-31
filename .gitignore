@@ -7,3 +7,4 @@ file_upload_path/*
 /autograd.db-wal
 /node_modules
 /tmp
+/private

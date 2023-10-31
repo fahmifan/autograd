@@ -94,6 +94,7 @@ message CreateAssignmentRequest {
     string description = 2;
     string case_input_file_id = 3;
     string case_output_file_id = 4;
+    string deadline_at = 5;
 }
 
 message CreateSubmissionRequest {

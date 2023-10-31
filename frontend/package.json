@@ -12,9 +12,12 @@
   },
   "dependencies": {
     "@mantine/core": "^7.1.7",
+    "@mantine/dates": "^7.1.7",
     "@mantine/hooks": "^7.1.7",
+    "@tabler/icons-react": "^2.40.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-query": "^3.39.3",
     "react-router-dom": "^6.17.0"
   },
   "devDependencies": {

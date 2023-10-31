@@ -16,10 +16,11 @@ var (
 )
 
 type ManagedUser struct {
-	ID    uuid.UUID
-	Name  string
-	Email string
-	Role  auth.Role
+	ID     uuid.UUID
+	Name   string
+	Email  string
+	Role   auth.Role
+	Active bool
 	core.TimestampMetadata
 }
 
@@ -51,6 +52,7 @@ func CreateUser(req CreateUserRequest) (ManagedUser, error) {
 		Email:             req.Email,
 		Role:              req.Role,
 		TimestampMetadata: core.NewEntityMeta(req.Now),
+		Active:            true,
 	}, nil
 }
 
@@ -77,5 +79,6 @@ func CreateAdminUser(req CreateAdminUserRequest) (ManagedUser, error) {
 		Email:             req.Email,
 		Role:              auth.RoleAdmin,
 		TimestampMetadata: core.NewEntityMeta(req.Now),
+		Active:            true,
 	}, nil
 }

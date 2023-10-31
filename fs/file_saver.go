@@ -2,6 +2,7 @@
 package fs
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -18,7 +19,7 @@ func NewLocalStorage() *LocalStorer {
 }
 
 // Store store file to local storage
-func (f *LocalStorer) Store(dst string, r io.Reader) error {
+func (f *LocalStorer) Store(ctx context.Context, dst string, r io.Reader) error {
 	dir, _ := path.Split(dst)
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil && !errors.Is(err, os.ErrExist) {

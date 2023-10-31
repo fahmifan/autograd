@@ -13,6 +13,11 @@ import (
 type ManagedUserWriter struct{}
 
 func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, user ManagedUser, password auth.CipherPassword) error {
+	active := 0
+	if user.Active {
+		active = 1
+	}
+
 	model := dbmodel.User{
 		Base: dbmodel.Base{
 			ID:       user.ID,
@@ -22,6 +27,7 @@ func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, 
 		Email:    user.Email,
 		Password: string(password),
 		Role:     string(user.Role),
+		Active:   active,
 	}
 
 	return tx.Save(&model).Error
@@ -41,6 +47,7 @@ func (ManagedUserReader) FindUserByID(ctx context.Context, tx *gorm.DB, id strin
 		Email:             model.Email,
 		Role:              auth.Role(model.Role),
 		TimestampMetadata: core.TimestampMetaFromModel(model.Metadata),
+		Active:            model.Active == 1,
 	}, nil
 }
 
@@ -73,6 +80,7 @@ func (ManagedUserReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllMa
 			Email:             model.Email,
 			Role:              auth.Role(model.Role),
 			TimestampMetadata: core.TimestampMetaFromModel(model.Metadata),
+			Active:            model.Active == 1,
 		}
 	}
 

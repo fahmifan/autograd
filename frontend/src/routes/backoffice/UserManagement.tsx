@@ -1,4 +1,4 @@
-import { Button, Group, Input, Select, Table, Title } from '@mantine/core';
+import { Button, Group, Input, Select, Table, Title } from "@mantine/core";
 import {
 	ActionFunctionArgs,
 	Form,
@@ -66,14 +66,14 @@ export async function loaderUserManagement(): Promise<LoaderResponse> {
 export function CreateManagedUser() {
 	const roleSelection = [
 		{
-			value: 'admin',
-			label: 'Admin',
+			value: "admin",
+			label: "Admin",
 		},
 		{
-			value: 'student',
-			label: 'Student',
-		}
-	]
+			value: "student",
+			label: "Student",
+		},
+	];
 
 	return (
 		<>
@@ -91,8 +91,8 @@ export function CreateManagedUser() {
 					<p>
 						<label htmlFor="role">Role</label>
 						<Select
-							name='role'
-							id='role'
+							name="role"
+							id="role"
 							placeholder="Choose a role"
 							data={roleSelection}
 						/>

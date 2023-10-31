@@ -949,6 +949,11 @@ export class CreateAssignmentRequest extends Message<CreateAssignmentRequest> {
 	 */
 	caseOutputFileId = "";
 
+	/**
+	 * @generated from field: string deadline_at = 5;
+	 */
+	deadlineAt = "";
+
 	constructor(data?: PartialMessage<CreateAssignmentRequest>) {
 		super();
 		proto3.util.initPartial(data, this);
@@ -973,6 +978,12 @@ export class CreateAssignmentRequest extends Message<CreateAssignmentRequest> {
 		{
 			no: 4,
 			name: "case_output_file_id",
+			kind: "scalar",
+			T: 9 /* ScalarType.STRING */,
+		},
+		{
+			no: 5,
+			name: "deadline_at",
 			kind: "scalar",
 			T: 9 /* ScalarType.STRING */,
 		},

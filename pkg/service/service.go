@@ -8,6 +8,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_cmd"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_query"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
+	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_query"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
@@ -21,14 +22,16 @@ type Service struct {
 	*user_management_cmd.UserManagementCmd
 	*assignments_cmd.AssignmentCmd
 	*assignments_query.AssignmentsQuery
+	*mediastore_cmd.MediaStoreCmd
 }
 
 var _ autogradv1connect.AutogradServiceHandler = &Service{}
 
-func NewService(gormDB *gorm.DB, jwtKey string) *Service {
+func NewService(gormDB *gorm.DB, jwtKey string, mediaCfg core.MediaConfig) *Service {
 	coreCtx := &core.Ctx{
-		GormDB: gormDB,
-		JWTKey: jwtKey,
+		GormDB:      gormDB,
+		JWTKey:      jwtKey,
+		MediaConfig: mediaCfg,
 	}
 	return &Service{
 		AuthCmd:             &auth_cmd.AuthCmd{Ctx: coreCtx},
@@ -36,6 +39,7 @@ func NewService(gormDB *gorm.DB, jwtKey string) *Service {
 		UserManagementQuery: &user_management_query.UserManagementQuery{Ctx: coreCtx},
 		AssignmentCmd:       &assignments_cmd.AssignmentCmd{Ctx: coreCtx},
 		AssignmentsQuery:    &assignments_query.AssignmentsQuery{Ctx: coreCtx},
+		MediaStoreCmd:       &mediastore_cmd.MediaStoreCmd{Ctx: coreCtx},
 	}
 }
 

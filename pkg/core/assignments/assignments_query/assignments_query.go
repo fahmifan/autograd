@@ -122,6 +122,10 @@ func toAssignmentProto(assignment assignments.Assignment) *autogradv1.Assignment
 		Name:              assignment.Name,
 		Description:       assignment.Description,
 		TimestampMetadata: assignment.ProtoTimestampMetadata(),
+		Assigner: &autogradv1.Assigner{
+			Id:   assignment.Assigner.ID.String(),
+			Name: assignment.Assigner.Name,
+		},
 		CaseInputFile: &autogradv1.AssignmentFile{
 			Id:                assignment.CaseInputFile.ID.String(),
 			Url:               assignment.CaseInputFile.URL,

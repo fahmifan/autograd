@@ -33,29 +33,71 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 
 	assignerReader := assignments.AssignerReader{}
 	assignmentWriter := assignments.AssignmentWriter{}
+	fileReader := assignments.FileReader{}
+
+	now := time.Now()
+	deadlineAt, err := time.Parse(time.RFC3339, req.Msg.GetDeadlineAt())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
 
 	assignment := assignments.Assignment{}
-	err := core.Transaction(cmd.Ctx, func(tx *gorm.DB) error {
+	caseStdinFileID, err := uuid.Parse(req.Msg.GetCaseInputFileId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	caseStdoutFileID, err := uuid.Parse(req.Msg.GetCaseOutputFileId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) error {
 		assigner, err := assignerReader.FindByID(ctx, cmd.GormDB, authUser.UserID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
+		}
+
+		fileIDs := []uuid.UUID{caseStdinFileID, caseStdoutFileID}
+		caseFiles, err := fileReader.FindCaseFiles(ctx, cmd.GormDB, fileIDs)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: FindCaseFiles")
+			return core.ErrInternalServer
+		}
+
+		caseInputFile, _, found := lo.FindIndexOf(caseFiles, func(file assignments.CaseFile) bool {
+			return file.Type == dbmodel.FileTypeAssignmentCaseInput
+		})
+		if !found {
+			return errors.New("case input file not found")
+		}
+
+		caseOutputFile, _, found := lo.FindIndexOf(caseFiles, func(file assignments.CaseFile) bool {
+			return file.Type == dbmodel.FileTypeAssignmentCaseOutput
+		})
+		if !found {
+			return errors.New("case output file not found")
 		}
 
 		assignment, err = assignments.CreateAssignment(assignments.CreateAssignmentRequest{
-			NewID:       uuid.New(),
-			Name:        req.Msg.GetName(),
-			Description: req.Msg.GetDescription(),
-			Assigner:    assigner,
+			NewID:          uuid.New(),
+			Name:           req.Msg.GetName(),
+			Description:    req.Msg.GetDescription(),
+			Assigner:       assigner,
+			Now:            now,
+			CaseInputFile:  caseInputFile,
+			CaseOutputFile: caseOutputFile,
+			DeadlineAt:     deadlineAt,
 		})
 		if err != nil {
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Save(ctx, tx, assignment)
+		err = assignmentWriter.Create(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: Save")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		return nil
@@ -98,20 +140,20 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 		assigner, err := assignerReader.FindByID(ctx, cmd.GormDB, authUser.UserID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		assignment, err := assignmentReader.FindByID(ctx, cmd.GormDB, assignmentID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		fileIDs := []uuid.UUID{assignment.CaseInputFile.ID, assignment.CaseOutputFile.ID}
 		caseFiles, err := fileReader.FindCaseFiles(ctx, cmd.GormDB, fileIDs)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: FindCaseFiles")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		caseInputFile, _, found := lo.FindIndexOf(caseFiles, func(file assignments.CaseFile) bool {
@@ -140,10 +182,10 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Save(ctx, tx, assignment)
+		err = assignmentWriter.Create(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: Save")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		return nil
@@ -179,7 +221,7 @@ func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Req
 		assignment, err := assignmentReader.FindByID(ctx, cmd.GormDB, assignmentID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: DeleteAssignment: FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		assignment, err = assignment.Delete(now)
@@ -187,10 +229,10 @@ func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Req
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Save(ctx, tx, assignment)
+		err = assignmentWriter.Create(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: Save")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		return nil
@@ -240,19 +282,19 @@ func (cmd *AssignmentCmd) CreateSubmission(ctx context.Context, req *connect.Req
 		assignment, err := assignments.AssignmentReader{}.FindByID(ctx, cmd.GormDB, assignmentID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		submitter, err := assignments.SubmitterReader{}.FindByID(ctx, cmd.GormDB, submitterID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmitterReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		submissionFile, err := assignments.SubmissionFileReader{}.FindByID(ctx, cmd.GormDB, submissionFileID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionFileReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		submission, err = assignments.CreateSubmission(assignments.CreateSubmissionRequest{
@@ -269,7 +311,7 @@ func (cmd *AssignmentCmd) CreateSubmission(ctx context.Context, req *connect.Req
 		err = assignments.SubmissionWriter{}.SaveNew(ctx, cmd.GormDB, &submission)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionWriter{}.Save")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		return nil
@@ -326,19 +368,19 @@ func (cmd *AssignmentCmd) UpdateSubmission(ctx context.Context, req *connect.Req
 		submission, err = assignments.SubmissionReader{}.FindByID(ctx, cmd.GormDB, submissionID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		submitter, err := assignments.SubmitterReader{}.FindByID(ctx, cmd.GormDB, submitterID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmitterReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		submissionFile, err := assignments.SubmissionFileReader{}.FindByID(ctx, cmd.GormDB, submissionFileID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionFileReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		submission, err = submission.Update(assignments.UpdateSubmissionRequest{
@@ -353,7 +395,7 @@ func (cmd *AssignmentCmd) UpdateSubmission(ctx context.Context, req *connect.Req
 		err = assignments.SubmissionWriter{}.Save(ctx, cmd.GormDB, &submission)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionWriter{}.Save")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		return nil
@@ -387,7 +429,7 @@ func (cmd *AssignmentCmd) DeleteSubmission(ctx context.Context, req *connect.Req
 		submission, err = assignments.SubmissionReader{}.FindByID(ctx, cmd.GormDB, submissionID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		isDeleteForOther := !submission.IsOwner(authUser.UserID)
@@ -404,7 +446,7 @@ func (cmd *AssignmentCmd) DeleteSubmission(ctx context.Context, req *connect.Req
 		err = assignments.SubmissionWriter{}.Delete(ctx, cmd.GormDB, &submission)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: SubmissionWriter{}.Save")
-			return connect.NewError(connect.CodeInternal, err)
+			return core.ErrInternalServer
 		}
 
 		return nil

@@ -1,8 +1,10 @@
 package core
 
 import (
+	"context"
 	"database/sql"
 	"errors"
+	"io"
 	"time"
 
 	"connectrpc.com/connect"
@@ -15,6 +17,17 @@ import (
 type Ctx struct {
 	GormDB *gorm.DB
 	JWTKey string
+	MediaConfig
+}
+
+type MediaConfig struct {
+	MediaServeBaseURL string
+	RootFolder        string
+	ObjectStorer      ObjectStorer
+}
+
+type ObjectStorer interface {
+	Store(ctx context.Context, dst string, r io.Reader) error
 }
 
 func IsDBNotFoundErr(err error) bool {
@@ -29,6 +42,14 @@ type TimestampMetadata struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt null.Time
+}
+
+func (meta TimestampMetadata) ModelMetadata() dbmodel.Metadata {
+	return dbmodel.Metadata{
+		CreatedAt: null.TimeFrom(meta.CreatedAt),
+		UpdatedAt: null.TimeFrom(meta.UpdatedAt),
+		DeletedAt: gorm.DeletedAt(meta.DeletedAt.NullTime),
+	}
 }
 
 func (meta TimestampMetadata) CreatedAtRFC3339() string {
@@ -79,3 +100,5 @@ func TimestampMetaFromModel(meta dbmodel.Metadata) TimestampMetadata {
 var ProtoEmptyResponse = &connect.Response[autogradv1.Empty]{
 	Msg: &autogradv1.Empty{},
 }
+
+var ErrInternalServer = connect.NewError(connect.CodeInternal, errors.New("internal server error"))

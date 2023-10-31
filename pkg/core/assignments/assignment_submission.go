@@ -44,6 +44,7 @@ type CreateAssignmentRequest struct {
 	Description    string
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
+	DeadlineAt     time.Time
 }
 
 func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
@@ -60,12 +61,14 @@ func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
 	}
 
 	return Assignment{
+		ID:                req.NewID,
 		TimestampMetadata: core.NewEntityMeta(req.Now),
 		Name:              req.Name,
 		Description:       req.Description,
 		CaseInputFile:     req.CaseInputFile,
 		CaseOutputFile:    req.CaseOutputFile,
 		Assigner:          req.Assigner,
+		DeadlineAt:        req.DeadlineAt,
 	}, nil
 }
 

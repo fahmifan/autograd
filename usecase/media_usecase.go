@@ -1,23 +1,24 @@
 package usecase
 
 import (
+	"context"
 	"mime/multipart"
 	"path"
 	"path/filepath"
 
-	"github.com/fahmifan/autograd/model"
+	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/utils"
 	"github.com/sirupsen/logrus"
 )
 
 // MediaUsecase ..
 type MediaUsecase struct {
-	objectStorer model.ObjectStorer
+	objectStorer core.ObjectStorer
 	dstFolder    string
 }
 
 // NewMediaUsecase ..
-func NewMediaUsecase(dstFolder string, uploader model.ObjectStorer) *MediaUsecase {
+func NewMediaUsecase(dstFolder string, uploader core.ObjectStorer) *MediaUsecase {
 	return &MediaUsecase{
 		objectStorer: uploader,
 		dstFolder:    dstFolder,
@@ -25,7 +26,7 @@ func NewMediaUsecase(dstFolder string, uploader model.ObjectStorer) *MediaUsecas
 }
 
 // Upload ..
-func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (name string, err error) {
+func (m *MediaUsecase) Upload(ctx context.Context, fileInfo *multipart.FileHeader) (name string, err error) {
 	src, err := fileInfo.Open()
 	if err != nil {
 		logrus.Error(err)
@@ -37,7 +38,7 @@ func (m *MediaUsecase) Upload(fileInfo *multipart.FileHeader) (name string, err 
 	fileName := utils.GenerateUniqueString() + ext
 	dst := path.Join(m.dstFolder, fileName)
 
-	err = m.objectStorer.Store(dst, src)
+	err = m.objectStorer.Store(ctx, dst, src)
 	if err != nil {
 		logrus.Error(err)
 		return

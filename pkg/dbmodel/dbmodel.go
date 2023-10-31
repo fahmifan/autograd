@@ -1,6 +1,8 @@
 package dbmodel
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
@@ -33,6 +35,7 @@ type Assignment struct {
 	Description      string
 	CaseInputFileID  uuid.UUID
 	CaseOutputFileID uuid.UUID
+	DeadlineAt       time.Time
 }
 
 type Submission struct {

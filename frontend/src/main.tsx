@@ -1,11 +1,15 @@
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import Login, { loginAction } from "./routes/Login.tsx";
 import * as backoffice from "./routes/backoffice";
+
+const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
 	{
@@ -17,13 +21,15 @@ const router = createBrowserRouter([
 		element: <Login />,
 		action: loginAction,
 	},
-	...backoffice.router
+	...backoffice.router,
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<React.StrictMode>
 		<MantineProvider>
-			<RouterProvider router={router} />
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+			</QueryClientProvider>
 		</MantineProvider>
 	</React.StrictMode>,
 );

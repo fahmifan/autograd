@@ -96,7 +96,7 @@ func (s *Server) routes() {
 	apiV1.PUT("/submissions", s.handleUpdateSubmission, s.authz(auth.UpdateSubmission))
 	apiV1.DELETE("/submissions/:id", s.handleDeleteSubmission, s.authz(auth.DeleteSubmission))
 
-	apiV1.POST("/media/upload", s.handleUploadMedia, s.authz(auth.CreateMedia))
+	apiV1.POST("/rpc/saveMedia", s.handleSaveMedia, s.authz(auth.CreateMedia))
 
 	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
 		s.service,

@@ -14,6 +14,7 @@ import (
 	db "github.com/fahmifan/autograd/db/migrations"
 	"github.com/fahmifan/autograd/fs"
 	"github.com/fahmifan/autograd/httpsvc"
+	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
@@ -44,7 +45,10 @@ func Execute() error {
 
 func mustInitService() *service.Service {
 	gormDB := db.MustSQLite()
-	return service.NewService(gormDB, config.JWTKey())
+	return service.NewService(gormDB, config.JWTKey(), core.MediaConfig{
+		RootFolder:   config.FileUploadPath(),
+		ObjectStorer: fs.NewLocalStorage(),
+	})
 }
 
 func serverCmd() *cobra.Command {
@@ -67,7 +71,7 @@ func serverCmd() *cobra.Command {
 			mediaUsecase := usecase.NewMediaUsecase(config.FileUploadPath(), localStorage)
 			graderUsecase := usecase.NewGraderUsecase(submissionUsecase, assignmentUsecase)
 
-			service := service.NewService(gormDB, config.JWTKey())
+			service := mustInitService()
 
 			server := httpsvc.NewServer(
 				config.Port(),

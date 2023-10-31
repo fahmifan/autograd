@@ -1,8 +1,11 @@
 package model
 
-import "mime/multipart"
+import (
+	"context"
+	"mime/multipart"
+)
 
 // MediaUsecase ..
 type MediaUsecase interface {
-	Upload(fileInfo *multipart.FileHeader) (name string, err error)
+	Upload(ctx context.Context, req *multipart.FileHeader) (name string, err error)
 }

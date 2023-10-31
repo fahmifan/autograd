@@ -8,19 +8,23 @@ import { ServiceType } from "@bufbuild/protobuf";
 import { useMemo } from "react";
 
 import { AutogradService } from "../pb/autograd/v1/autograd_connect";
+import { AutogradRPC } from "./rcp_client";
 
 export function useAutogradClient(): PromiseClient<typeof AutogradService> {
 	return useClient(AutogradService);
 }
 
+const jwtToken = localStorage.getItem("token") ?? "";
+
 const csrfInterceptor: Interceptor = (next) => async (req) => {
-	const token = localStorage.getItem("token");
-	req.header.set("Authorization", `Bearer ${token}`);
+	req.header.set("Authorization", `Bearer ${jwtToken}`);
 	return await next(req);
 };
 
+const host = "http://localhost:8080";
+
 const transport = createConnectTransport({
-	baseUrl: "http://localhost:8080/grpc",
+	baseUrl: `${host}/grpc`,
 	interceptors: [csrfInterceptor],
 });
 
@@ -32,4 +36,9 @@ function useClient<T extends ServiceType>(service: T): PromiseClient<T> {
 export const AutogradServiceClient = createPromiseClient(
 	AutogradService,
 	transport,
+);
+
+export const AutogradRPCClient = new AutogradRPC(
+	`${host}/api/v1/rpc`,
+	jwtToken,
 );

@@ -65,12 +65,14 @@ var policy = map[Role]map[Permission]bool{
 		ViewAnySubmissions:       _ok,
 		CreateUser:               _ok,
 		CreateSubmissionForOther: _ok,
+		CreateMedia:              _ok,
 	},
 	RoleStudent: {
 		ViewAssignment:   _ok,
 		UpdateSubmission: _ok,
 		DeleteSubmission: _ok,
 		UpdateUser:       _ok,
+		CreateMedia:      _ok,
 	},
 }
 
