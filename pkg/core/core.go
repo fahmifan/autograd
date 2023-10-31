@@ -97,8 +97,47 @@ func TimestampMetaFromModel(meta dbmodel.Metadata) TimestampMetadata {
 	}
 }
 
-var ProtoEmptyResponse = &connect.Response[autogradv1.Empty]{
-	Msg: &autogradv1.Empty{},
+type PaginationRequest struct {
+	Page  int32
+	Limit int32
 }
 
-var ErrInternalServer = connect.NewError(connect.CodeInternal, errors.New("internal server error"))
+func (p PaginationRequest) Offset() int32 {
+	if p.Page <= 1 {
+		return 0
+	}
+
+	return (p.Page - 1) * p.Limit
+}
+
+type Pagination struct {
+	Page  int32
+	Limit int32
+	Total int32
+}
+
+func (p Pagination) ProtoPagination() *autogradv1.PaginationMetadata {
+	return &autogradv1.PaginationMetadata{
+		Total:     p.Total,
+		Page:      p.Page,
+		Limit:     p.Limit,
+		TotalPage: p.TotalPage(),
+	}
+}
+
+func (p Pagination) Offset() int32 {
+	if p.Page <= 1 {
+		return 0
+	}
+
+	return (p.Page - 1) * p.Limit
+}
+
+func (p Pagination) TotalPage() int32 {
+	return p.Total/p.Limit + 1
+}
+
+var (
+	ProtoEmptyResponse = &connect.Response[autogradv1.Empty]{Msg: &autogradv1.Empty{}}
+	ErrInternalServer  = connect.NewError(connect.CodeInternal, errors.New("internal server error"))
+)

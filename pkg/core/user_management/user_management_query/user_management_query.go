@@ -27,12 +27,8 @@ func (query *UserManagementQuery) FindAllManagedUsers(
 
 	return &connect.Response[autogradv1.FindAllManagedUsersResponse]{
 		Msg: &autogradv1.FindAllManagedUsersResponse{
-			ManagedUsers: toManagedUserProtos(res.Users),
-			PaginationMetadata: &autogradv1.PaginationMetadata{
-				Total: res.Count,
-				Page:  req.Msg.GetPage(),
-				Limit: req.Msg.GetLimit(),
-			},
+			ManagedUsers:       toManagedUserProtos(res.Users),
+			PaginationMetadata: res.ProtoPagination(),
 		},
 	}, nil
 }

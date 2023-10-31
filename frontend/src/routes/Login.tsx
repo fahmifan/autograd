@@ -1,25 +1,63 @@
+import {
+	Anchor,
+	Button,
+	Container,
+	Group,
+	PasswordInput,
+	Stack,
+	Text,
+	TextInput,
+} from "@mantine/core";
+import { upperFirst, useToggle } from "@mantine/hooks";
+import { JwtPayload, jwtDecode } from "jwt-decode";
 import { ActionFunctionArgs, Form, redirect } from "react-router-dom";
 import { AutogradServiceClient } from "../service";
 
 export default function Login() {
 	return (
-		<div>
-			<h1>Login</h1>
-			<Form method="post" id="login-form">
-				<p>
-					<label htmlFor="email">Email</label>
-					<input type="email" name="email" id="email" />
-				</p>
-				<p>
-					<label htmlFor="password">Password</label>
-					<input type="password" name="password" id="password" />
-				</p>
+		<Container maw={400} pt="md">
+			<Text size="lg" fw={500} mb="md">
+				Welcome to Autograd, login to continue
+			</Text>
 
-				<button type="submit">Login</button>
+			<Form method="POST" id="login-form">
+				<Stack>
+					<TextInput
+						required
+						label="Email"
+						placeholder="your@email.com"
+						radius="md"
+						name="email"
+						id="email"
+					/>
+
+					<PasswordInput
+						required
+						label="Password"
+						placeholder="Your password"
+						radius="md"
+						name="password"
+						id="password"
+					/>
+				</Stack>
+
+				<Group justify="space-between" mt="xl">
+					<Anchor />
+					<Button type="submit" radius="xl">
+						Login
+					</Button>
+				</Group>
 			</Form>
-		</div>
+		</Container>
 	);
 }
+
+type JWTDecoded = JwtPayload & {
+	id?: string;
+	email?: string;
+	name?: string;
+	role?: string;
+};
 
 export async function loginAction({
 	request,
@@ -34,8 +72,15 @@ export async function loginAction({
 	});
 
 	if (res) {
+		// parse jwt token
+		const decoded = jwtDecode<JWTDecoded>(res.token);
 		localStorage.setItem("token", res.token);
-		return redirect("/user-management");
+
+    if (decoded?.role === 'admin') {
+      return redirect("/backoffice");
+    }
+
+    return redirect("/student-dashboard");
 	}
 
 	return null;

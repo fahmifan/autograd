@@ -58,12 +58,17 @@ type FindAllManagedUsersRequest struct {
 
 type FindAllManagedUsersResponse struct {
 	Users []ManagedUser
-	Count int32
+	core.Pagination
 }
 
 func (ManagedUserReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllManagedUsersRequest) (res FindAllManagedUsersResponse, err error) {
+	pagination := core.Pagination{
+		Page:  req.Page,
+		Limit: req.Limit,
+	}
+
 	var models []dbmodel.User
-	if err := tx.Limit(int(req.Limit)).Offset(int((req.Page - 1) * req.Limit)).Find(&models).Error; err != nil {
+	if err := tx.Limit(int(req.Limit)).Offset(int(pagination.Offset())).Find(&models).Error; err != nil {
 		return res, fmt.Errorf("find all: %w", err)
 	}
 
@@ -84,7 +89,7 @@ func (ManagedUserReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllMa
 		}
 	}
 
-	res.Count = int32(count)
-
+	pagination.Total = int32(count)
+	res.Pagination = pagination
 	return res, nil
 }

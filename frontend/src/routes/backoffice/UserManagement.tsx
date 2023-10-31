@@ -1,15 +1,20 @@
-import { Button, Group, Input, Select, Table, Title } from "@mantine/core";
+import { Button, Group, Input, Pagination, Select, Table, Title } from "@mantine/core";
+import { useEffect, useState } from "react";
 import {
 	ActionFunctionArgs,
 	Form,
+	LoaderFunctionArgs,
 	redirect,
+	useFetcher,
 	useLoaderData,
+	useNavigate,
 } from "react-router-dom";
-import { ManagedUser } from "../../pb/autograd/v1/autograd_pb";
+import { FindAllManagedUsersResponse } from "../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../service";
 
 export function ListManagedUsers() {
-	const { managedUsers } = useLoaderData() as LoaderResponse;
+	const { managedUsers, paginationMetadata } = useLoaderData() as FindAllManagedUsersResponse;
+	const navigate = useNavigate()
 
 	if (!managedUsers || managedUsers.length === 0) {
 		return (
@@ -46,22 +51,18 @@ export function ListManagedUsers() {
 					})}
 				</Table.Tbody>
 			</Table>
+
+			<Pagination 
+				total={paginationMetadata?.totalPage as number}
+				onChange={(page) => {
+					navigate(`/backoffice/user-management?page=${page}&limit=${paginationMetadata?.limit}`);
+				}}
+				siblings={1}
+				boundaries={2} />
 		</>
 	);
 }
 
-type LoaderResponse = {
-	managedUsers: ManagedUser[];
-};
-
-export async function loaderUserManagement(): Promise<LoaderResponse> {
-	const res = await AutogradServiceClient.findAllManagedUsers({
-		limit: 10,
-		page: 1,
-	});
-
-	return res;
-}
 
 export function CreateManagedUser() {
 	const roleSelection = [
@@ -103,6 +104,32 @@ export function CreateManagedUser() {
 			</Group>
 		</>
 	);
+}
+
+export async function loaderUserManagement({ request }: LoaderFunctionArgs): Promise<FindAllManagedUsersResponse> {
+	const url = new URL(request.url)
+	const searchParam = new URLSearchParams(request.url)
+	const page = parseIntWithDefault(url.searchParams.get("page"), 1)
+	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10)
+
+	console.log("url", request.url)
+	console.log(searchParam.get("page"))
+	console.log(`page: ${page}, limit: ${limit}`)
+
+	const res = await AutogradServiceClient.findAllManagedUsers({
+		limit,
+		page,
+	});
+
+	return res;
+}
+
+function parseIntWithDefault(value: string | null, defaultValue: number): number {
+	if (value) {
+		return parseInt(value);
+	}
+
+	return defaultValue;
 }
 
 export async function actionCreateManagedUser({

@@ -73,18 +73,27 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 }
 
 type FindAllAssignmentsRequest struct {
-	Page  int32
-	Limit int32
+	core.PaginationRequest
 }
 
 type FindAllAssignmentsResponse struct {
 	Assignments []Assignment
-	Count       int32
+	core.Pagination
 }
 
 func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAssignmentsRequest) (FindAllAssignmentsResponse, error) {
 	assignments := []dbmodel.Assignment{}
-	err := tx.Table("assignments").Find(&assignments).Error
+	err := tx.Table("assignments").
+		Limit(int(req.Limit)).
+		Offset(int(req.Offset())).
+		Find(&assignments).Error
+
+	if err != nil {
+		return FindAllAssignmentsResponse{}, err
+	}
+
+	count := int64(0)
+	err = tx.Table("assignments").Count(&count).Error
 	if err != nil {
 		return FindAllAssignmentsResponse{}, err
 	}
@@ -100,6 +109,11 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		return FindAllAssignmentsResponse{}, err
 	}
 
+	userMap := make(map[uuid.UUID]dbmodel.User, len(users))
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
+
 	fileIDs := []uuid.UUID{}
 	for _, assignment := range assignments {
 		fileIDs = append(fileIDs, assignment.CaseInputFileID, assignment.CaseOutputFileID)
@@ -111,14 +125,26 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		return FindAllAssignmentsResponse{}, err
 	}
 
-	assignmentMap := map[uuid.UUID]Assignment{}
-	for _, assignment := range assignments {
-		assignmentMap[assignment.ID] = toAssignment(assignment, users[0], files[0], files[1])
+	fileMap := make(map[uuid.UUID]dbmodel.File, len(files))
+	for _, file := range files {
+		fileMap[file.ID] = file
 	}
 
-	result := FindAllAssignmentsResponse{}
+	result := FindAllAssignmentsResponse{
+		Pagination: core.Pagination{
+			Page:  req.Page,
+			Limit: req.Limit,
+			Total: int32(count),
+		},
+	}
+
 	for _, assignment := range assignments {
-		result.Assignments = append(result.Assignments, assignmentMap[assignment.ID])
+		user := userMap[assignment.AssignedBy]
+		fileInput := fileMap[assignment.CaseInputFileID]
+		fileOutput := fileMap[assignment.CaseOutputFileID]
+
+		asg := toAssignment(assignment, user, fileInput, fileOutput)
+		result.Assignments = append(result.Assignments, asg)
 	}
 
 	return result, nil

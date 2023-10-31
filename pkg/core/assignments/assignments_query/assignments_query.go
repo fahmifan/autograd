@@ -20,8 +20,10 @@ func (query *AssignmentsQuery) FindAllAssignments(
 	req *connect.Request[autogradv1.FindAllAssignmentsRequest],
 ) (*connect.Response[autogradv1.FindAllAssignmentsResponse], error) {
 	res, err := assignments.AssignmentReader{}.FindAll(ctx, query.GormDB, assignments.FindAllAssignmentsRequest{
-		Page:  req.Msg.GetPage(),
-		Limit: req.Msg.GetLimit(),
+		PaginationRequest: core.PaginationRequest{
+			Page:  req.Msg.GetPage(),
+			Limit: req.Msg.GetLimit(),
+		},
 	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: FindAll")
@@ -30,12 +32,8 @@ func (query *AssignmentsQuery) FindAllAssignments(
 
 	return &connect.Response[autogradv1.FindAllAssignmentsResponse]{
 		Msg: &autogradv1.FindAllAssignmentsResponse{
-			Assignments: toAssignmentProtos(res.Assignments),
-			PaginationMetadata: &autogradv1.PaginationMetadata{
-				Total: res.Count,
-				Page:  req.Msg.GetPage(),
-				Limit: req.Msg.GetLimit(),
-			},
+			Assignments:        toAssignmentProtos(res.Assignments),
+			PaginationMetadata: res.ProtoPagination(),
 		},
 	}, nil
 }

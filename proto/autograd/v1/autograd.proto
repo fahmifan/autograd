@@ -127,6 +127,7 @@ message PaginationMetadata {
     int32 page = 1;
     int32 limit = 2;
     int32 total = 3;
+    int32 total_page = 4;
 }
 
 message FindAllAssignmentsResponse {
