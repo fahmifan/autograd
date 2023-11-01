@@ -40,6 +40,6 @@ func (f *LocalStorer) Store(ctx context.Context, dst string, r io.Reader) error 
 }
 
 // Seek seek a file to local disk
-func (f *LocalStorer) Seek(dst string) (r io.ReadCloser, err error) {
-	return os.Open(dst)
+func (f *LocalStorer) Seek(ctx context.Context, src string) (r io.ReadCloser, err error) {
+	return os.Open(src)
 }

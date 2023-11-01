@@ -28,14 +28,15 @@ type MediaConfig struct {
 
 type ObjectStorer interface {
 	Store(ctx context.Context, dst string, r io.Reader) error
+	Seek(ctx context.Context, srcpath string) (io.ReadCloser, error)
 }
 
 func IsDBNotFoundErr(err error) bool {
 	return errors.Is(err, gorm.ErrRecordNotFound)
 }
 
-func Transaction(ctx *Ctx, fn func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
-	return ctx.GormDB.Transaction(fn)
+func Transaction(ctx context.Context, coreCtx *Ctx, fn func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+	return coreCtx.GormDB.WithContext(ctx).Transaction(fn)
 }
 
 type TimestampMetadata struct {
@@ -74,7 +75,7 @@ func (meta TimestampMetadata) ProtoTimestampMetadata() *autogradv1.TimestampMeta
 	}
 }
 
-func NewEntityMeta(now time.Time) TimestampMetadata {
+func NewTimestampMeta(now time.Time) TimestampMetadata {
 	return TimestampMetadata{
 		CreatedAt: now,
 		UpdatedAt: now,

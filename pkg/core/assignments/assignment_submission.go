@@ -62,7 +62,7 @@ func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
 
 	return Assignment{
 		ID:                req.NewID,
-		TimestampMetadata: core.NewEntityMeta(req.Now),
+		TimestampMetadata: core.NewTimestampMeta(req.Now),
 		Name:              req.Name,
 		Description:       req.Description,
 		CaseInputFile:     req.CaseInputFile,
@@ -154,7 +154,7 @@ func CreateSubmission(req CreateSubmissionRequest) (Submission, error) {
 		SourceFile:        req.SubmissionFile,
 		Grade:             0,
 		Feedback:          "",
-		TimestampMetadata: core.NewEntityMeta(req.Now),
+		TimestampMetadata: core.NewTimestampMeta(req.Now),
 	}
 
 	return subm, nil

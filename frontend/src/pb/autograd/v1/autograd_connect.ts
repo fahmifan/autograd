@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateStudentSubmissionRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateStudentSubmissionRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -72,7 +72,7 @@ export const AutogradService = {
       kind: MethodKind.Unary,
     },
     /**
-     * Assignment Mutations
+     * Assignment Command
      *
      * @generated from rpc autograd.v1.AutogradService.CreateAssignment
      */
@@ -129,6 +129,7 @@ export const AutogradService = {
     },
     /**
      * Student Assignment
+     * Student Assignment Queries
      *
      * @generated from rpc autograd.v1.AutogradService.FindAllStudentAssignments
      */
@@ -145,6 +146,26 @@ export const AutogradService = {
       name: "FindStudentAssignment",
       I: FindByIDRequest,
       O: StudentAssignment,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Student Assignment Command
+     *
+     * @generated from rpc autograd.v1.AutogradService.CreateStudentSubmission
+     */
+    createStudentSubmission: {
+      name: "CreateStudentSubmission",
+      I: CreateStudentSubmissionRequest,
+      O: CreatedResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradService.UpdateStudentSubmission
+     */
+    updateStudentSubmission: {
+      name: "UpdateStudentSubmission",
+      I: UpdateStudentSubmissionRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
     /**

@@ -170,6 +170,13 @@ message FindAllStudentAssignmentsResponse {
 }
 
 message StudentAssignment {
+    message Submission {
+        string id = 1;
+        string submission_code = 2;
+        int32 grade = 3;
+        string updated_at = 4;
+    }
+
     string id = 1;
     string name = 2;
     string description = 3;
@@ -177,6 +184,30 @@ message StudentAssignment {
     string assigner_name = 5;
     string updated_at = 6;
     string deadline_at = 7;
+    Submission submission = 8;
+    bool has_submission = 9;
+}
+
+message StudentSubmission {
+    string id = 1;
+    string assignment_id = 2;
+    string assignment_name = 3;
+    string assignment_description = 4;
+    string assignment_assigner_id = 5;
+    string assignment_assigner_name = 6;
+    string assignment_deadline_at = 7;
+    string submission_code = 8;
+    string updated_at = 9;
+}
+
+message CreateStudentSubmissionRequest {
+    string assignment_id = 1;
+    string submission_code = 2;
+}
+
+message UpdateStudentSubmissionRequest {
+    string submission_id = 1;
+    string submission_code = 2;
 }
 
 service AutogradService {
@@ -191,7 +222,7 @@ service AutogradService {
     rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
     rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
     rpc FindSubmission(FindByIDRequest) returns (Submission) {}
-    // Assignment Mutations
+    // Assignment Command
     rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
     rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}
     rpc DeleteAssignment(DeleteByIDRequest) returns (Empty) {}
@@ -200,8 +231,12 @@ service AutogradService {
     rpc DeleteSubmission(DeleteByIDRequest) returns (Empty) {}
 
     // Student Assignment
+    // Student Assignment Queries
     rpc FindAllStudentAssignments(FindAllStudentAssignmentsRequest) returns (FindAllStudentAssignmentsResponse) {}
     rpc FindStudentAssignment(FindByIDRequest) returns (StudentAssignment) {}
+    // Student Assignment Command
+    rpc CreateStudentSubmission(CreateStudentSubmissionRequest) returns (CreatedResponse) {}
+    rpc UpdateStudentSubmission(UpdateStudentSubmissionRequest) returns (Empty) {}
 
     // Auth
     // Auth Queries

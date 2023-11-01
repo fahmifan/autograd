@@ -1,13 +1,15 @@
-package sutdent_assignment_query
+package student_assignment_query
 
 import (
 	"context"
 	"errors"
+	"io"
 	"time"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
+	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_query"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
@@ -55,6 +57,7 @@ func (query *StudentAssignmentQuery) FindAllStudentAssignments(ctx context.Conte
 		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
 		From:              from,
 		To:                to,
+		StudentID:         authUser.UserID,
 	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindAllStudentAssignments: FindAllAssignments")
@@ -87,26 +90,49 @@ func (query *StudentAssignmentQuery) FindStudentAssignment(ctx context.Context, 
 	}
 
 	reader := student_assignment.StudentAssignmentReader{}
-	res, err := reader.FindByID(ctx, query.GormDB, id)
+	res, err := reader.FindByID(ctx, query.GormDB, student_assignment.FindStudentAssignmentByIDRequest{
+		ID:            id,
+		StudentID:     authUser.UserID,
+		WithStudentID: true,
+	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindStudentAssignment: FindByID")
 		return nil, core.ErrInternalServer
 	}
 
+	var submissionBuf []byte
+	if res.HasSubmission {
+		mediaStoreQuery := mediastore_query.MediaStoreQuery{Ctx: query.Ctx}
+		submissionMedia, err := mediaStoreQuery.InternalFindMediaFile(ctx, mediastore_query.InternalFindMediaFileRequest{
+			ID: res.Submission.SubmissionFileID,
+		})
+		if err != nil {
+			logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindStudentAssignment: InternalFindMediaFile")
+			return nil, core.ErrInternalServer
+		}
+		defer submissionMedia.BodyCloser.Close()
+
+		submissionBuf, err = io.ReadAll(submissionMedia.BodyCloser)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindStudentAssignment: io.ReadAll")
+			return nil, core.ErrInternalServer
+		}
+	}
+
 	return &connect.Response[autogradv1.StudentAssignment]{
-		Msg: toStudentAssignmentProto(res),
+		Msg: toStudentAssignmentProto(res, submissionBuf),
 	}, nil
 }
 
 func toStudentAssignmentProtos(assignments []student_assignment.StudentAssignment) []*autogradv1.StudentAssignment {
 	var assignmentProtos []*autogradv1.StudentAssignment
 	for _, assignment := range assignments {
-		assignmentProtos = append(assignmentProtos, toStudentAssignmentProto(assignment))
+		assignmentProtos = append(assignmentProtos, toStudentAssignmentProto(assignment, nil))
 	}
 	return assignmentProtos
 }
 
-func toStudentAssignmentProto(assignment student_assignment.StudentAssignment) *autogradv1.StudentAssignment {
+func toStudentAssignmentProto(assignment student_assignment.StudentAssignment, submissionCode []byte) *autogradv1.StudentAssignment {
 	return &autogradv1.StudentAssignment{
 		Id:           assignment.ID.String(),
 		Name:         assignment.Name,
@@ -115,5 +141,12 @@ func toStudentAssignmentProto(assignment student_assignment.StudentAssignment) *
 		AssignerName: assignment.Assigner.Name,
 		UpdatedAt:    assignment.UpdatedAt.Format(time.RFC3339),
 		DeadlineAt:   assignment.DeadlineAt.Format(time.RFC3339),
+		Submission: &autogradv1.StudentAssignment_Submission{
+			Id:             assignment.Submission.ID.String(),
+			SubmissionCode: string(submissionCode),
+			Grade:          int32(assignment.Submission.Grade),
+			UpdatedAt:      assignment.Submission.UpdatedAt.Format(time.RFC3339),
+		},
+		HasSubmission: assignment.HasSubmission,
 	}
 }

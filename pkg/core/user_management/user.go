@@ -51,7 +51,7 @@ func CreateUser(req CreateUserRequest) (ManagedUser, error) {
 		Name:              req.Name,
 		Email:             req.Email,
 		Role:              req.Role,
-		TimestampMetadata: core.NewEntityMeta(req.Now),
+		TimestampMetadata: core.NewTimestampMeta(req.Now),
 		Active:            true,
 	}, nil
 }
@@ -78,7 +78,7 @@ func CreateAdminUser(req CreateAdminUserRequest) (ManagedUser, error) {
 		Name:              req.Name,
 		Email:             req.Email,
 		Role:              auth.RoleAdmin,
-		TimestampMetadata: core.NewEntityMeta(req.Now),
+		TimestampMetadata: core.NewTimestampMeta(req.Now),
 		Active:            true,
 	}, nil
 }

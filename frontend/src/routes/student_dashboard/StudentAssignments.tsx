@@ -1,7 +1,10 @@
-import { Anchor, Box, Breadcrumbs, Container, Group, Pagination, Paper, Table, Text, Title } from "@mantine/core";
+import { Anchor, Box, Breadcrumbs, Button, Group, Pagination, Table, Title, VisuallyHidden } from "@mantine/core";
 import { MDXEditor, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePlugin, thematicBreakPlugin } from "@mdxeditor/editor";
+import { Editor } from "@monaco-editor/react";
+import { IconExternalLink, IconFileCheck } from "@tabler/icons-react";
 import * as dayjs from 'dayjs'
-import { Link, LoaderFunctionArgs, useLoaderData, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Form, Link, LoaderFunctionArgs, redirect, useLoaderData, useNavigate } from "react-router-dom";
 import { FindAllStudentAssignmentsResponse, StudentAssignment } from "../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../service";
 import { parseIntWithDefault } from "../../types/parser";
@@ -24,13 +27,14 @@ export function ListStudentAssignments() {
     return (
 		<>
 			<Title order={2} mb="lg">Assignments</Title>
-			<Table striped highlightOnHover mb="lg" maw={600}>
+			<Table striped highlightOnHover mb="lg" maw={700}>
 				<Table.Thead>
 					<Table.Tr>
 						<Table.Th>Name</Table.Th>
 						<Table.Th>Deadline</Table.Th>
 						<Table.Th>Last Update</Table.Th>
-						<Table.Th> </Table.Th>
+						<Table.Th>Submitted</Table.Th>
+						<Table.Th>Detail</Table.Th>
 					</Table.Tr>
 				</Table.Thead>
 
@@ -41,13 +45,16 @@ export function ListStudentAssignments() {
 								<Table.Td>{assg.name}</Table.Td>
 								<Table.Td>{humanizeDate(assg.deadlineAt)}</Table.Td>
 								<Table.Td>{humanizeDate(assg.updatedAt)}</Table.Td>
-								<Table.Td>
+								<Table.Td align="center">
+									{assg.hasSubmission && <IconFileCheck color="green" />}
+								</Table.Td>
+								<Table.Td align="center">
 									<Anchor 
 										component={Link}
 										to={`/student-dashboard/assignments/detail?id=${assg.id}`} 
 										>
-											Detail
-									</Anchor>
+											<IconExternalLink color="#339AF0" />
+										</Anchor>
 								</Table.Td>
 							</Table.Tr>
 						);
@@ -68,6 +75,7 @@ export function ListStudentAssignments() {
 
 export function DetailStudentAssignment() {
 	const res = useLoaderData() as StudentAssignment;
+	const [submisisonCode, setSubmissionCode] = useState<string>("");
 
 	if (!res) {
 		return (
@@ -108,13 +116,20 @@ export function DetailStudentAssignment() {
 						<Table.Th>Updated At</Table.Th>
 						<Table.Td>{humanizeDate(res.updatedAt)}</Table.Td>
 					</Table.Tr>
+					<Table.Tr>
+						<Table.Th>Submitted At</Table.Th>
+						<Table.Td>{res.hasSubmission && humanizeDate(res.submission?.updatedAt ?? '') }</Table.Td>
+					</Table.Tr>
 				</Table.Tbody>
 			</Table>
 		</Group>
 
 		<Box mt="md">
 			<Title order={4} my="lg">Description</Title>
-			<Paper shadow="xs" p="xl">
+			<Box p="lg" style={{
+				border: "1px solid #e0e0e0",
+				borderRadius: "8px",
+			}}>
 				<MDXEditor 
 					markdown={res.description}
 					readOnly
@@ -125,13 +140,70 @@ export function DetailStudentAssignment() {
 						thematicBreakPlugin(),
 						markdownShortcutPlugin(),
 					]} />
-			</Paper>
+			</Box>
 		</Box>
 
+		<Box>
+			<Group>
+				<Title order={4} my="lg">Submission</Title>
+				{ res.hasSubmission 
+					? <Form method="post" id="update-student-submission">
+						<VisuallyHidden>
+							<input type="hidden" name="assignment_id" value={res.id} />
+							<input type="hidden" name="submission_id" value={res.submission?.id ?? ''} />
+							<input type="hidden" name="submission_code" value={submisisonCode} />
+						</VisuallyHidden>
+						<Button 
+							variant="light" 
+							color="green.9" 
+							type="submit"
+							name="intent"
+							value="resubmit_submission"
+							>
+							Resubmit</Button>
+					</Form>
+					: <Form method="post" id="create-student-submission">
+						<VisuallyHidden>
+							<input type="hidden" name="assignment_id" value={res.id} />
+							<input type="hidden" name="submission_code" value={submisisonCode} />
+						</VisuallyHidden>
+
+						<Button type="submit" 
+							variant="light" 
+							size="sm"
+							name="intent"
+							value="submit_submission"
+						>Submit</Button>
+					</Form>
+				}
+			</Group>
+
+			<Box 
+				py="lg"
+				style={{
+					border: "1px solid #e0e0e0",
+					borderRadius: "8px",
+				}}>
+				<Editor
+					onChange={(value) => {
+						setSubmissionCode(value as string);
+					}}
+					height="300px"
+					defaultLanguage="cpp"
+					language="cpp"
+					defaultValue={ 
+						res?.submission?.submissionCode ?? "// some comment"
+					}
+					/>
+			</Box>
+		</Box>
 	</>
 }
 
 function humanizeDate(date: string): string {
+	if (date === "") {
+		return ""
+	}
 	return dayjs(date).format("HH:MM - ddd DD MMM YYYY")
 }
 
@@ -159,4 +231,37 @@ export async function loaderListStudentAssignments({ request }: LoaderFunctionAr
 	});
 
 	return res;
+}
+
+export async function actionDetailAssignment({ request }: LoaderFunctionArgs): Promise<Response | null> {
+	const form = await request.formData();
+	const intent = form.get("intent");
+
+	switch (intent) {
+		case "submit_submission": {
+			const assignmentId = form.get("assignment_id") as string;
+			const submissionCode = form.get("submission_code") as string;
+
+			await AutogradServiceClient.createStudentSubmission({
+				assignmentId,
+				submissionCode,
+			})
+
+			return redirect(`/student-dashboard/assignments/detail?id=${assignmentId}`);
+		}
+		case "resubmit_submission": {
+			const assignmentId = form.get("assignment_id") as string;
+			const submissionId = form.get("submission_id") as string;
+			const submissionCode = form.get("submission_code") as string;
+
+			await AutogradServiceClient.updateStudentSubmission({
+				submissionId,
+				submissionCode,
+			})
+
+			return redirect(`/student-dashboard/assignments/detail?id=${assignmentId}`);
+		}
+		default:
+			throw new Error("Invalid intent");
+	}
 }

@@ -2,6 +2,7 @@ package mediastore
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
@@ -20,9 +21,18 @@ type MediaFile struct {
 	core.TimestampMetadata
 }
 
+func (media MediaFile) GetInternalPath(baseURL string) string {
+	strs := strings.Split(media.URL, baseURL)
+	if len(strs) != 2 {
+		return ""
+	}
+
+	return strs[1]
+}
+
 func ValidExtension(ext Extension) bool {
 	switch ext {
-	case ".txt":
+	case ".txt", ".cpp":
 		return true
 	default:
 		return false

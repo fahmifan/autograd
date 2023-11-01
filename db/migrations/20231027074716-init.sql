@@ -47,7 +47,7 @@ CREATE TABLE "submissions" (
     "is_graded" INT NOT NULL DEFAULT 0,
     "grade" INT NOT NULL DEFAULT 0,
     "feedback" TEXT DEFAULT '' NOT NULL,
-    "file_url" TEXT DEFAULT '' NOT NULL,
+    "file_id" TEXT DEFAULT '' NOT NULL,
     "created_at" TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP NOT NULL,
     "deleted_at" TIMESTAMP,

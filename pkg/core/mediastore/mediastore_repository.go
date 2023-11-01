@@ -23,3 +23,21 @@ func (MediaFileWriter) Create(ctx context.Context, tx *gorm.DB, mediaFile *Media
 
 	return tx.Create(model).Error
 }
+
+type MediaFileReader struct{}
+
+func (MediaFileReader) FindByID(ctx context.Context, tx *gorm.DB, id string) (MediaFile, error) {
+	model := dbmodel.File{}
+	err := tx.Where("id = ?", id).First(&model).Error
+	if err != nil {
+		return MediaFile{}, err
+	}
+
+	return MediaFile{
+		ID:       model.ID,
+		FileName: model.Name,
+		FileType: MediaFileType(model.Type),
+		Ext:      Extension(model.Ext),
+		URL:      model.URL,
+	}, nil
+}

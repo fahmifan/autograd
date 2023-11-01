@@ -52,7 +52,7 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) error {
+	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
 		assigner, err := assignerReader.FindByID(ctx, cmd.GormDB, authUser.UserID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: FindByID")
@@ -136,7 +136,7 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 	assignmentWriter := assignments.AssignmentWriter{}
 	fileReader := assignments.FileReader{}
 
-	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) error {
+	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
 		assigner, err := assignerReader.FindByID(ctx, cmd.GormDB, authUser.UserID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: FindByID")
@@ -217,7 +217,7 @@ func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Req
 	assignmentWriter := assignments.AssignmentWriter{}
 	now := time.Now()
 
-	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) error {
+	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
 		assignment, err := assignmentReader.FindByID(ctx, cmd.GormDB, assignmentID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: DeleteAssignment: FindByID")
@@ -278,7 +278,7 @@ func (cmd *AssignmentCmd) CreateSubmission(ctx context.Context, req *connect.Req
 	now := time.Now()
 	submission := assignments.Submission{}
 
-	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) (err error) {
+	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) (err error) {
 		assignment, err := assignments.AssignmentReader{}.FindByID(ctx, cmd.GormDB, assignmentID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
@@ -364,7 +364,7 @@ func (cmd *AssignmentCmd) UpdateSubmission(ctx context.Context, req *connect.Req
 	now := time.Now()
 	submission := assignments.Submission{}
 
-	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) (err error) {
+	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) (err error) {
 		submission, err = assignments.SubmissionReader{}.FindByID(ctx, cmd.GormDB, submissionID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")
@@ -425,7 +425,7 @@ func (cmd *AssignmentCmd) DeleteSubmission(ctx context.Context, req *connect.Req
 	now := time.Now()
 	submission := assignments.Submission{}
 
-	err = core.Transaction(cmd.Ctx, func(tx *gorm.DB) (err error) {
+	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) (err error) {
 		submission, err = assignments.SubmissionReader{}.FindByID(ctx, cmd.GormDB, submissionID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateSubmission: AssignmentReader{}.FindByID")

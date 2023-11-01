@@ -1389,6 +1389,16 @@ export class StudentAssignment extends Message<StudentAssignment> {
    */
   deadlineAt = "";
 
+  /**
+   * @generated from field: autograd.v1.StudentAssignment.Submission submission = 8;
+   */
+  submission?: StudentAssignment_Submission;
+
+  /**
+   * @generated from field: bool has_submission = 9;
+   */
+  hasSubmission = false;
+
   constructor(data?: PartialMessage<StudentAssignment>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1404,6 +1414,8 @@ export class StudentAssignment extends Message<StudentAssignment> {
     { no: 5, name: "assigner_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "updated_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "submission", kind: "message", T: StudentAssignment_Submission },
+    { no: 9, name: "has_submission", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StudentAssignment {
@@ -1420,6 +1432,232 @@ export class StudentAssignment extends Message<StudentAssignment> {
 
   static equals(a: StudentAssignment | PlainMessage<StudentAssignment> | undefined, b: StudentAssignment | PlainMessage<StudentAssignment> | undefined): boolean {
     return proto3.util.equals(StudentAssignment, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.StudentAssignment.Submission
+ */
+export class StudentAssignment_Submission extends Message<StudentAssignment_Submission> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string submission_code = 2;
+   */
+  submissionCode = "";
+
+  /**
+   * @generated from field: int32 grade = 3;
+   */
+  grade = 0;
+
+  /**
+   * @generated from field: string updated_at = 4;
+   */
+  updatedAt = "";
+
+  constructor(data?: PartialMessage<StudentAssignment_Submission>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.StudentAssignment.Submission";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "submission_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "grade", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: "updated_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StudentAssignment_Submission {
+    return new StudentAssignment_Submission().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StudentAssignment_Submission {
+    return new StudentAssignment_Submission().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StudentAssignment_Submission {
+    return new StudentAssignment_Submission().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StudentAssignment_Submission | PlainMessage<StudentAssignment_Submission> | undefined, b: StudentAssignment_Submission | PlainMessage<StudentAssignment_Submission> | undefined): boolean {
+    return proto3.util.equals(StudentAssignment_Submission, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.StudentSubmission
+ */
+export class StudentSubmission extends Message<StudentSubmission> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string assignment_id = 2;
+   */
+  assignmentId = "";
+
+  /**
+   * @generated from field: string assignment_name = 3;
+   */
+  assignmentName = "";
+
+  /**
+   * @generated from field: string assignment_description = 4;
+   */
+  assignmentDescription = "";
+
+  /**
+   * @generated from field: string assignment_assigner_id = 5;
+   */
+  assignmentAssignerId = "";
+
+  /**
+   * @generated from field: string assignment_assigner_name = 6;
+   */
+  assignmentAssignerName = "";
+
+  /**
+   * @generated from field: string assignment_deadline_at = 7;
+   */
+  assignmentDeadlineAt = "";
+
+  /**
+   * @generated from field: string submission_code = 8;
+   */
+  submissionCode = "";
+
+  /**
+   * @generated from field: string updated_at = 9;
+   */
+  updatedAt = "";
+
+  constructor(data?: PartialMessage<StudentSubmission>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.StudentSubmission";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "assignment_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "assignment_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "assignment_description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "assignment_assigner_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "assignment_assigner_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "assignment_deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "submission_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "updated_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StudentSubmission {
+    return new StudentSubmission().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StudentSubmission {
+    return new StudentSubmission().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StudentSubmission {
+    return new StudentSubmission().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StudentSubmission | PlainMessage<StudentSubmission> | undefined, b: StudentSubmission | PlainMessage<StudentSubmission> | undefined): boolean {
+    return proto3.util.equals(StudentSubmission, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.CreateStudentSubmissionRequest
+ */
+export class CreateStudentSubmissionRequest extends Message<CreateStudentSubmissionRequest> {
+  /**
+   * @generated from field: string assignment_id = 1;
+   */
+  assignmentId = "";
+
+  /**
+   * @generated from field: string submission_code = 2;
+   */
+  submissionCode = "";
+
+  constructor(data?: PartialMessage<CreateStudentSubmissionRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.CreateStudentSubmissionRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "assignment_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "submission_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateStudentSubmissionRequest {
+    return new CreateStudentSubmissionRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateStudentSubmissionRequest {
+    return new CreateStudentSubmissionRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateStudentSubmissionRequest {
+    return new CreateStudentSubmissionRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CreateStudentSubmissionRequest | PlainMessage<CreateStudentSubmissionRequest> | undefined, b: CreateStudentSubmissionRequest | PlainMessage<CreateStudentSubmissionRequest> | undefined): boolean {
+    return proto3.util.equals(CreateStudentSubmissionRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.UpdateStudentSubmissionRequest
+ */
+export class UpdateStudentSubmissionRequest extends Message<UpdateStudentSubmissionRequest> {
+  /**
+   * @generated from field: string submission_id = 1;
+   */
+  submissionId = "";
+
+  /**
+   * @generated from field: string submission_code = 2;
+   */
+  submissionCode = "";
+
+  constructor(data?: PartialMessage<UpdateStudentSubmissionRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.UpdateStudentSubmissionRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "submission_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "submission_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateStudentSubmissionRequest {
+    return new UpdateStudentSubmissionRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateStudentSubmissionRequest {
+    return new UpdateStudentSubmissionRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateStudentSubmissionRequest {
+    return new UpdateStudentSubmissionRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateStudentSubmissionRequest | PlainMessage<UpdateStudentSubmissionRequest> | undefined, b: UpdateStudentSubmissionRequest | PlainMessage<UpdateStudentSubmissionRequest> | undefined): boolean {
+    return proto3.util.equals(UpdateStudentSubmissionRequest, a, b);
   }
 }
 

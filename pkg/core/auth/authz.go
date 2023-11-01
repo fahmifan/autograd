@@ -61,6 +61,7 @@ var policy = map[Role]map[Permission]bool{
 		ViewAnyAssignments:       _ok,
 		DeleteAssignment:         _ok,
 		GradeAssignment:          _ok,
+		CreateSubmission:         _ok,
 		ViewSubmission:           _ok,
 		ViewAnySubmissions:       _ok,
 		CreateUser:               _ok,
@@ -73,6 +74,7 @@ var policy = map[Role]map[Permission]bool{
 		DeleteSubmission: _ok,
 		UpdateUser:       _ok,
 		CreateMedia:      _ok,
+		CreateSubmission: _ok,
 	},
 }
 
