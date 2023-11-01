@@ -102,12 +102,23 @@ type PaginationRequest struct {
 	Limit int32
 }
 
+func PaginationRequestFromProto(p *autogradv1.PaginationRequest) PaginationRequest {
+	return PaginationRequest{
+		Page:  p.GetPage(),
+		Limit: p.GetLimit(),
+	}
+}
+
 func (p PaginationRequest) Offset() int32 {
 	if p.Page <= 1 {
 		return 0
 	}
 
 	return (p.Page - 1) * p.Limit
+}
+
+func (p PaginationRequest) PaginateScope(tx *gorm.DB) *gorm.DB {
+	return tx.Limit(int(p.Limit)).Offset(int(p.Offset()))
 }
 
 type Pagination struct {
@@ -134,10 +145,20 @@ func (p Pagination) Offset() int32 {
 }
 
 func (p Pagination) TotalPage() int32 {
+	if p.Total < p.Limit {
+		return 1
+	}
+
+	if p.Total%p.Limit == 0 {
+		return p.Total / p.Limit
+	}
+
 	return p.Total/p.Limit + 1
 }
 
 var (
-	ProtoEmptyResponse = &connect.Response[autogradv1.Empty]{Msg: &autogradv1.Empty{}}
-	ErrInternalServer  = connect.NewError(connect.CodeInternal, errors.New("internal server error"))
+	ProtoEmptyResponse  = &connect.Response[autogradv1.Empty]{Msg: &autogradv1.Empty{}}
+	ErrInternalServer   = connect.NewError(connect.CodeInternal, errors.New("internal server error"))
+	ErrUnauthenticated  = connect.NewError(connect.CodeUnauthenticated, errors.New("unauthenticated"))
+	ErrPermissionDenied = connect.NewError(connect.CodePermissionDenied, errors.New("unauthorized"))
 )

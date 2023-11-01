@@ -52,8 +52,7 @@ func (ManagedUserReader) FindUserByID(ctx context.Context, tx *gorm.DB, id strin
 }
 
 type FindAllManagedUsersRequest struct {
-	Page  int32
-	Limit int32
+	core.PaginationRequest
 }
 
 type FindAllManagedUsersResponse struct {

@@ -1,18 +1,25 @@
 import {
+	Box,
 	Button,
 	FileInput,
 	Group,
 	Input,
+	Paper,
+	Stack,
 	Table,
+	Text,
 	TextInput,
 	Title,
+	VisuallyHidden,
 	rem,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
+import { ChangeCodeMirrorLanguage, ConditionalContents, InsertCodeBlock, InsertSandpack, MDXEditor, MDXEditorMethods, ShowSandpackInfo, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePlugin, thematicBreakPlugin, toolbarPlugin } from "@mdxeditor/editor";
+import '@mdxeditor/editor/style.css'
 import { IconUpload } from "@tabler/icons-react";
-import { useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import { useMutation } from "react-query";
-import { ActionFunctionArgs, Form, useLoaderData } from "react-router-dom";
+import { ActionFunctionArgs, Form, redirect, useLoaderData, useSubmit } from "react-router-dom";
 import { FindAllAssignmentsResponse } from "../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../service";
 
@@ -60,6 +67,8 @@ export function ListAssignments() {
 export function CreateAssignment() {
 	const [stdinFileID, setStdinFileID] = useState("");
 	const [stdoutFileID, setStdoutFileID] = useState("");
+	const markdownRef = useRef<MDXEditorMethods>(null)
+	const submit = useSubmit();
 
 	const mutateUploadStdin = useMutation({
 		mutationKey: "uploadStdin",
@@ -94,32 +103,34 @@ export function CreateAssignment() {
 	});
 
 	return (
-		<div>
+		<>
 			<Title order={3}>Create Assignment</Title>
-			<Group>
-				<Form method="POST" id="create-assignment">
+			<Form method="POST" id="create-assignment">
+				<Stack maw={400}>
 					<TextInput label="Name" required name="name" title="Name" id="name" />
-					<TextInput
-						required
-						label="Description"
-						title="Description"
-						name="description"
-						id="description"
-					/>
+					
+					<VisuallyHidden>
+						<Input
+							type="hidden"
+							name="description"
+							id="description"
+							value={markdownRef.current?.getMarkdown() ?? ""}
+						/>
 
-					<Input
-						type="hidden"
-						name="case_input_file_id"
-						id="case_input_file_id"
-						value={stdinFileID}
-					/>
+						<Input
+							type="hidden"
+							name="case_input_file_id"
+							id="case_input_file_id"
+							value={stdinFileID}
+						/>
 
-					<Input
-						type="hidden"
-						name="case_output_file_id"
-						id="case_output_file_id"
-						value={stdoutFileID}
-					/>
+						<Input
+							type="hidden"
+							name="case_output_file_id"
+							id="case_output_file_id"
+							value={stdoutFileID}
+						/>
+					</VisuallyHidden>
 
 					<FileInput
 						required
@@ -166,20 +177,55 @@ export function CreateAssignment() {
 						name="deadline_at"
 						id="deadline_at"
 					/>
+				</Stack>
 
-					<Button mt="md" type="submit">
-						Create
-					</Button>
-				</Form>
-			</Group>
-		</div>
+				<Text py="lg">
+					Description
+				</Text>
+				<MarkdownEditor ref={markdownRef} />
+
+				<Button mt="md" type="submit" onClick={(event) => {
+					event.preventDefault()
+					const el = event.currentTarget.form?.elements.namedItem("description") as Element
+					el.setAttribute("value", markdownRef.current?.getMarkdown() ?? "")
+					submit(event.currentTarget)
+				}}>
+					Create
+				</Button>
+			</Form>
+		</>
 	);
 }
 
+type MarkdownEditorProps = {
+	onChange?: (value: string) => void
+	ref: React.RefObject<MDXEditorMethods>
+}
+
+export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>((props: MarkdownEditorProps, ref) => {
+	return (
+		<Paper shadow="xs" p="xl">
+			<MDXEditor 
+				ref={ref}
+				onChange={props.onChange}
+				markdown={'## Description' }
+				plugins={[
+					headingsPlugin(), 
+					listsPlugin(), 
+					quotePlugin(), 
+					thematicBreakPlugin(),
+					markdownShortcutPlugin(),
+				]} />
+		</Paper>
+	)
+})
+
 export async function loaderListAssignments(): Promise<FindAllAssignmentsResponse> {
 	return await AutogradServiceClient.findAllAssignments({
-		limit: 10,
-		page: 1,
+		paginationRequest: {
+			limit: 10,
+			page: 1,
+		}
 	});
 }
 
@@ -193,13 +239,17 @@ export async function actionCreateAssignemnt(
 	const caseOutputFileId = formData.get("case_output_file_id") as string;
 	const deadlineAt = formData.get("deadline_at") as string;
 
-	await AutogradServiceClient.createAssignment({
+	const res = await AutogradServiceClient.createAssignment({
 		name,
 		description,
 		caseInputFileId,
 		caseOutputFileId,
 		deadlineAt,
 	});
+
+	if (res) {
+		return redirect("/backoffice/assignment-submission");
+	}
 
 	return null;
 }

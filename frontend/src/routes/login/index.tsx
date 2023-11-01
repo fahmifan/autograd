@@ -8,12 +8,11 @@ import {
 	Text,
 	TextInput,
 } from "@mantine/core";
-import { upperFirst, useToggle } from "@mantine/hooks";
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import { ActionFunctionArgs, Form, redirect } from "react-router-dom";
-import { AutogradServiceClient } from "../service";
+import { AutogradServiceClient } from "../../service";
 
-export default function Login() {
+export function LoginPage() {
 	return (
 		<Container maw={400} pt="md">
 			<Text size="lg" fw={500} mb="md">

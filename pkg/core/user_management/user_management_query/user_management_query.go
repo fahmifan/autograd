@@ -18,9 +18,9 @@ func (query *UserManagementQuery) FindAllManagedUsers(
 	req *connect.Request[autogradv1.FindAllManagedUsersRequest],
 ) (*connect.Response[autogradv1.FindAllManagedUsersResponse], error) {
 	res, err := user_management.ManagedUserReader{}.FindAll(ctx, query.GormDB, user_management.FindAllManagedUsersRequest{
-		Page:  req.Msg.GetPage(),
-		Limit: req.Msg.GetLimit(),
+		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
 	})
+
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

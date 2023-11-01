@@ -108,17 +108,14 @@ export function CreateManagedUser() {
 
 export async function loaderUserManagement({ request }: LoaderFunctionArgs): Promise<FindAllManagedUsersResponse> {
 	const url = new URL(request.url)
-	const searchParam = new URLSearchParams(request.url)
 	const page = parseIntWithDefault(url.searchParams.get("page"), 1)
 	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10)
 
-	console.log("url", request.url)
-	console.log(searchParam.get("page"))
-	console.log(`page: ${page}, limit: ${limit}`)
-
 	const res = await AutogradServiceClient.findAllManagedUsers({
-		limit,
-		page,
+		paginationRequest: {
+			limit,
+			page,
+		}
 	});
 
 	return res;

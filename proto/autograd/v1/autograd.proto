@@ -23,6 +23,19 @@ message DeleteByIDRequest {
     string id = 1;
 }
 
+
+message PaginationMetadata {
+    int32 page = 1;
+    int32 limit = 2;
+    int32 total = 3;
+    int32 total_page = 4;
+}
+
+message PaginationRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
+
 message CreateManagedUserRequest {
     string name = 1;
     string email = 2;
@@ -70,7 +83,8 @@ message Assignment {
     Assigner assigner = 4;
     AssignmentFile case_input_file = 5;
     AssignmentFile case_output_file = 6;
-    TimestampMetadata timestamp_metadata = 7;
+    string deadline_at = 7;
+    TimestampMetadata timestamp_metadata = 8;
 }
 
 message Submission {
@@ -119,15 +133,7 @@ message LoginResponse {
 }
 
 message FindAllAssignmentsRequest {
-    int32 page = 1;
-    int32 limit = 2;
-}
-
-message PaginationMetadata {
-    int32 page = 1;
-    int32 limit = 2;
-    int32 total = 3;
-    int32 total_page = 4;
+    PaginationRequest pagination_request = 1;
 }
 
 message FindAllAssignmentsResponse {
@@ -144,13 +150,33 @@ message ManagedUser {
 }
 
 message FindAllManagedUsersRequest {
-    int32 page = 1;
-    int32 limit = 2;
+    PaginationRequest pagination_request = 1;
 }
 
 message FindAllManagedUsersResponse {
     repeated ManagedUser managed_users = 1;
     PaginationMetadata pagination_metadata = 2;
+}
+
+message FindAllStudentAssignmentsRequest {
+    PaginationRequest pagination_request = 1;
+    string from_date = 2;
+    string to_date = 3;
+}
+
+message FindAllStudentAssignmentsResponse {
+    repeated StudentAssignment assignments = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
+message StudentAssignment {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string assigner_id = 4;
+    string assigner_name = 5;
+    string updated_at = 6;
+    string deadline_at = 7;
 }
 
 service AutogradService {
@@ -172,6 +198,10 @@ service AutogradService {
     rpc CreateSubmission(CreateSubmissionRequest) returns (CreatedResponse) {}
     rpc UpdateSubmission(UpdateSubmissionRequest) returns (Empty) {}
     rpc DeleteSubmission(DeleteByIDRequest) returns (Empty) {}
+
+    // Student Assignment
+    rpc FindAllStudentAssignments(FindAllStudentAssignmentsRequest) returns (FindAllStudentAssignmentsResponse) {}
+    rpc FindStudentAssignment(FindByIDRequest) returns (StudentAssignment) {}
 
     // Auth
     // Auth Queries

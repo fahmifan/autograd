@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, Submission, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -125,6 +125,26 @@ export const AutogradService = {
       name: "DeleteSubmission",
       I: DeleteByIDRequest,
       O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Student Assignment
+     *
+     * @generated from rpc autograd.v1.AutogradService.FindAllStudentAssignments
+     */
+    findAllStudentAssignments: {
+      name: "FindAllStudentAssignments",
+      I: FindAllStudentAssignmentsRequest,
+      O: FindAllStudentAssignmentsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradService.FindStudentAssignment
+     */
+    findStudentAssignment: {
+      name: "FindStudentAssignment",
+      I: FindByIDRequest,
+      O: StudentAssignment,
       kind: MethodKind.Unary,
     },
     /**
