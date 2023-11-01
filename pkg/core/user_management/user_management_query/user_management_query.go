@@ -5,6 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
+	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/core/user_management"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 )
@@ -17,6 +18,15 @@ func (query *UserManagementQuery) FindAllManagedUsers(
 	ctx context.Context,
 	req *connect.Request[autogradv1.FindAllManagedUsersRequest],
 ) (*connect.Response[autogradv1.FindAllManagedUsersResponse], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, core.ErrUnauthenticated
+	}
+
+	if !authUser.Role.Can(auth.ViewAnyAssignments) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	res, err := user_management.ManagedUserReader{}.FindAll(ctx, query.GormDB, user_management.FindAllManagedUsersRequest{
 		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
 	})

@@ -1,32 +1,63 @@
-import { Anchor, Box, Breadcrumbs, Button, Group, Pagination, Table, Title, VisuallyHidden } from "@mantine/core";
-import { MDXEditor, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePlugin, thematicBreakPlugin } from "@mdxeditor/editor";
+import {
+	Anchor,
+	Box,
+	Breadcrumbs,
+	Button,
+	Group,
+	Pagination,
+	Table,
+	Title,
+	VisuallyHidden,
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import {
+	MDXEditor,
+	headingsPlugin,
+	listsPlugin,
+	markdownShortcutPlugin,
+	quotePlugin,
+	thematicBreakPlugin,
+} from "@mdxeditor/editor";
 import { Editor } from "@monaco-editor/react";
 import { IconExternalLink, IconFileCheck } from "@tabler/icons-react";
-import * as dayjs from 'dayjs'
+import * as dayjs from "dayjs";
 import { useState } from "react";
-import { Form, Link, LoaderFunctionArgs, redirect, useLoaderData, useNavigate } from "react-router-dom";
-import { FindAllStudentAssignmentsResponse, StudentAssignment } from "../../pb/autograd/v1/autograd_pb";
+import {
+	Form,
+	Link,
+	LoaderFunctionArgs,
+	redirect,
+	useLoaderData,
+	useNavigate,
+	useSubmit,
+} from "react-router-dom";
+import {
+	FindAllStudentAssignmentsResponse,
+	StudentAssignment,
+} from "../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../service";
 import { parseIntWithDefault } from "../../types/parser";
 
 export function ListStudentAssignments() {
-    const res = useLoaderData() as FindAllStudentAssignmentsResponse;
-    const navigate = useNavigate();
+	const res = useLoaderData() as FindAllStudentAssignmentsResponse;
+	const navigate = useNavigate();
 
-    if (!res || res.assignments.length === 0) {
-        return (
-            <>
-                <h2>Assignments</h2>
-                <p>
-                    <i>No Assignments</i>
-                </p>
-            </>
-        );
-    }
+	if (!res || res.assignments.length === 0) {
+		return (
+			<>
+				<h2>Assignments</h2>
+				<p>
+					<i>No Assignments</i>
+				</p>
+			</>
+		);
+	}
 
-    return (
+	return (
 		<>
-			<Title order={2} mb="lg">Assignments</Title>
+			<Title order={2} mb="lg">
+				Assignments
+			</Title>
 			<Table striped highlightOnHover mb="lg" maw={700}>
 				<Table.Thead>
 					<Table.Tr>
@@ -49,12 +80,12 @@ export function ListStudentAssignments() {
 									{assg.hasSubmission && <IconFileCheck color="green" />}
 								</Table.Td>
 								<Table.Td align="center">
-									<Anchor 
+									<Anchor
 										component={Link}
-										to={`/student-dashboard/assignments/detail?id=${assg.id}`} 
-										>
-											<IconExternalLink color="#339AF0" />
-										</Anchor>
+										to={`/student-dashboard/assignments/detail?id=${assg.id}`}
+									>
+										<IconExternalLink color="#339AF0" />
+									</Anchor>
 								</Table.Td>
 							</Table.Tr>
 						);
@@ -62,19 +93,23 @@ export function ListStudentAssignments() {
 				</Table.Tbody>
 			</Table>
 
-			<Pagination 
+			<Pagination
 				total={res.paginationMetadata?.totalPage as number}
 				onChange={(page) => {
-					navigate(`/student-dashboard/assignments?page=${page}&limit=${res.paginationMetadata?.limit}`);
+					navigate(
+						`/student-dashboard/assignments?page=${page}&limit=${res.paginationMetadata?.limit}`,
+					);
 				}}
 				siblings={1}
-				boundaries={2} />
+				boundaries={2}
+			/>
 		</>
 	);
 }
 
 export function DetailStudentAssignment() {
 	const res = useLoaderData() as StudentAssignment;
+	const submit = useSubmit();
 	const [submisisonCode, setSubmissionCode] = useState<string>("");
 
 	if (!res) {
@@ -89,127 +124,181 @@ export function DetailStudentAssignment() {
 
 	const items = [
 		{ title: "Assignments", to: "/student-dashboard/assignments" },
-		{ title: res.name, to: `/student-dashboard/assignments/detail?id=${res.id}` },
+		{
+			title: res.name,
+			to: `/student-dashboard/assignments/detail?id=${res.id}`,
+		},
 	].map((item) => {
-		return <Anchor key={item.to} component={Link} to={item.to}>
-			{item.title}
-		</Anchor>
-	})
+		return (
+			<Anchor key={item.to} component={Link} to={item.to}>
+				{item.title}
+			</Anchor>
+		);
+	});
 
-	return <>
-		<Title order={2} mb="lg">Assignments</Title>
+	return (
+		<>
+			<Title order={2} mb="lg">
+				Assignments
+			</Title>
 
-		<Breadcrumbs mb="lg">
-			{items}
-		</Breadcrumbs>
+			<Breadcrumbs mb="lg">{items}</Breadcrumbs>
 
-		<Title order={3} mb="sm">{res.name}</Title>
+			<Title order={3} mb="sm">
+				{res.name}
+			</Title>
 
-		<Group>
-			<Table maw={300}>
-				<Table.Tbody>
-					<Table.Tr>
-						<Table.Th>Deadline</Table.Th>
-						<Table.Td>{humanizeDate(res.deadlineAt)}</Table.Td>
-					</Table.Tr>
-					<Table.Tr>
-						<Table.Th>Updated At</Table.Th>
-						<Table.Td>{humanizeDate(res.updatedAt)}</Table.Td>
-					</Table.Tr>
-					<Table.Tr>
-						<Table.Th>Submitted At</Table.Th>
-						<Table.Td>{res.hasSubmission && humanizeDate(res.submission?.updatedAt ?? '') }</Table.Td>
-					</Table.Tr>
-				</Table.Tbody>
-			</Table>
-		</Group>
-
-		<Box mt="md">
-			<Title order={4} my="lg">Description</Title>
-			<Box p="lg" style={{
-				border: "1px solid #e0e0e0",
-				borderRadius: "8px",
-			}}>
-				<MDXEditor 
-					markdown={res.description}
-					readOnly
-					plugins={[
-						headingsPlugin(), 
-						listsPlugin(), 
-						quotePlugin(), 
-						thematicBreakPlugin(),
-						markdownShortcutPlugin(),
-					]} />
-			</Box>
-		</Box>
-
-		<Box>
 			<Group>
-				<Title order={4} my="lg">Submission</Title>
-				{ res.hasSubmission 
-					? <Form method="post" id="update-student-submission">
-						<VisuallyHidden>
-							<input type="hidden" name="assignment_id" value={res.id} />
-							<input type="hidden" name="submission_id" value={res.submission?.id ?? ''} />
-							<input type="hidden" name="submission_code" value={submisisonCode} />
-						</VisuallyHidden>
-						<Button 
-							variant="light" 
-							color="green.9" 
-							type="submit"
-							name="intent"
-							value="resubmit_submission"
-							>
-							Resubmit</Button>
-					</Form>
-					: <Form method="post" id="create-student-submission">
-						<VisuallyHidden>
-							<input type="hidden" name="assignment_id" value={res.id} />
-							<input type="hidden" name="submission_code" value={submisisonCode} />
-						</VisuallyHidden>
-
-						<Button type="submit" 
-							variant="light" 
-							size="sm"
-							name="intent"
-							value="submit_submission"
-						>Submit</Button>
-					</Form>
-				}
+				<Table maw={300}>
+					<Table.Tbody>
+						<Table.Tr>
+							<Table.Th>Deadline</Table.Th>
+							<Table.Td>{humanizeDate(res.deadlineAt)}</Table.Td>
+						</Table.Tr>
+						<Table.Tr>
+							<Table.Th>Updated At</Table.Th>
+							<Table.Td>{humanizeDate(res.updatedAt)}</Table.Td>
+						</Table.Tr>
+						<Table.Tr>
+							<Table.Th>Submitted At</Table.Th>
+							<Table.Td>
+								{res.hasSubmission &&
+									humanizeDate(res.submission?.updatedAt ?? "")}
+							</Table.Td>
+						</Table.Tr>
+					</Table.Tbody>
+				</Table>
 			</Group>
 
-			<Box 
-				py="lg"
-				style={{
-					border: "1px solid #e0e0e0",
-					borderRadius: "8px",
-				}}>
-				<Editor
-					onChange={(value) => {
-						setSubmissionCode(value as string);
+			<Box mt="md">
+				<Title order={4} my="lg">
+					Description
+				</Title>
+				<Box
+					p="lg"
+					style={{
+						border: "1px solid #e0e0e0",
+						borderRadius: "8px",
 					}}
-					height="300px"
-					defaultLanguage="cpp"
-					language="cpp"
-					defaultValue={ 
-						res?.submission?.submissionCode ?? "// some comment"
-					}
+				>
+					<MDXEditor
+						markdown={res.description}
+						readOnly
+						plugins={[
+							headingsPlugin(),
+							listsPlugin(),
+							quotePlugin(),
+							thematicBreakPlugin(),
+							markdownShortcutPlugin(),
+						]}
 					/>
+				</Box>
 			</Box>
-		</Box>
-	</>
+
+			<Box>
+				<Group>
+					<Title order={4} my="lg">
+						Submission
+					</Title>
+					{res.hasSubmission ? (
+						<Form method="post" id="update-student-submission">
+							<VisuallyHidden>
+								<input type="hidden" name="assignment_id" value={res.id} />
+								<input
+									type="hidden"
+									name="submission_id"
+									value={res.submission?.id ?? ""}
+								/>
+								<input
+									type="hidden"
+									name="submission_code"
+									value={submisisonCode}
+								/>
+							</VisuallyHidden>
+							<Button
+								variant="light"
+								color="green.9"
+								type="submit"
+								name="intent"
+								value="resubmit_submission"
+								onClick={(event) => {
+									event.preventDefault();
+									const ok = confirm("Are you sure to resubmit?");
+									if (!ok) {
+										return;
+									}
+									submit(event.currentTarget);
+								}}
+							>
+								Resubmit
+							</Button>
+						</Form>
+					) : (
+						<Form method="post" id="create-student-submission">
+							<VisuallyHidden>
+								<input type="hidden" name="assignment_id" value={res.id} />
+								<input
+									type="hidden"
+									name="submission_code"
+									value={submisisonCode}
+								/>
+							</VisuallyHidden>
+
+							<Button
+								type="submit"
+								variant="light"
+								size="sm"
+								name="intent"
+								value="submit_submission"
+								onClick={(event) => {
+									event.preventDefault();
+									const ok = confirm("Are you sure to submit?");
+									if (!ok) {
+										return;
+									}
+									submit(event.currentTarget);
+								}}
+							>
+								Submit
+							</Button>
+						</Form>
+					)}
+				</Group>
+
+				<Box
+					py="lg"
+					style={{
+						border: "1px solid #e0e0e0",
+						borderRadius: "8px",
+					}}
+				>
+					<Editor
+						onChange={(value) => {
+							setSubmissionCode(value as string);
+						}}
+						height="300px"
+						defaultLanguage="cpp"
+						language="cpp"
+						defaultValue={res?.submission?.submissionCode ?? "// some comment"}
+					/>
+				</Box>
+			</Box>
+		</>
+	);
 }
 
 function humanizeDate(date: string): string {
 	if (date === "") {
-		return ""
+		return "";
 	}
-	return dayjs(date).format("HH:MM - ddd DD MMM YYYY")
+	return dayjs(date).format("HH:MM - ddd DD MMM YYYY");
 }
 
-export async function loaderDetailStudentAssignment({ request }: LoaderFunctionArgs): Promise<StudentAssignment> {
-	const url = new URL(request.url)
-	const id = url.searchParams.get("id")
+export async function loaderDetailStudentAssignment({
+	request,
+}: LoaderFunctionArgs): Promise<StudentAssignment> {
+	const url = new URL(request.url);
+	const id = url.searchParams.get("id");
 
 	const res = await AutogradServiceClient.findStudentAssignment({
 		id: id as string,
@@ -218,22 +307,26 @@ export async function loaderDetailStudentAssignment({ request }: LoaderFunctionA
 	return res;
 }
 
-export async function loaderListStudentAssignments({ request }: LoaderFunctionArgs): Promise<FindAllStudentAssignmentsResponse> {
-    const url = new URL(request.url)
-	const page = parseIntWithDefault(url.searchParams.get("page"), 1)
-	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10)
+export async function loaderListStudentAssignments({
+	request,
+}: LoaderFunctionArgs): Promise<FindAllStudentAssignmentsResponse> {
+	const url = new URL(request.url);
+	const page = parseIntWithDefault(url.searchParams.get("page"), 1);
+	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10);
 
 	const res = await AutogradServiceClient.findAllStudentAssignments({
 		paginationRequest: {
 			limit,
 			page,
-		}
+		},
 	});
 
 	return res;
 }
 
-export async function actionDetailAssignment({ request }: LoaderFunctionArgs): Promise<Response | null> {
+export async function actionDetailAssignment({
+	request,
+}: LoaderFunctionArgs): Promise<Response | null> {
 	const form = await request.formData();
 	const intent = form.get("intent");
 
@@ -245,9 +338,18 @@ export async function actionDetailAssignment({ request }: LoaderFunctionArgs): P
 			await AutogradServiceClient.createStudentSubmission({
 				assignmentId,
 				submissionCode,
-			})
+			});
 
-			return redirect(`/student-dashboard/assignments/detail?id=${assignmentId}`);
+			notifications.show({
+				title: "Submit",
+				message: "Success submit your submission",
+				withCloseButton: true,
+				color: "green",
+			});
+
+			return redirect(
+				`/student-dashboard/assignments/detail?id=${assignmentId}`,
+			);
 		}
 		case "resubmit_submission": {
 			const assignmentId = form.get("assignment_id") as string;
@@ -257,9 +359,17 @@ export async function actionDetailAssignment({ request }: LoaderFunctionArgs): P
 			await AutogradServiceClient.updateStudentSubmission({
 				submissionId,
 				submissionCode,
-			})
+			});
 
-			return redirect(`/student-dashboard/assignments/detail?id=${assignmentId}`);
+			notifications.show({
+				title: "Resubmit",
+				message: "Success resubmit your submission",
+				withCloseButton: true,
+				color: "green",
+			});
+			return redirect(
+				`/student-dashboard/assignments/detail?id=${assignmentId}`,
+			);
 		}
 		default:
 			throw new Error("Invalid intent");

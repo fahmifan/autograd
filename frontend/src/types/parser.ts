@@ -1,4 +1,7 @@
-export function parseIntWithDefault(value: string | null, defaultValue: number): number {
+export function parseIntWithDefault(
+	value: string | null,
+	defaultValue: number,
+): number {
 	if (value) {
 		return parseInt(value);
 	}

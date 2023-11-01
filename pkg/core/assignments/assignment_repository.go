@@ -39,7 +39,7 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 	}
 
 	user := dbmodel.User{}
-	err = tx.Table("users").Where("id = ?", id).Take(&user).Error
+	err = tx.Table("users").Where("id = ?", assignment.AssignedBy).Take(&user).Error
 	if err != nil {
 		return Assignment{}, err
 	}
@@ -188,6 +188,7 @@ func toAssignment(
 		CaseInputFile:     toCaseFile(inputFile),
 		CaseOutputFile:    toCaseFile(outputFile),
 		TimestampMetadata: toEntityMeta(model.Base),
+		DeadlineAt:        model.DeadlineAt,
 	}
 }
 

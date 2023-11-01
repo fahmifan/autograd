@@ -1,20 +1,28 @@
-import { Button, Group, Input, Pagination, Select, Table, Title } from "@mantine/core";
-import { useEffect, useState } from "react";
+import {
+	Button,
+	Group,
+	Input,
+	Pagination,
+	Select,
+	Table,
+	Title,
+} from "@mantine/core";
 import {
 	ActionFunctionArgs,
 	Form,
 	LoaderFunctionArgs,
 	redirect,
-	useFetcher,
 	useLoaderData,
 	useNavigate,
+	useSubmit,
 } from "react-router-dom";
 import { FindAllManagedUsersResponse } from "../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../service";
 
 export function ListManagedUsers() {
-	const { managedUsers, paginationMetadata } = useLoaderData() as FindAllManagedUsersResponse;
-	const navigate = useNavigate()
+	const { managedUsers, paginationMetadata } =
+		useLoaderData() as FindAllManagedUsersResponse;
+	const navigate = useNavigate();
 
 	if (!managedUsers || managedUsers.length === 0) {
 		return (
@@ -29,8 +37,10 @@ export function ListManagedUsers() {
 
 	return (
 		<>
-			<Title order={3}>List Users</Title>
-			<Table striped highlightOnHover>
+			<Title order={3} mb="lg">
+				List Users
+			</Title>
+			<Table striped highlightOnHover mb="lg" maw={700}>
 				<Table.Thead>
 					<Table.Tr>
 						<Table.Th>Name</Table.Th>
@@ -52,19 +62,24 @@ export function ListManagedUsers() {
 				</Table.Tbody>
 			</Table>
 
-			<Pagination 
+			<Pagination
+				mb="lg"
 				total={paginationMetadata?.totalPage as number}
 				onChange={(page) => {
-					navigate(`/backoffice/user-management?page=${page}&limit=${paginationMetadata?.limit}`);
+					navigate(
+						`/backoffice/user-management?page=${page}&limit=${paginationMetadata?.limit}`,
+					);
 				}}
 				siblings={1}
-				boundaries={2} />
+				boundaries={2}
+			/>
 		</>
 	);
 }
 
-
 export function CreateManagedUser() {
+	const submit = useSubmit();
+
 	const roleSelection = [
 		{
 			value: "admin",
@@ -99,29 +114,46 @@ export function CreateManagedUser() {
 						/>
 					</p>
 
-					<Button type="submit">Create User</Button>
+					<Button
+						type="submit"
+						onClick={(event) => {
+							event.preventDefault();
+							const ok = confirm("Are you sure you want to create this user?");
+							if (!ok) {
+								return;
+							}
+							submit(event.currentTarget);
+						}}
+					>
+						Create User
+					</Button>
 				</Form>
 			</Group>
 		</>
 	);
 }
 
-export async function loaderUserManagement({ request }: LoaderFunctionArgs): Promise<FindAllManagedUsersResponse> {
-	const url = new URL(request.url)
-	const page = parseIntWithDefault(url.searchParams.get("page"), 1)
-	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10)
+export async function loaderUserManagement({
+	request,
+}: LoaderFunctionArgs): Promise<FindAllManagedUsersResponse> {
+	const url = new URL(request.url);
+	const page = parseIntWithDefault(url.searchParams.get("page"), 1);
+	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10);
 
 	const res = await AutogradServiceClient.findAllManagedUsers({
 		paginationRequest: {
 			limit,
 			page,
-		}
+		},
 	});
 
 	return res;
 }
 
-function parseIntWithDefault(value: string | null, defaultValue: number): number {
+function parseIntWithDefault(
+	value: string | null,
+	defaultValue: number,
+): number {
 	if (value) {
 		return parseInt(value);
 	}
@@ -145,7 +177,7 @@ export async function actionCreateManagedUser({
 	});
 
 	if (res) {
-		return redirect("/user-management");
+		return redirect("/backoffice/user-management");
 	}
 
 	return null;

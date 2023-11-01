@@ -3,10 +3,12 @@ import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
 	CreateAssignment,
+	DetailAssignment,
 	ListAssignments,
 	actionCreateAssignemnt,
+	loadEditAssignment,
 	loaderListAssignments,
-} from "./AssignmentSubmission";
+} from "./Assignment";
 import {
 	CreateManagedUser,
 	ListManagedUsers,
@@ -31,14 +33,19 @@ export const router: RouteObject[] = [
 				action: actionCreateManagedUser,
 			},
 			{
-				path: "/backoffice/assignment-submission",
+				path: "/backoffice/assignments",
 				element: <ListAssignments />,
 				loader: loaderListAssignments,
 			},
 			{
-				path: "/backoffice/assignment-submission/create",
+				path: "/backoffice/assignments/create",
 				element: <CreateAssignment />,
 				action: actionCreateAssignemnt,
+			},
+			{
+				path: "/backoffice/assignments/detail",
+				element: <DetailAssignment />,
+				loader: loadEditAssignment,
 			},
 		],
 	},
@@ -64,15 +71,15 @@ export default function DashboardLayout() {
 		},
 		{
 			label: "Assignment Submission",
-			to: "/backoffice/assignment-submission",
+			to: "/backoffice/assignments",
 			children: [
 				{
 					label: "List Assignments",
-					to: "/backoffice/assignment-submission",
+					to: "/backoffice/assignments",
 				},
 				{
 					label: "Create Assignment",
-					to: "/backoffice/assignment-submission/create",
+					to: "/backoffice/assignments/create",
 				},
 			],
 		},

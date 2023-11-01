@@ -47,6 +47,8 @@ const (
 	DeleteSubmission
 	DeleteSubmissionForOther
 
+	ViewAnyUsers
+	CreateAnyUser
 	UpdateUser
 	CreateUser
 
@@ -55,6 +57,7 @@ const (
 
 var policy = map[Role]map[Permission]bool{
 	RoleAdmin: {
+		ViewAnyUsers:             _ok,
 		CreateAssignment:         _ok,
 		UpdateAssignment:         _ok,
 		ViewAssignment:           _ok,

@@ -21,6 +21,15 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 	ctx context.Context,
 	req *connect.Request[autogradv1.CreateManagedUserRequest],
 ) (*connect.Response[autogradv1.CreatedResponse], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, core.ErrUnauthenticated
+	}
+
+	if !authUser.Role.Can(auth.CreateAnyUser) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	now := time.Now()
 	newUser, err := user_management.CreateUser(user_management.CreateUserRequest{
 		NewID: uuid.New(),

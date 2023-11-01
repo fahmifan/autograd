@@ -2,10 +2,12 @@ package assignments_query
 
 import (
 	"context"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/assignments"
+	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/google/uuid"
@@ -19,6 +21,15 @@ func (query *AssignmentsQuery) FindAllAssignments(
 	ctx context.Context,
 	req *connect.Request[autogradv1.FindAllAssignmentsRequest],
 ) (*connect.Response[autogradv1.FindAllAssignmentsResponse], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, core.ErrUnauthenticated
+	}
+
+	if !authUser.Role.Can(auth.ViewAnyAssignments) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	res, err := assignments.AssignmentReader{}.FindAll(ctx, query.GormDB, assignments.FindAllAssignmentsRequest{
 		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
 	})
@@ -39,6 +50,15 @@ func (query *AssignmentsQuery) FindAssignment(
 	ctx context.Context,
 	req *connect.Request[autogradv1.FindByIDRequest],
 ) (*connect.Response[autogradv1.Assignment], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, core.ErrUnauthenticated
+	}
+
+	if !authUser.Role.Can(auth.ViewAnyAssignments) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	assignmentID, err := uuid.Parse(req.Msg.GetId())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -63,6 +83,15 @@ func (query *AssignmentsQuery) FindSubmission(
 	ctx context.Context,
 	req *connect.Request[autogradv1.FindByIDRequest],
 ) (*connect.Response[autogradv1.Submission], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, core.ErrUnauthenticated
+	}
+
+	if !authUser.Role.Can(auth.ViewAnySubmissions) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	submissionID, err := uuid.Parse(req.Msg.GetId())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -117,6 +146,7 @@ func toAssignmentProto(assignment assignments.Assignment) *autogradv1.Assignment
 		Name:              assignment.Name,
 		Description:       assignment.Description,
 		TimestampMetadata: assignment.ProtoTimestampMetadata(),
+		DeadlineAt:        assignment.DeadlineAt.Format(time.RFC3339),
 		Assigner: &autogradv1.Assigner{
 			Id:   assignment.Assigner.ID.String(),
 			Name: assignment.Assigner.Name,

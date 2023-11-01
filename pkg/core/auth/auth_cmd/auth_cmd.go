@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
+	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 )
 
@@ -46,9 +47,9 @@ func (cmd *AuthCmd) Login(ctx context.Context, req *connect.Request[autogradv1.L
 		Email:    req.Msg.Email,
 		Password: req.Msg.Password,
 	})
-
 	if err != nil {
-		return nil, err
+		logs.ErrCtx(ctx, err, "AuthCmd: Login: InternalLogin")
+		return nil, core.ErrInternalServer
 	}
 
 	return &connect.Response[autogradv1.LoginResponse]{

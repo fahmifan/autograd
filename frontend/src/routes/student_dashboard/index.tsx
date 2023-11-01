@@ -1,8 +1,13 @@
 import { AppShell, Container, NavLink, Text } from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { DetailStudentAssignment, ListStudentAssignments, actionDetailAssignment, loaderDetailStudentAssignment, loaderListStudentAssignments } from "./StudentAssignments";
-
+import {
+	DetailStudentAssignment,
+	ListStudentAssignments,
+	actionDetailAssignment,
+	loaderDetailStudentAssignment,
+	loaderListStudentAssignments,
+} from "./StudentAssignments";
 
 export const router: RouteObject[] = [
 	{
@@ -12,14 +17,14 @@ export const router: RouteObject[] = [
 			{
 				path: "/student-dashboard/assignments",
 				element: <ListStudentAssignments />,
-				loader: loaderListStudentAssignments
+				loader: loaderListStudentAssignments,
 			},
 			{
 				path: "/student-dashboard/assignments/detail",
 				element: <DetailStudentAssignment />,
 				loader: loaderDetailStudentAssignment,
 				action: actionDetailAssignment,
-			}
+			},
 		],
 	},
 ];

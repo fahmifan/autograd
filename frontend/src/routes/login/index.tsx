@@ -70,17 +70,17 @@ export async function loginAction({
 		password,
 	});
 
-	if (res) {
-		// parse jwt token
-		const decoded = jwtDecode<JWTDecoded>(res.token);
-		localStorage.setItem("token", res.token);
-
-    if (decoded?.role === 'admin') {
-      return redirect("/backoffice");
-    }
-
-    return redirect("/student-dashboard");
+	if (!res) {
+		return null;
 	}
 
-	return null;
+	// parse jwt token
+	const decoded = jwtDecode<JWTDecoded>(res.token);
+	localStorage.setItem("token", res.token);
+
+	if (decoded?.role === "admin") {
+		return redirect("/backoffice");
+	}
+
+	return redirect("/student-dashboard");
 }
