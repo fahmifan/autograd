@@ -1,0 +1,245 @@
+syntax = "proto3";
+
+package autograd.v1;
+
+option go_package = "github.com/fahmifan/autograd/pkg/pb/autograd/v1;autogradv1";
+
+message Empty {}
+
+message CreatedResponse {
+    string id = 1;
+    string message = 2;
+}
+
+message PingResponse {
+    string message = 1;
+}
+
+message FindByIDRequest {
+    string id = 1;
+}
+
+message DeleteByIDRequest {
+    string id = 1;
+}
+
+
+message PaginationMetadata {
+    int32 page = 1;
+    int32 limit = 2;
+    int32 total = 3;
+    int32 total_page = 4;
+}
+
+message PaginationRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
+
+message CreateManagedUserRequest {
+    string name = 1;
+    string email = 2;
+    string role = 3;
+}
+
+message TimestampMetadata {
+    string created_at = 1;
+    string updated_at = 2;
+}
+
+enum AssignmentType {
+    ASSIGNMENT_TYPE_UNKNOWN = 0;
+    ASSIGNMENT_TYPE_INPUT = 1;
+    ASSIGNMENT_TYPE_OUTPUT = 2;
+}
+
+message AssignmentFile {
+    string id = 1;
+    string description = 2;
+    string url = 3;
+    TimestampMetadata timestamp_metadata = 5;
+}
+
+message SubmissionFile {
+    string id = 1;
+    string url = 2;
+    TimestampMetadata timestamp_metadata = 3;
+}
+
+message Submitter {
+    string id = 1;
+    string name = 2;
+}
+
+message Assigner {
+    string id = 1;
+    string name = 2;
+}
+
+message Assignment {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    Assigner assigner = 4;
+    AssignmentFile case_input_file = 5;
+    AssignmentFile case_output_file = 6;
+    string deadline_at = 7;
+    TimestampMetadata timestamp_metadata = 8;
+}
+
+message Submission {
+    string id = 1;
+    Assignment assignment = 2;
+    Submitter submitter = 3;
+    SubmissionFile submission_file = 4;
+    TimestampMetadata timestamp_metadata = 5;
+}
+
+message UpdateAssignmentRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string case_input_file_id = 4;
+    string case_output_file_id = 5;
+}
+
+message CreateAssignmentRequest {
+    string name = 1;
+    string description = 2;
+    string case_input_file_id = 3;
+    string case_output_file_id = 4;
+    string deadline_at = 5;
+}
+
+message CreateSubmissionRequest {
+    string assignment_id = 1;
+    string submitter_id = 2;
+    string source_file_id = 3;
+}
+
+message UpdateSubmissionRequest {
+    string id = 1;
+    string submitter_id = 2;
+    string source_file_id = 3;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string token = 1;
+}
+
+message FindAllAssignmentsRequest {
+    PaginationRequest pagination_request = 1;
+}
+
+message FindAllAssignmentsResponse {
+    repeated Assignment assignments = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
+message ManagedUser {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string role = 4;
+    TimestampMetadata timestamp_metadata = 5;
+}
+
+message FindAllManagedUsersRequest {
+    PaginationRequest pagination_request = 1;
+}
+
+message FindAllManagedUsersResponse {
+    repeated ManagedUser managed_users = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
+message FindAllStudentAssignmentsRequest {
+    PaginationRequest pagination_request = 1;
+    string from_date = 2;
+    string to_date = 3;
+}
+
+message FindAllStudentAssignmentsResponse {
+    repeated StudentAssignment assignments = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
+message StudentAssignment {
+    message Submission {
+        string id = 1;
+        string submission_code = 2;
+        int32 grade = 3;
+        string updated_at = 4;
+        bool is_graded = 5;
+    }
+
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string assigner_id = 4;
+    string assigner_name = 5;
+    string updated_at = 6;
+    string deadline_at = 7;
+    Submission submission = 8;
+    bool has_submission = 9;
+}
+
+message StudentSubmission {
+    string id = 1;
+    string assignment_id = 2;
+    string assignment_name = 3;
+    string assignment_description = 4;
+    string assignment_assigner_id = 5;
+    string assignment_assigner_name = 6;
+    string assignment_deadline_at = 7;
+    string submission_code = 8;
+    string updated_at = 9;
+}
+
+message CreateStudentSubmissionRequest {
+    string assignment_id = 1;
+    string submission_code = 2;
+}
+
+message UpdateStudentSubmissionRequest {
+    string submission_id = 1;
+    string submission_code = 2;
+}
+
+service AutogradService {
+    rpc Ping(Empty) returns (PingResponse) {}
+
+    // User Management
+    rpc CreateManagedUser(CreateManagedUserRequest) returns (CreatedResponse) {}
+    rpc FindAllManagedUsers(FindAllManagedUsersRequest) returns (FindAllManagedUsersResponse) {}
+    
+    // Assignment Submission
+    // Assignment Queries
+    rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
+    rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
+    rpc FindSubmission(FindByIDRequest) returns (Submission) {}
+    // Assignment Command
+    rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
+    rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}
+    rpc DeleteAssignment(DeleteByIDRequest) returns (Empty) {}
+    rpc CreateSubmission(CreateSubmissionRequest) returns (CreatedResponse) {}
+    rpc UpdateSubmission(UpdateSubmissionRequest) returns (Empty) {}
+    rpc DeleteSubmission(DeleteByIDRequest) returns (Empty) {}
+
+    // Student Assignment
+    // Student Assignment Queries
+    rpc FindAllStudentAssignments(FindAllStudentAssignmentsRequest) returns (FindAllStudentAssignmentsResponse) {}
+    rpc FindStudentAssignment(FindByIDRequest) returns (StudentAssignment) {}
+    // Student Assignment Command
+    rpc CreateStudentSubmission(CreateStudentSubmissionRequest) returns (CreatedResponse) {}
+    rpc UpdateStudentSubmission(UpdateStudentSubmissionRequest) returns (Empty) {}
+
+    // Auth
+    // Auth Mutation
+    rpc Login(LoginRequest) returns (LoginResponse) {}
+}

@@ -1,3 +1,10 @@
 .vscode
 submission/*.bin
+file_upload_path/*
 .env
+/autograd.db
+/autograd.db-shm
+/autograd.db-wal
+/node_modules
+/tmp
+/private
