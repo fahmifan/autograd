@@ -5,14 +5,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fahmifan/autograd/model"
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
-// ErrUnauthorized error
-var ErrUnauthorized = errors.New("unauthorized")
+var (
+	ErrUnauthorized    = errors.New("unauthorized")
+	ErrUnauthenticated = errors.New("unauthorized")
+	ErrTokenInvalid    = errors.New("token invalid")
+)
 
 // ErrMissingAuthorization error
 var ErrMissingAuthorization = errors.New("missing Authorization header")
@@ -28,15 +30,6 @@ func (server *Server) addUserToCtx(next echo.HandlerFunc) echo.HandlerFunc {
 		if !ok {
 			return next(c)
 		}
-
-		setUserToCtx(c, &model.User{
-			Base: model.Base{
-				ID: authUser.UserID.String(),
-			},
-			Email: authUser.Email,
-			Role:  authUser.Role,
-			Name:  authUser.Name,
-		})
 
 		ctx := c.Request().Context()
 		reqCtx := auth.CtxWithUser(ctx, authUser)
@@ -90,3 +83,5 @@ func parseTokenFromHeader(header *http.Header) (auth.JWTToken, error) {
 
 	return auth.JWTToken(token), nil
 }
+
+const userInfoCtx = "userInfoCtx"

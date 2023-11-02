@@ -12,18 +12,15 @@ import (
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/config"
 	db "github.com/fahmifan/autograd/db/migrations"
-	"github.com/fahmifan/autograd/fs"
 	"github.com/fahmifan/autograd/httpsvc"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
+	"github.com/fahmifan/autograd/pkg/fs"
+	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
 	"github.com/fahmifan/autograd/pkg/service"
-	"github.com/fahmifan/autograd/repository"
-	"github.com/fahmifan/autograd/usecase"
-	"github.com/fahmifan/autograd/worker"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -56,45 +53,21 @@ func serverCmd() *cobra.Command {
 		Use:   "server",
 		Short: "Run autograd server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			redisPool := config.NewRedisPool(config.RedisWorkerHost())
 			gormDB := db.MustSQLite()
-			broker := worker.NewBroker(redisPool)
-			localStorage := fs.NewLocalStorage()
-
-			userRepo := repository.NewUserRepository(gormDB)
-			userUsecase := usecase.NewUserUsecase(userRepo)
-			submissionRepo := repository.NewSubmissionRepo(gormDB)
-			assignmentRepo := repository.NewAssignmentRepository(gormDB)
-
-			assignmentUsecase := usecase.NewAssignmentUsecase(assignmentRepo, submissionRepo)
-			submissionUsecase := usecase.NewSubmissionUsecase(submissionRepo, usecase.SubmissionUsecaseWithBroker(broker))
-			mediaUsecase := usecase.NewMediaUsecase(config.FileUploadPath(), localStorage)
-			graderUsecase := usecase.NewGraderUsecase(submissionUsecase, assignmentUsecase)
 
 			service := mustInitService()
 
 			server := httpsvc.NewServer(
 				config.Port(),
 				config.FileUploadPath(),
-				httpsvc.WithUserUsecase(userUsecase),
-				httpsvc.WithAssignmentUsecase(assignmentUsecase),
-				httpsvc.WithSubmissionUsecase(submissionUsecase),
-				httpsvc.WithMediaUsecase(mediaUsecase),
 				httpsvc.WithGormDB(gormDB),
 				httpsvc.WithService(service),
 				httpsvc.WithJWTKey(config.JWTKey()),
 			)
 
-			wrk := worker.NewWorker(redisPool, worker.WithGrader(graderUsecase))
-
 			go func() {
-				logrus.Info("run server")
+				logs.Info("run server")
 				server.Run()
-			}()
-
-			go func() {
-				logrus.Info("run worker")
-				wrk.Start()
 			}()
 
 			// Wait for a signal to quit:
@@ -102,17 +75,16 @@ func serverCmd() *cobra.Command {
 			signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 			<-signalChan
 
-			logrus.Info("stopping server")
+			logs.Info("stopping server")
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 			server.Stop(ctx)
 
-			logrus.Info("stopping worker")
+			logs.Info("stopping worker")
 			time.AfterFunc(time.Second*30, func() {
 				os.Exit(1)
 			})
-			wrk.Stop()
-			logrus.Info("worker stopped")
+			logs.Info("worker stopped")
 
 			return nil
 		},

@@ -14,7 +14,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/core/mediastore"
 	"github.com/fahmifan/autograd/pkg/logs"
-	"github.com/fahmifan/autograd/utils"
+	"github.com/fahmifan/autograd/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"

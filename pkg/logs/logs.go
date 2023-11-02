@@ -120,3 +120,7 @@ func InfoCtx(ctx context.Context, label string, msg ...string) {
 	}
 	logger.Msg(strings.Join(msg, ". "))
 }
+
+func Info(label string, msg ...string) {
+	log.Info().Str("label", label).Msg(strings.Join(msg, ". "))
+}

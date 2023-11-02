@@ -2,11 +2,8 @@ package httpsvc
 
 import (
 	"context"
-	"net/http"
 	"strings"
 
-	"github.com/fahmifan/autograd/model"
-	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
 	"github.com/fahmifan/autograd/pkg/service"
@@ -19,16 +16,12 @@ import (
 
 // Server ..
 type Server struct {
-	echo              *echo.Echo
-	gormDB            *gorm.DB
-	port              string
-	staticMediaPath   string
-	userUsecase       model.UserUsecase
-	assignmentUsecase model.AssignmentUsecase
-	submissionUsecase model.SubmissionUsecase
-	mediaUsecase      model.MediaUsecase
-	service           *service.Service
-	jwtKey            string
+	echo            *echo.Echo
+	gormDB          *gorm.DB
+	port            string
+	staticMediaPath string
+	service         *service.Service
+	jwtKey          string
 }
 
 // NewServer ..
@@ -74,29 +67,8 @@ func (s *Server) routes() {
 		// FIXME: debug mode
 	)
 
-	s.echo.GET("/ping", s.handlePing)
-
-	// TODO: add auth for private static
-	s.echo.Static("/storage", "submission")
-	s.echo.Static("/media", s.staticMediaPath)
-
 	apiV1 := s.echo.Group("/api/v1")
-	apiV1.POST("/users", s.handleCreateUser)
-	apiV1.POST("/users/login", s.handleLogin)
-
-	apiV1.POST("/assignments", s.handleCreateAssignment, s.authz(auth.CreateAssignment))
-	apiV1.GET("/assignments", s.handleGetAssignments, s.authz(auth.ViewAnyAssignments))
-	apiV1.GET("/assignments/:id", s.handleGetAssignment, s.authz(auth.ViewAssignment))
-	apiV1.GET("/assignments/:id/submissions", s.handleGetAssignmentSubmissions, s.authz(auth.ViewAnySubmissions))
-	apiV1.PUT("/assignments/:id", s.handleUpdateAssignment, s.authz(auth.UpdateAssignment))
-	apiV1.DELETE("/assignments/:id", s.handleDeleteAssignment, s.authz(auth.DeleteAssignment))
-
-	apiV1.POST("/submissions", s.handleCreateSubmission, s.authz(auth.CreateSubmission))
-	apiV1.GET("/submissions/:id", s.handleGetSubmission, s.authz(auth.ViewAnySubmissions))
-	apiV1.PUT("/submissions", s.handleUpdateSubmission, s.authz(auth.UpdateSubmission))
-	apiV1.DELETE("/submissions/:id", s.handleDeleteSubmission, s.authz(auth.DeleteSubmission))
-
-	apiV1.POST("/rpc/saveMedia", s.handleSaveMedia, s.authz(auth.CreateMedia))
+	apiV1.POST("/rpc/saveMedia", s.handleSaveMedia)
 
 	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
 		s.service,
@@ -115,8 +87,4 @@ func trimPathGroup(groupPrefix string) echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
-}
-
-func (s *Server) handlePing(c echo.Context) error {
-	return c.String(http.StatusOK, "pong")
 }

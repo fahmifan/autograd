@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fahmifan/autograd/model"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/google/uuid"
@@ -68,7 +67,7 @@ func (StudentAssignmentReader) FindAllAssignments(ctx context.Context, tx *gorm.
 	assignmentModels := []dbmodel.Assignment{}
 	count := int64(0)
 
-	err := tx.Model(&model.Assignment{}).Count(&count).Error
+	err := tx.Model(&dbmodel.Assignment{}).Count(&count).Error
 	if err != nil {
 		return FindAllAssignmentResponse{}, fmt.Errorf("count assignments: %w", err)
 	}
