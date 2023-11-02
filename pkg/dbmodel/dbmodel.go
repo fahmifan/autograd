@@ -47,8 +47,9 @@ type Submission struct {
 	AssignmentID uuid.UUID
 	FileID       uuid.UUID
 	SubmittedBy  uuid.UUID
-	Grade        int64
+	Grade        int32
 	Feedback     string
+	IsGraded     int
 }
 
 type FileExt string

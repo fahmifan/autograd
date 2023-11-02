@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"time"
 
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/grading"
@@ -71,6 +72,13 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 	})
 	if err != nil {
 		return InternalGradeSubmissionResult{}, fmt.Errorf("grade: %w", err)
+	}
+
+	submission = submission.SaveGrade(time.Now(), gradeRes)
+
+	err = grading.SubmissionWriter{}.Update(ctx, cmd.GormDB, &submission)
+	if err != nil {
+		return InternalGradeSubmissionResult{}, fmt.Errorf("update submission: %w", err)
 	}
 
 	return InternalGradeSubmissionResult{

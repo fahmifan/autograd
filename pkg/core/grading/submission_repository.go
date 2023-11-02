@@ -65,9 +65,10 @@ func (SubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, objStorer cor
 	}
 
 	submission := Submission{
-		ID:       id,
-		Grade:    submModel.Grade,
-		Feedback: submModel.Feedback,
+		ID:        id,
+		Grade:     submModel.Grade,
+		Feedback:  submModel.Feedback,
+		UpdatedAt: submModel.UpdatedAt.Time,
 		SubmissionFile: SubmissionFile{
 			FileName: submFile.Name,
 		},
@@ -114,6 +115,25 @@ func (SubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, objStorer cor
 	}
 
 	return submission, nil
+}
+
+type SubmissionWriter struct{}
+
+func (SubmissionWriter) Update(ctx context.Context, tx *gorm.DB, submission *Submission) error {
+	return tx.WithContext(ctx).Model(&dbmodel.Submission{}).
+		Where("id = ?", submission.ID).
+		UpdateColumns(map[string]any{
+			"grade":      submission.Grade,
+			"updated_at": submission.UpdatedAt,
+			"is_graded":  intBool(submission.IsGraded),
+		}).Error
+}
+
+func intBool(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func closeWhenErr(err error, readCloser io.ReadCloser) {

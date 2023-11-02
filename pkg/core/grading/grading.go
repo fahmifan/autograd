@@ -28,11 +28,22 @@ type GradeRequest struct {
 	SourceCodePath string
 	Expecteds      io.Reader
 	Inputs         io.Reader
+	Submission     Submission
 }
 
 type GradeResult struct {
 	Outputs  []string
 	Corrects []bool
+}
+
+func (g GradeResult) GradeScore() (sum int64) {
+	for _, c := range g.Corrects {
+		if c == true {
+			sum++
+		}
+	}
+
+	return (sum * 100 / int64(len(g.Corrects)))
 }
 
 func Grade(arg GradeRequest) (GradeResult, error) {
@@ -82,8 +93,27 @@ type Submission struct {
 	Assigner       Assigner
 	Assignment     Assignment
 	SubmissionFile SubmissionFile
-	Grade          int64
+	Grade          int32
 	Feedback       string
+	UpdatedAt      time.Time
+	IsGraded       bool
+}
+
+func (submission Submission) SaveGrade(now time.Time, grade GradeResult) Submission {
+	var sum int32
+	for _, correct := range grade.Corrects {
+		if correct {
+			sum++
+		}
+	}
+
+	gradeScore := sum * 100 / int32(len(grade.Corrects))
+
+	submission.Grade = gradeScore
+	submission.UpdatedAt = now
+	submission.IsGraded = true
+
+	return submission
 }
 
 type Assigner struct {

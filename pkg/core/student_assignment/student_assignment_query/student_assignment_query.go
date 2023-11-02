@@ -146,6 +146,7 @@ func toStudentAssignmentProto(assignment student_assignment.StudentAssignment, s
 			SubmissionCode: string(submissionCode),
 			Grade:          int32(assignment.Submission.Grade),
 			UpdatedAt:      assignment.Submission.UpdatedAt.Format(time.RFC3339),
+			IsGraded:       assignment.Submission.IsGraded,
 		},
 		HasSubmission: assignment.HasSubmission,
 	}

@@ -290,6 +290,7 @@ func toStudentAssignment(assignmentModel dbmodel.Assignment, assigner dbmodel.Us
 			Feedback:         submission.Feedback,
 			SubmissionFileID: submission.FileID,
 			UpdatedAt:        submission.UpdatedAt.Time,
+			IsGraded:         submission.IsGraded == 1,
 		},
 		HasSubmission: (submission.ID != uuid.Nil && submission.ID.String() != ""),
 	}

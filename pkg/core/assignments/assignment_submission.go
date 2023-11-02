@@ -119,7 +119,7 @@ type Submission struct {
 	Assignment Assignment
 	Submitter  Submitter
 	SourceFile SubmissionFile
-	Grade      int64
+	Grade      int32
 	Feedback   string
 	core.TimestampMetadata
 }

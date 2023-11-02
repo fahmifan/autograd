@@ -34,7 +34,8 @@ type StudentAssignment struct {
 type StudentSubmissionForAssignment struct {
 	ID               uuid.UUID
 	StudentID        uuid.UUID
-	Grade            int64
+	Grade            int32
+	IsGraded         bool
 	Feedback         string
 	SubmissionFileID uuid.UUID
 	UpdatedAt        time.Time
@@ -58,7 +59,7 @@ type StudentSubmission struct {
 	Student        Student
 	Assignment     Assignment
 	SubmissionFile SubmissionFile
-	Grade          int64
+	Grade          int32
 	Feedback       string
 
 	core.TimestampMetadata

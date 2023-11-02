@@ -163,7 +163,13 @@ export function DetailStudentAssignment() {
 							<Table.Th>Submitted At</Table.Th>
 							<Table.Td>
 								{res.hasSubmission &&
-									humanizeDate(res.submission?.updatedAt ?? "")}
+									humanizeDate(res.submission?.updatedAt ?? "-")}
+							</Table.Td>
+						</Table.Tr>
+						<Table.Tr>
+							<Table.Th>Grade</Table.Th>
+							<Table.Td>
+								{(res.hasSubmission && res.submission?.isGraded) ? res.submission?.grade : "-"}
 							</Table.Td>
 						</Table.Tr>
 					</Table.Tbody>

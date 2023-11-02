@@ -175,6 +175,7 @@ message StudentAssignment {
         string submission_code = 2;
         int32 grade = 3;
         string updated_at = 4;
+        bool is_graded = 5;
     }
 
     string id = 1;
@@ -239,6 +240,6 @@ service AutogradService {
     rpc UpdateStudentSubmission(UpdateStudentSubmissionRequest) returns (Empty) {}
 
     // Auth
-    // Auth Queries
+    // Auth Mutation
     rpc Login(LoginRequest) returns (LoginResponse) {}
 }
