@@ -36,16 +36,6 @@ type GradeResult struct {
 	Corrects []bool
 }
 
-func (g GradeResult) GradeScore() (sum int64) {
-	for _, c := range g.Corrects {
-		if c == true {
-			sum++
-		}
-	}
-
-	return (sum * 100 / int64(len(g.Corrects)))
-}
-
 func Grade(arg GradeRequest) (GradeResult, error) {
 	compiler := arg.Compiler
 
