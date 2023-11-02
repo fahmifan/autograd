@@ -22,7 +22,7 @@ type Ctx struct {
 
 type MediaConfig struct {
 	MediaServeBaseURL string
-	RootFolder        string
+	RootDir           string
 	ObjectStorer      ObjectStorer
 }
 

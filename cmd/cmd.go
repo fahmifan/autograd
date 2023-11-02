@@ -46,7 +46,7 @@ func Execute() error {
 func mustInitService() *service.Service {
 	gormDB := db.MustSQLite()
 	return service.NewService(gormDB, config.JWTKey(), core.MediaConfig{
-		RootFolder:   config.FileUploadPath(),
+		RootDir:      config.FileUploadPath(),
 		ObjectStorer: fs.NewLocalStorage(),
 	})
 }

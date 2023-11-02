@@ -3,6 +3,7 @@ package mediastore
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
@@ -41,6 +42,7 @@ func ValidExtension(ext Extension) bool {
 
 type CreateMediaRequest struct {
 	NewID     uuid.UUID
+	Now       time.Time
 	FileName  string
 	FileType  MediaFileType
 	Ext       Extension
@@ -57,9 +59,11 @@ func CreateMediaFile(req CreateMediaRequest) (MediaFile, error) {
 	}
 
 	return MediaFile{
-		ID:       req.NewID,
-		FileName: req.FileName,
-		Ext:      req.Ext,
-		FileType: req.FileType,
+		ID:                req.NewID,
+		FileName:          req.FileName,
+		Ext:               req.Ext,
+		FileType:          req.FileType,
+		URL:               req.PublicURL,
+		TimestampMetadata: core.NewTimestampMeta(req.Now),
 	}, nil
 }

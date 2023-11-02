@@ -28,6 +28,10 @@ type User struct {
 	Active   int
 }
 
+func (user User) IsActive() bool {
+	return user.Active == 1
+}
+
 type Assignment struct {
 	Base
 	AssignedBy       uuid.UUID

@@ -83,6 +83,10 @@ func EchoRequestLogger(debug bool) func(c echo.Context, v middleware.RequestLogg
 	}
 }
 
+func Err(err error, label string, msg ...string) {
+	log.Error().Str("label", label).Err(err).Msg(strings.Join(msg, "."))
+}
+
 func ErrCtx(ctx context.Context, err error, label string, msg ...string) {
 	logger := log.Error().Str("label", label).Err(err)
 	if reqID := GetRequestID(ctx); reqID != "" {

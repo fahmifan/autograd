@@ -299,7 +299,7 @@ export function DetailAssignment() {
 			<Title order={3} mb="lg">
 				{res.name}
 			</Title>
-			<Form method="POST" id="edit-assignment">
+			<Form method="post" id="edit-assignment">
 				<Stack maw={400}>
 					<TextInput
 						label="Name"

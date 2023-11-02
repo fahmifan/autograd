@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"path"
 	"path/filepath"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
@@ -52,7 +53,7 @@ func (m *MediaStoreCmd) InternalSaveMultipart(ctx context.Context, req InternalS
 
 	ext := filepath.Ext(fileInfo.Filename)
 	fileName := utils.GenerateUniqueString() + ext
-	dst := path.Join(m.RootFolder, fileName)
+	dst := path.Join(m.RootDir, fileName)
 
 	err = m.ObjectStorer.Store(ctx, dst, src)
 	if err != nil {
@@ -64,7 +65,8 @@ func (m *MediaStoreCmd) InternalSaveMultipart(ctx context.Context, req InternalS
 
 	mediaFile, err := mediastore.CreateMediaFile(mediastore.CreateMediaRequest{
 		NewID:     uuid.New(),
-		FileName:  fileInfo.Filename,
+		Now:       time.Now(),
+		FileName:  fileName,
 		FileType:  req.MediaType,
 		Ext:       mediastore.Extension(ext),
 		PublicURL: publicURL,
@@ -103,7 +105,7 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 
 	ext := req.Ext
 	fileName := utils.GenerateUniqueString() + string(ext)
-	dst := path.Join(m.RootFolder, fileName)
+	dst := path.Join(m.RootDir, fileName)
 
 	err := m.ObjectStorer.Store(ctx, dst, req.Body)
 	if err != nil {
@@ -113,8 +115,11 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 
 	publicURL := fmt.Sprintf("%s/%s", m.MediaServeBaseURL, fileName)
 
+	now := time.Now()
+
 	mediaFile, err := mediastore.CreateMediaFile(mediastore.CreateMediaRequest{
 		NewID:     uuid.New(),
+		Now:       now,
 		FileName:  fileName,
 		FileType:  req.MediaType,
 		Ext:       mediastore.Extension(ext),
