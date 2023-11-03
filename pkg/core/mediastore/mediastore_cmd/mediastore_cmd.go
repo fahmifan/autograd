@@ -2,8 +2,11 @@ package mediastore_cmd
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
+	"math/rand"
 	"mime/multipart"
 	"path"
 	"path/filepath"
@@ -14,9 +17,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/core/mediastore"
 	"github.com/fahmifan/autograd/pkg/logs"
-	"github.com/fahmifan/autograd/pkg/utils"
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -52,12 +53,12 @@ func (m *MediaStoreCmd) InternalSaveMultipart(ctx context.Context, req InternalS
 	defer src.Close()
 
 	ext := filepath.Ext(fileInfo.Filename)
-	fileName := utils.GenerateUniqueString() + ext
+	fileName := generateUniqueString() + ext
 	dst := path.Join(m.RootDir, fileName)
 
 	err = m.ObjectStorer.Store(ctx, dst, src)
 	if err != nil {
-		logrus.Error(err)
+		logs.ErrCtx(ctx, err, "MediaStoreCmd: InternalSaveMultipart: m.ObjectStorer.Store")
 		return InternalSaveMultipartResponse{}, err
 	}
 
@@ -104,12 +105,12 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 	}
 
 	ext := req.Ext
-	fileName := utils.GenerateUniqueString() + string(ext)
+	fileName := generateUniqueString() + string(ext)
 	dst := path.Join(m.RootDir, fileName)
 
 	err := m.ObjectStorer.Store(ctx, dst, req.Body)
 	if err != nil {
-		logrus.Error(err)
+		logs.ErrCtx(ctx, err, "MediaStoreCmd: InternalSave: m.ObjectStorer.Store")
 		return InternalSaveMultipartResponse{}, err
 	}
 
@@ -143,4 +144,14 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 	return InternalSaveMultipartResponse{
 		ID: mediaFile.ID,
 	}, nil
+}
+
+func generateUniqueString() string {
+	h := md5.New()
+	randomNumber := fmt.Sprint(rand.Intn(10))
+	timestamp := fmt.Sprint(time.Now().Unix())
+
+	h.Write([]byte(randomNumber + timestamp))
+
+	return hex.EncodeToString(h.Sum(nil))
 }

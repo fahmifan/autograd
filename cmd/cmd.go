@@ -10,13 +10,13 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/fahmifan/autograd/config"
-	db "github.com/fahmifan/autograd/db/migrations"
-	"github.com/fahmifan/autograd/httpsvc"
+	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
+	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/fs"
+	"github.com/fahmifan/autograd/pkg/httpsvc"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
@@ -41,7 +41,7 @@ func Execute() error {
 }
 
 func mustInitService() *service.Service {
-	gormDB := db.MustSQLite()
+	gormDB := dbconn.MustSQLite()
 	return service.NewService(gormDB, config.JWTKey(), core.MediaConfig{
 		RootDir:      config.FileUploadPath(),
 		ObjectStorer: fs.NewLocalStorage(),
@@ -53,14 +53,10 @@ func serverCmd() *cobra.Command {
 		Use:   "server",
 		Short: "Run autograd server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			gormDB := db.MustSQLite()
-
 			service := mustInitService()
 
 			server := httpsvc.NewServer(
 				config.Port(),
-				config.FileUploadPath(),
-				httpsvc.WithGormDB(gormDB),
 				httpsvc.WithService(service),
 				httpsvc.WithJWTKey(config.JWTKey()),
 			)

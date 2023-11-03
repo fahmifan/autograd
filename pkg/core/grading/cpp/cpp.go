@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/fahmifan/autograd/pkg/core/grading"
-	"github.com/sirupsen/logrus"
 )
 
 var _ grading.Compiler = (*CPPCompiler)(nil)
@@ -24,14 +23,10 @@ func (c *CPPCompiler) Compile(inputPath string) (outPath string, err error) {
 	cmd := exec.Command("g++", args...)
 	bt, err := cmd.CombinedOutput()
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"output":  string(bt),
-			"args":    args,
-			"outPath": outPath,
-		}).Error(err)
+		return "", fmt.Errorf("comile: %w", err)
 	}
 
-	return
+	return string(bt), nil
 }
 
 func (c *CPPCompiler) Run(bindPath string, input io.Reader, output io.Writer) (err error) {
@@ -56,10 +51,5 @@ func (c *CPPCompiler) Run(bindPath string, input io.Reader, output io.Writer) (e
 }
 
 func (c *CPPCompiler) Remove(source string) error {
-	err := os.Remove(source)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	return err
+	return os.Remove(source)
 }

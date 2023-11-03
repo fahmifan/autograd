@@ -124,3 +124,7 @@ func InfoCtx(ctx context.Context, label string, msg ...string) {
 func Info(label string, msg ...string) {
 	log.Info().Str("label", label).Msg(strings.Join(msg, ". "))
 }
+
+func Warn(label string, msg ...string) {
+	log.Warn().Str("label", label).Msg(strings.Join(msg, ". "))
+}

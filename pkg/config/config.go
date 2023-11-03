@@ -2,22 +2,22 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		logrus.Warn(".env file not found")
+		logs.Warn(".env file not found")
 		return
 	}
 
-	logrus.SetReportCaller(true)
-	logrus.Info("load .env file to os env")
+	logs.Info("load .env file to os env")
 }
 
 // Port ..
@@ -38,7 +38,7 @@ func Env() string {
 func JWTKey() string {
 	val, ok := os.LookupEnv("JWT_SECRET")
 	if !ok {
-		logrus.Fatal("JWT_SECRET not provided")
+		log.Fatal("JWT_SECRET not provided")
 	}
 	return val
 }
