@@ -2,34 +2,30 @@ package httpsvc
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
 	"github.com/fahmifan/autograd/pkg/service"
-	"gorm.io/gorm"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sirupsen/logrus"
 )
 
 // Server ..
 type Server struct {
-	echo            *echo.Echo
-	gormDB          *gorm.DB
-	port            string
-	staticMediaPath string
-	service         *service.Service
-	jwtKey          string
+	echo    *echo.Echo
+	port    string
+	service *service.Service
+	jwtKey  string
 }
 
 // NewServer ..
-func NewServer(port, staticMediaPath string, opts ...Option) *Server {
+func NewServer(port string, opts ...Option) *Server {
 	s := &Server{
-		echo:            echo.New(),
-		port:            port,
-		staticMediaPath: staticMediaPath,
+		echo: echo.New(),
+		port: port,
 	}
 
 	for _, opt := range opts {
@@ -42,13 +38,13 @@ func NewServer(port, staticMediaPath string, opts ...Option) *Server {
 // Run server
 func (s *Server) Run() {
 	s.routes()
-	logrus.Fatal(s.echo.Start(":" + s.port))
+	log.Fatal(s.echo.Start(":" + s.port))
 }
 
 // Stop server gracefully
 func (s *Server) Stop(ctx context.Context) {
 	if err := s.echo.Shutdown(ctx); err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 

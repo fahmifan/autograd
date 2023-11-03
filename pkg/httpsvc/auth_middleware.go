@@ -7,7 +7,6 @@ import (
 
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -69,19 +68,13 @@ func parseTokenFromHeader(header *http.Header) (auth.JWTToken, error) {
 	}
 
 	if authHeaders[0] != "Bearer" {
-		err := ErrMissingAuthorization
-		log.WithField(authzHeader, header.Get(authzHeader)).Error(err)
-		return auth.JWTToken(token), err
+		return "", ErrMissingAuthorization
 	}
 
 	token = strings.Trim(authHeaders[1], " ")
 	if token == "" {
-		err := ErrMissingAuthorization
-		log.WithField(authzHeader, header.Get(authzHeader)).Error(err)
-		return auth.JWTToken(token), err
+		return "", ErrMissingAuthorization
 	}
 
 	return auth.JWTToken(token), nil
 }
-
-const userInfoCtx = "userInfoCtx"

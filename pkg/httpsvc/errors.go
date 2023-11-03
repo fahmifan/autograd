@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 )
 
 // errors ..
@@ -22,7 +22,7 @@ func responseError(c echo.Context, err error) error {
 	case ErrNotFound:
 		return c.JSON(http.StatusNotFound, echo.Map{"error": "not found"})
 	default:
-		logrus.Error(err)
+		logs.ErrCtx(c.Request().Context(), err, "responseError")
 		return c.JSON(http.StatusInternalServerError, "system error")
 	}
 }

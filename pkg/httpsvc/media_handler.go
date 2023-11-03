@@ -6,8 +6,8 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/core/mediastore"
 	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_cmd"
+	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 )
 
 func (s *Server) handleSaveMedia(c echo.Context) error {
@@ -22,7 +22,7 @@ func (s *Server) handleSaveMedia(c echo.Context) error {
 
 	fileInfo, err := c.FormFile("media")
 	if err != nil {
-		logrus.Error(err)
+		logs.ErrCtx(c.Request().Context(), err, "handleSaveMedia", "parse media")
 		return responseError(c, err)
 	}
 
@@ -33,7 +33,7 @@ func (s *Server) handleSaveMedia(c echo.Context) error {
 		MediaType: mediastore.MediaFileType(mediaType),
 	})
 	if err != nil {
-		logrus.Error(err)
+		logs.ErrCtx(c.Request().Context(), err, "handleSaveMedia", "InternalSaveMultipart")
 		return responseError(c, err)
 	}
 
