@@ -1,6 +1,7 @@
 import { AppShell, Container, NavLink, Text } from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { PrivateRoute } from "../private_route";
 import {
 	DetailStudentAssignment,
 	ListStudentAssignments,
@@ -12,16 +13,16 @@ import {
 export const router: RouteObject[] = [
 	{
 		path: "/student-dashboard",
-		element: <DashboardLayout />,
+		element: <PrivateRoute element={<DashboardLayout />} />,
 		children: [
 			{
 				path: "/student-dashboard/assignments",
-				element: <ListStudentAssignments />,
+				element: <PrivateRoute element={<ListStudentAssignments />} />,
 				loader: loaderListStudentAssignments,
 			},
 			{
 				path: "/student-dashboard/assignments/detail",
-				element: <DetailStudentAssignment />,
+				element: <PrivateRoute element={<DetailStudentAssignment />} />,
 				loader: loaderDetailStudentAssignment,
 				action: actionDetailAssignment,
 			},

@@ -1,6 +1,7 @@
 import { AppShell, Container, NavLink, Text } from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { PrivateRoute } from "../private_route";
 import {
 	CreateAssignment,
 	DetailAssignment,
@@ -19,35 +20,35 @@ import {
 export const router: RouteObject[] = [
 	{
 		path: "/backoffice",
-		element: <DashboardLayout />,
+		element: <PrivateRoute element={<DashboardLayout />} />,
 		children: [
 			{
 				path: "/backoffice/user-management",
 				index: true,
-				element: <ListManagedUsers />,
+				element: <PrivateRoute element={<ListManagedUsers />} />,
 				loader: loaderUserManagement,
 			},
 			{
 				path: "/backoffice/user-management/create",
-				element: <CreateManagedUser />,
+				element: <PrivateRoute element={<CreateManagedUser />} />,
 				action: actionCreateManagedUser,
 			},
 			{
 				path: "/backoffice/assignments",
-				element: <ListAssignments />,
+				element: <PrivateRoute element={<ListAssignments />} />,
 				loader: loaderListAssignments,
 			},
 			{
 				path: "/backoffice/assignments/create",
-				element: <CreateAssignment />,
+				element: <PrivateRoute element={<CreateAssignment />} />,
 				action: actionCreateAssignemnt,
 			},
 			{
 				path: "/backoffice/assignments/detail",
-				element: <DetailAssignment />,
+				element: <PrivateRoute element={<DetailAssignment />} />,
 				loader: loadEditAssignment,
 			},
-		],
+		]
 	},
 ];
 

@@ -3,6 +3,7 @@ import { LoginPage, loginAction } from "../routes/login/index";
 import * as backoffice from "./backoffice/index";
 import * as studentdash from "./student_dashboard/index";
 
+
 export const router = createBrowserRouter([
 	{
 		path: "/",

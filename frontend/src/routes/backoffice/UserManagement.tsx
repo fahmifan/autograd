@@ -5,6 +5,7 @@ import {
 	Pagination,
 	Select,
 	Table,
+	TextInput,
 	Title,
 } from "@mantine/core";
 import {
@@ -93,26 +94,19 @@ export function CreateManagedUser() {
 
 	return (
 		<>
-			<Title order={3}>Create User</Title>
+			<Title order={3} mb="lg">Create User</Title>
 			<Group>
 				<Form method="post" id="create-managed-user">
-					<p>
-						<label htmlFor="name">Name</label>
-						<Input type="text" name="name" id="name" />
-					</p>
-					<p>
-						<label htmlFor="email">Email</label>
-						<Input type="email" name="email" id="email" />
-					</p>
-					<p>
-						<label htmlFor="role">Role</label>
+						<TextInput mb="md" type="text" name="name" id="name" label="Name" />
+						<TextInput mb="md" type="email" name="email" id="email" label="Email" />
 						<Select
+							mb="md"
+							label="Role"
 							name="role"
 							id="role"
 							placeholder="Choose a role"
 							data={roleSelection}
 						/>
-					</p>
 
 					<Button
 						type="submit"
