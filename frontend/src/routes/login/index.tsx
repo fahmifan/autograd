@@ -8,11 +8,19 @@ import {
 	Text,
 	TextInput,
 } from "@mantine/core";
-import { JwtPayload, jwtDecode } from "jwt-decode";
-import { ActionFunctionArgs, Form, redirect } from "react-router-dom";
-import { AutogradServiceClient } from "../../service";
+import { ActionFunctionArgs, Form, Navigate, redirect } from "react-router-dom";
+import { AutogradServiceClient, getDecodedJWTToken, saveJWTToken } from "../../service";
 
 export function LoginPage() {
+	const decoded = getDecodedJWTToken();
+	if (decoded?.id) {
+		if (decoded?.role === "admin") {
+			return <Navigate to="/backoffice" />;
+		} else if (decoded?.role === "student") {
+			return <Navigate to="/student-dashboard" />;
+		}
+	}
+
 	return (
 		<Container maw={400} pt="md">
 			<Text size="lg" fw={500} mb="md">
@@ -51,13 +59,6 @@ export function LoginPage() {
 	);
 }
 
-type JWTDecoded = JwtPayload & {
-	id?: string;
-	email?: string;
-	name?: string;
-	role?: string;
-};
-
 export async function loginAction({
 	request,
 }: ActionFunctionArgs): Promise<Response | null> {
@@ -74,9 +75,8 @@ export async function loginAction({
 		return null;
 	}
 
-	// parse jwt token
-	const decoded = jwtDecode<JWTDecoded>(res.token);
-	localStorage.setItem("token", res.token);
+	saveJWTToken(res.token);
+	const decoded = getDecodedJWTToken();
 
 	if (decoded?.role === "admin") {
 		return redirect("/backoffice");

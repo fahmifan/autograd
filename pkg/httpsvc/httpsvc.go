@@ -52,6 +52,7 @@ func (s *Server) routes() {
 	s.echo.Use(
 		middleware.CORS(),
 		s.addUserToCtx,
+		logs.EchoRequestID(),
 		middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 			LogValuesFunc: logs.EchoRequestLogger(true),
 			LogLatency:    true,
