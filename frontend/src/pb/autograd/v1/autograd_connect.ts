@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateStudentSubmissionRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateStudentSubmissionRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { ActivateManagedUserRequest, Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateStudentSubmissionRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateStudentSubmissionRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -30,6 +30,15 @@ export const AutogradService = {
       name: "CreateManagedUser",
       I: CreateManagedUserRequest,
       O: CreatedResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradService.ActivateManagedUser
+     */
+    activateManagedUser: {
+      name: "ActivateManagedUser",
+      I: ActivateManagedUserRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
     /**
@@ -170,7 +179,7 @@ export const AutogradService = {
     },
     /**
      * Auth
-     * Auth Queries
+     * Auth Mutation
      *
      * @generated from rpc autograd.v1.AutogradService.Login
      */

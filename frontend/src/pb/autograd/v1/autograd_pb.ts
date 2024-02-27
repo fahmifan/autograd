@@ -1667,3 +1667,46 @@ export class UpdateStudentSubmissionRequest extends Message<UpdateStudentSubmiss
   }
 }
 
+/**
+ * @generated from message autograd.v1.ActivateManagedUserRequest
+ */
+export class ActivateManagedUserRequest extends Message<ActivateManagedUserRequest> {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId = "";
+
+  /**
+   * @generated from field: string activation_token = 2;
+   */
+  activationToken = "";
+
+  constructor(data?: PartialMessage<ActivateManagedUserRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.ActivateManagedUserRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "activation_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ActivateManagedUserRequest {
+    return new ActivateManagedUserRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ActivateManagedUserRequest {
+    return new ActivateManagedUserRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ActivateManagedUserRequest {
+    return new ActivateManagedUserRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ActivateManagedUserRequest | PlainMessage<ActivateManagedUserRequest> | undefined, b: ActivateManagedUserRequest | PlainMessage<ActivateManagedUserRequest> | undefined): boolean {
+    return proto3.util.equals(ActivateManagedUserRequest, a, b);
+  }
+}
+

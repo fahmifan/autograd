@@ -211,11 +211,17 @@ message UpdateStudentSubmissionRequest {
     string submission_code = 2;
 }
 
+message ActivateManagedUserRequest {
+    string user_id = 1;
+    string activation_token = 2;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
 
     // User Management
     rpc CreateManagedUser(CreateManagedUserRequest) returns (CreatedResponse) {}
+    rpc ActivateManagedUser(ActivateManagedUserRequest) returns (Empty) {}
     rpc FindAllManagedUsers(FindAllManagedUsersRequest) returns (FindAllManagedUsersResponse) {}
     
     // Assignment Submission

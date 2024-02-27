@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +19,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/fs"
 	"github.com/fahmifan/autograd/pkg/httpsvc"
 	"github.com/fahmifan/autograd/pkg/logs"
+	"github.com/fahmifan/autograd/pkg/mailer/smtp"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
 	"github.com/fahmifan/autograd/pkg/service"
@@ -42,10 +44,26 @@ func Execute() error {
 
 func mustInitService() *service.Service {
 	gormDB := dbconn.MustSQLite()
-	return service.NewService(gormDB, config.JWTKey(), core.MediaConfig{
+	mediaCfg := core.MediaConfig{
 		RootDir:      config.FileUploadPath(),
 		ObjectStorer: fs.NewLocalStorage(),
-	})
+	}
+	smtpConfig := config.SMTPConfig()
+
+	mailer, err := smtp.NewSmtpClient(&smtpConfig)
+	if err != nil {
+		log.Fatal("init mailer failed:", err)
+	}
+
+	svc := service.NewService(
+		gormDB,
+		config.JWTKey(),
+		mediaCfg,
+		config.SenderEmail(),
+		mailer,
+	)
+
+	return svc
 }
 
 func serverCmd() *cobra.Command {
@@ -54,6 +72,8 @@ func serverCmd() *cobra.Command {
 		Short: "Run autograd server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			service := mustInitService()
+
+			ctx := context.Background()
 
 			server := httpsvc.NewServer(
 				config.Port(),
@@ -66,13 +86,19 @@ func serverCmd() *cobra.Command {
 				server.Run()
 			}()
 
+			go func() {
+				logs.Info("run outbox service")
+				service.RegisterJobHandlers()
+				service.RunOutboxService(ctx)
+			}()
+
 			// Wait for a signal to quit:
 			signalChan := make(chan os.Signal, 1)
 			signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 			<-signalChan
 
 			logs.Info("stopping server")
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 			defer cancel()
 			server.Stop(ctx)
 

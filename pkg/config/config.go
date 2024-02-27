@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/fahmifan/autograd/pkg/logs"
+	"github.com/fahmifan/autograd/pkg/mailer/smtp"
 	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
 )
@@ -116,4 +118,22 @@ func AutogradAuthToken() string {
 func AutogradServerURL() string {
 	val, _ := os.LookupEnv("AUTOGRAD_SERVER_URL")
 	return val
+}
+
+func SenderEmail() string {
+	return os.Getenv("SENDER_EMAIL")
+}
+
+func SMTPConfig() smtp.Config {
+	return smtp.Config{
+		Host:     os.Getenv("SMTP_HOST"),
+		Port:     parseInt(os.Getenv("SMTP_PORT")),
+		Username: os.Getenv("SMTP_USERNAME"),
+		Password: os.Getenv("SMTP_PASSWORD"),
+	}
+}
+
+func parseInt(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
 }
