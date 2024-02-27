@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ActivateManagedUserRequest, Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateStudentSubmissionRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateStudentSubmissionRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { ActivateManagedUserRequest, Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateStudentSubmissionRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, UpdateAssignmentRequest, UpdateStudentSubmissionRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -78,6 +78,15 @@ export const AutogradService = {
       name: "FindSubmission",
       I: FindByIDRequest,
       O: Submission,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradService.FindAllSubmissionForAssignment
+     */
+    findAllSubmissionForAssignment: {
+      name: "FindAllSubmissionForAssignment",
+      I: FindAllSubmissionsForAssignmentRequest,
+      O: FindAllSubmissionsForAssignmentResponse,
       kind: MethodKind.Unary,
     },
     /**

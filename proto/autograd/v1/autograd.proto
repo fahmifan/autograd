@@ -93,6 +93,7 @@ message Submission {
     Submitter submitter = 3;
     SubmissionFile submission_file = 4;
     TimestampMetadata timestamp_metadata = 5;
+    string submission_code = 6;
 }
 
 message UpdateAssignmentRequest {
@@ -156,6 +157,25 @@ message FindAllManagedUsersRequest {
 message FindAllManagedUsersResponse {
     repeated ManagedUser managed_users = 1;
     PaginationMetadata pagination_metadata = 2;
+}
+
+message FindAllSubmissionsForAssignmentRequest {
+    PaginationRequest pagination_request = 1;
+    string assignment_id = 2;
+}
+
+message FindAllSubmissionsForAssignmentResponse {
+    repeated Submission submissions = 1;
+    string assignment_id = 2;
+    string assignment_name = 3;
+    string assigner_id = 4;
+    string assigner_name = 5;
+
+    message Submission {
+        string id = 1;
+        string submitter_id = 4;
+        string submitter_name = 5;
+    }
 }
 
 message FindAllStudentAssignmentsRequest {
@@ -229,6 +249,7 @@ service AutogradService {
     rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
     rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
     rpc FindSubmission(FindByIDRequest) returns (Submission) {}
+    rpc FindAllSubmissionForAssignment(FindAllSubmissionsForAssignmentRequest) returns (FindAllSubmissionsForAssignmentResponse) {}
     // Assignment Command
     rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
     rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}

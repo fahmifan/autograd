@@ -3,19 +3,20 @@ import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
 import {
+	CreateManagedUser,
+	ListManagedUsers,
+	actionCreateManagedUser,
+	loaderUserManagement,
+} from "./UserManagement";
+import {
 	CreateAssignment,
 	DetailAssignment,
 	ListAssignments,
 	actionCreateAssignemnt,
 	loadEditAssignment,
 	loaderListAssignments,
-} from "./Assignment";
-import {
-	CreateManagedUser,
-	ListManagedUsers,
-	actionCreateManagedUser,
-	loaderUserManagement,
-} from "./UserManagement";
+} from "./assignments/Assignment";
+import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./assignments/Submissions";
 
 export const router: RouteObject[] = [
 	{
@@ -47,6 +48,16 @@ export const router: RouteObject[] = [
 				path: "/backoffice/assignments/detail",
 				element: <PrivateRoute element={<DetailAssignment />} />,
 				loader: loadEditAssignment,
+			},
+			{
+				path: "/backoffice/assignments/submissions",
+				element: <PrivateRoute element={<ListSubmissions />} />,
+				loader: loaderListSubmissions,
+			},
+			{
+				path: "/backoffice/assignments/submissions/detail",
+				element: <PrivateRoute element={<SubmissionDetail />} />,
+				loader: loaderSubmissionDetail,
 			},
 		]
 	},

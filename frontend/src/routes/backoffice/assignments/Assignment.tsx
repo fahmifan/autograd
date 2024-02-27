@@ -1,10 +1,9 @@
 import {
 	Anchor,
-	Box,
 	Breadcrumbs,
 	Button,
 	FileInput,
-	Group,
+	Flex,
 	Input,
 	Paper,
 	Stack,
@@ -12,27 +11,22 @@ import {
 	Text,
 	TextInput,
 	Title,
+	Tooltip,
 	VisuallyHidden,
 	rem,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import {
-	ChangeCodeMirrorLanguage,
-	ConditionalContents,
-	InsertCodeBlock,
-	InsertSandpack,
 	MDXEditor,
 	MDXEditorMethods,
-	ShowSandpackInfo,
 	headingsPlugin,
 	listsPlugin,
 	markdownShortcutPlugin,
 	quotePlugin,
 	thematicBreakPlugin,
-	toolbarPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
-import { IconExternalLink, IconUpload } from "@tabler/icons-react";
+import { IconExternalLink, IconNote, IconUpload } from "@tabler/icons-react";
 import { forwardRef, useRef, useState } from "react";
 import { useMutation } from "react-query";
 import {
@@ -47,8 +41,8 @@ import {
 import {
 	Assignment,
 	FindAllAssignmentsResponse,
-} from "../../pb/autograd/v1/autograd_pb";
-import { AutogradRPCClient, AutogradServiceClient } from "../../service";
+} from "../../../pb/autograd/v1/autograd_pb";
+import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
 
 export function ListAssignments() {
 	const res = useLoaderData() as FindAllAssignmentsResponse;
@@ -68,13 +62,14 @@ export function ListAssignments() {
 			<Title order={3} mb="lg">
 				Assignments
 			</Title>
-			<Table striped highlightOnHover maw={700} mb="lg">
+			<Table striped highlightOnHover maw={800} mb="lg">
 				<Table.Thead>
 					<Table.Tr>
 						<Table.Th>ID</Table.Th>
 						<Table.Th>Name</Table.Th>
 						<Table.Th>Assigner</Table.Th>
 						<Table.Th>Detail</Table.Th>
+						<Table.Th>Submissions</Table.Th>
 					</Table.Tr>
 				</Table.Thead>
 
@@ -86,11 +81,25 @@ export function ListAssignments() {
 								<Table.Td>{assignment.name}</Table.Td>
 								<Table.Td>{assignment.assigner?.name ?? ""}</Table.Td>
 								<Table.Td>
+										<Anchor
+											component={Link}
+											to={`/backoffice/assignments/detail?id=${assignment.id}`}
+											size="sm"
+										>
+											<Tooltip label={`Detail Assignment for ${assignment.name}`}>
+												<IconExternalLink color="#339AF0" />
+											</Tooltip>
+										</Anchor>
+								</Table.Td>
+								<Table.Td>
 									<Anchor
 										component={Link}
-										to={`/backoffice/assignments/detail?id=${assignment.id}`}
+										to={`/backoffice/assignments/submissions?assignmentID=${assignment.id}`}
+										size="sm"
 									>
-										<IconExternalLink color="#339AF0" />
+										<Tooltip label={`Submission for ${assignment.name}`}>
+											<IconNote color="#339AF0" />
+										</Tooltip>
 									</Anchor>
 								</Table.Td>
 							</Table.Tr>

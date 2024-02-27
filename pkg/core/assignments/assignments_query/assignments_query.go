@@ -2,12 +2,15 @@ package assignments_query
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/assignments"
 	"github.com/fahmifan/autograd/pkg/core/auth"
+	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_query"
+	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/google/uuid"
@@ -107,12 +110,108 @@ func (query *AssignmentsQuery) FindSubmission(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	var submissionBuf []byte
+	if submission.SourceFile.ID != uuid.Nil {
+		mediaStoreQuery := mediastore_query.MediaStoreQuery{Ctx: query.Ctx}
+		submissionMedia, err := mediaStoreQuery.InternalFindMediaFile(ctx, mediastore_query.InternalFindMediaFileRequest{
+			ID: submission.SourceFile.ID,
+		})
+		if err != nil {
+			logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindStudentAssignment: InternalFindMediaFile")
+			return nil, core.ErrInternalServer
+		}
+		defer submissionMedia.BodyCloser.Close()
+
+		submissionBuf, err = io.ReadAll(submissionMedia.BodyCloser)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindStudentAssignment: io.ReadAll")
+			return nil, core.ErrInternalServer
+		}
+	}
+
 	return &connect.Response[autogradv1.Submission]{
-		Msg: toSubmissionProto(submission),
+		Msg: toSubmissionProto(submission, submissionBuf),
 	}, nil
 }
 
-func toSubmissionProto(submission assignments.Submission) *autogradv1.Submission {
+func (query *AssignmentsQuery) FindAllSubmissionForAssignment(
+	ctx context.Context,
+	req *connect.Request[autogradv1.FindAllSubmissionsForAssignmentRequest],
+) (*connect.Response[autogradv1.FindAllSubmissionsForAssignmentResponse], error) {
+	authUser, ok := auth.GetUserFromCtx(ctx)
+	if !ok {
+		return nil, core.ErrUnauthenticated
+	}
+
+	if !authUser.Role.Can(auth.ViewAnySubmissions) {
+		return nil, core.ErrPermissionDenied
+	}
+
+	assignment := dbmodel.Assignment{}
+	err := query.GormDB.Where("id = ?", req.Msg.GetAssignmentId()).Take(&assignment).Error
+	if err != nil && core.IsDBNotFoundErr(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	assigner := dbmodel.User{}
+	err = query.GormDB.Where("id = ?", assignment.AssignedBy).Take(&assigner).Error
+	if err != nil && core.IsDBNotFoundErr(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	var submissions []dbmodel.Submission
+	err = query.GormDB.
+		Model(&dbmodel.Submission{}).
+		Select("id", "submitted_by").
+		Where("assignment_id = ?", assignment.ID).Find(&submissions).Error
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	submitterIDs := make([]uuid.UUID, len(submissions))
+	for i, submission := range submissions {
+		submitterIDs[i] = submission.SubmittedBy
+	}
+
+	var submitters []dbmodel.User
+	err = query.GormDB.
+		Select("id", "name").
+		Where("id IN ?", submitterIDs).Find(&submitters).Error
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	submitterMap := make(map[uuid.UUID]string)
+	for _, submitter := range submitters {
+		submitterMap[submitter.ID] = submitter.Name
+	}
+
+	submissionRes := make([]*autogradv1.FindAllSubmissionsForAssignmentResponse_Submission, len(submissions))
+	for i := range submissions {
+		submissionRes[i] = &autogradv1.FindAllSubmissionsForAssignmentResponse_Submission{
+			Id:            submissions[i].ID.String(),
+			SubmitterId:   submissions[i].SubmittedBy.String(),
+			SubmitterName: submitterMap[submissions[i].SubmittedBy],
+		}
+	}
+
+	res := &connect.Response[autogradv1.FindAllSubmissionsForAssignmentResponse]{
+		Msg: &autogradv1.FindAllSubmissionsForAssignmentResponse{
+			Submissions:    submissionRes,
+			AssignerId:     assigner.ID.String(),
+			AssignerName:   assigner.Name,
+			AssignmentId:   assignment.ID.String(),
+			AssignmentName: assignment.Name,
+		},
+	}
+
+	return res, nil
+}
+
+func toSubmissionProto(submission assignments.Submission, submissionBuf []byte) *autogradv1.Submission {
 	return &autogradv1.Submission{
 		Id:         submission.ID.String(),
 		Assignment: toAssignmentProto(submission.Assignment),
@@ -122,6 +221,7 @@ func toSubmissionProto(submission assignments.Submission) *autogradv1.Submission
 			Url: submission.SourceFile.URL,
 		},
 		TimestampMetadata: submission.ProtoTimestampMetadata(),
+		SubmissionCode:    string(submissionBuf),
 	}
 }
 
