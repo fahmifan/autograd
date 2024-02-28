@@ -3,6 +3,7 @@ package dbmodel
 import (
 	"time"
 
+	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
@@ -30,6 +31,26 @@ type User struct {
 
 func (user User) IsActive() bool {
 	return user.Active == 1
+}
+
+type RelUserToActivationToken struct {
+	UserID            uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ActivationTokenID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	DeletedAt         gorm.DeletedAt
+}
+
+func (RelUserToActivationToken) TableName() string {
+	return "rel_user_to_activation_tokens"
+}
+
+type ActivationToken struct {
+	Base
+	Token     string
+	ExpiredAt time.Time
+}
+
+func (ActivationToken) TableName() string {
+	return "activation_tokens"
 }
 
 type Assignment struct {
@@ -67,4 +88,12 @@ type File struct {
 	Type FileType
 	Ext  FileExt
 	URL  string
+}
+
+type OutboxItem struct {
+	ID            ulids.ULID
+	IdempotentKey string
+	Status        string
+	JobType       string
+	Payload       string
 }

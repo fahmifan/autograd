@@ -93,6 +93,7 @@ message Submission {
     Submitter submitter = 3;
     SubmissionFile submission_file = 4;
     TimestampMetadata timestamp_metadata = 5;
+    string submission_code = 6;
 }
 
 message UpdateAssignmentRequest {
@@ -158,6 +159,25 @@ message FindAllManagedUsersResponse {
     PaginationMetadata pagination_metadata = 2;
 }
 
+message FindAllSubmissionsForAssignmentRequest {
+    PaginationRequest pagination_request = 1;
+    string assignment_id = 2;
+}
+
+message FindAllSubmissionsForAssignmentResponse {
+    repeated Submission submissions = 1;
+    string assignment_id = 2;
+    string assignment_name = 3;
+    string assigner_id = 4;
+    string assigner_name = 5;
+
+    message Submission {
+        string id = 1;
+        string submitter_id = 4;
+        string submitter_name = 5;
+    }
+}
+
 message FindAllStudentAssignmentsRequest {
     PaginationRequest pagination_request = 1;
     string from_date = 2;
@@ -211,11 +231,17 @@ message UpdateStudentSubmissionRequest {
     string submission_code = 2;
 }
 
+message ActivateManagedUserRequest {
+    string user_id = 1;
+    string activation_token = 2;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
 
     // User Management
     rpc CreateManagedUser(CreateManagedUserRequest) returns (CreatedResponse) {}
+    rpc ActivateManagedUser(ActivateManagedUserRequest) returns (Empty) {}
     rpc FindAllManagedUsers(FindAllManagedUsersRequest) returns (FindAllManagedUsersResponse) {}
     
     // Assignment Submission
@@ -223,6 +249,7 @@ service AutogradService {
     rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
     rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
     rpc FindSubmission(FindByIDRequest) returns (Submission) {}
+    rpc FindAllSubmissionForAssignment(FindAllSubmissionsForAssignmentRequest) returns (FindAllSubmissionsForAssignmentResponse) {}
     // Assignment Command
     rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
     rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}

@@ -67,7 +67,7 @@ var policy = map[Role]map[Permission]bool{
 		CreateSubmission:         _ok,
 		ViewSubmission:           _ok,
 		ViewAnySubmissions:       _ok,
-		CreateUser:               _ok,
+		CreateAnyUser:            _ok,
 		CreateSubmissionForOther: _ok,
 		CreateMedia:              _ok,
 	},

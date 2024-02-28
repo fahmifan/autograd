@@ -66,6 +66,7 @@ func (s *Server) routes() {
 
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/rpc/saveMedia", s.handleSaveMedia)
+	apiV1.GET("/rpc/activateManagedUser", s.handleActivateManagedUser)
 
 	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
 		s.service,

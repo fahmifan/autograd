@@ -36,6 +36,11 @@ export function saveJWTToken(token: string): void {
 	_jwtToken = token
 }
 
+export function removeJWTToken(): void {
+	localStorage.removeItem("token");
+	_jwtToken = ''
+}
+
 export function decodeJWTToken(token: string): JWTDecoded {
 	return jwtDecode<JWTDecoded>(token);
 }

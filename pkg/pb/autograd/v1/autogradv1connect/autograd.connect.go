@@ -38,6 +38,9 @@ const (
 	// AutogradServiceCreateManagedUserProcedure is the fully-qualified name of the AutogradService's
 	// CreateManagedUser RPC.
 	AutogradServiceCreateManagedUserProcedure = "/autograd.v1.AutogradService/CreateManagedUser"
+	// AutogradServiceActivateManagedUserProcedure is the fully-qualified name of the AutogradService's
+	// ActivateManagedUser RPC.
+	AutogradServiceActivateManagedUserProcedure = "/autograd.v1.AutogradService/ActivateManagedUser"
 	// AutogradServiceFindAllManagedUsersProcedure is the fully-qualified name of the AutogradService's
 	// FindAllManagedUsers RPC.
 	AutogradServiceFindAllManagedUsersProcedure = "/autograd.v1.AutogradService/FindAllManagedUsers"
@@ -50,6 +53,9 @@ const (
 	// AutogradServiceFindSubmissionProcedure is the fully-qualified name of the AutogradService's
 	// FindSubmission RPC.
 	AutogradServiceFindSubmissionProcedure = "/autograd.v1.AutogradService/FindSubmission"
+	// AutogradServiceFindAllSubmissionForAssignmentProcedure is the fully-qualified name of the
+	// AutogradService's FindAllSubmissionForAssignment RPC.
+	AutogradServiceFindAllSubmissionForAssignmentProcedure = "/autograd.v1.AutogradService/FindAllSubmissionForAssignment"
 	// AutogradServiceCreateAssignmentProcedure is the fully-qualified name of the AutogradService's
 	// CreateAssignment RPC.
 	AutogradServiceCreateAssignmentProcedure = "/autograd.v1.AutogradService/CreateAssignment"
@@ -89,12 +95,14 @@ type AutogradServiceClient interface {
 	Ping(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.PingResponse], error)
 	// User Management
 	CreateManagedUser(context.Context, *connect.Request[v1.CreateManagedUserRequest]) (*connect.Response[v1.CreatedResponse], error)
+	ActivateManagedUser(context.Context, *connect.Request[v1.ActivateManagedUserRequest]) (*connect.Response[v1.Empty], error)
 	FindAllManagedUsers(context.Context, *connect.Request[v1.FindAllManagedUsersRequest]) (*connect.Response[v1.FindAllManagedUsersResponse], error)
 	// Assignment Submission
 	// Assignment Queries
 	FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error)
 	FindAllAssignments(context.Context, *connect.Request[v1.FindAllAssignmentsRequest]) (*connect.Response[v1.FindAllAssignmentsResponse], error)
 	FindSubmission(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error)
+	FindAllSubmissionForAssignment(context.Context, *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error)
 	// Assignment Command
 	CreateAssignment(context.Context, *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error)
 	UpdateAssignment(context.Context, *connect.Request[v1.UpdateAssignmentRequest]) (*connect.Response[v1.Empty], error)
@@ -110,7 +118,7 @@ type AutogradServiceClient interface {
 	CreateStudentSubmission(context.Context, *connect.Request[v1.CreateStudentSubmissionRequest]) (*connect.Response[v1.CreatedResponse], error)
 	UpdateStudentSubmission(context.Context, *connect.Request[v1.UpdateStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
 	// Auth
-	// Auth Queries
+	// Auth Mutation
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 }
 
@@ -134,6 +142,11 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			baseURL+AutogradServiceCreateManagedUserProcedure,
 			opts...,
 		),
+		activateManagedUser: connect.NewClient[v1.ActivateManagedUserRequest, v1.Empty](
+			httpClient,
+			baseURL+AutogradServiceActivateManagedUserProcedure,
+			opts...,
+		),
 		findAllManagedUsers: connect.NewClient[v1.FindAllManagedUsersRequest, v1.FindAllManagedUsersResponse](
 			httpClient,
 			baseURL+AutogradServiceFindAllManagedUsersProcedure,
@@ -152,6 +165,11 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 		findSubmission: connect.NewClient[v1.FindByIDRequest, v1.Submission](
 			httpClient,
 			baseURL+AutogradServiceFindSubmissionProcedure,
+			opts...,
+		),
+		findAllSubmissionForAssignment: connect.NewClient[v1.FindAllSubmissionsForAssignmentRequest, v1.FindAllSubmissionsForAssignmentResponse](
+			httpClient,
+			baseURL+AutogradServiceFindAllSubmissionForAssignmentProcedure,
 			opts...,
 		),
 		createAssignment: connect.NewClient[v1.CreateAssignmentRequest, v1.CreatedResponse](
@@ -214,23 +232,25 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // autogradServiceClient implements AutogradServiceClient.
 type autogradServiceClient struct {
-	ping                      *connect.Client[v1.Empty, v1.PingResponse]
-	createManagedUser         *connect.Client[v1.CreateManagedUserRequest, v1.CreatedResponse]
-	findAllManagedUsers       *connect.Client[v1.FindAllManagedUsersRequest, v1.FindAllManagedUsersResponse]
-	findAssignment            *connect.Client[v1.FindByIDRequest, v1.Assignment]
-	findAllAssignments        *connect.Client[v1.FindAllAssignmentsRequest, v1.FindAllAssignmentsResponse]
-	findSubmission            *connect.Client[v1.FindByIDRequest, v1.Submission]
-	createAssignment          *connect.Client[v1.CreateAssignmentRequest, v1.CreatedResponse]
-	updateAssignment          *connect.Client[v1.UpdateAssignmentRequest, v1.Empty]
-	deleteAssignment          *connect.Client[v1.DeleteByIDRequest, v1.Empty]
-	createSubmission          *connect.Client[v1.CreateSubmissionRequest, v1.CreatedResponse]
-	updateSubmission          *connect.Client[v1.UpdateSubmissionRequest, v1.Empty]
-	deleteSubmission          *connect.Client[v1.DeleteByIDRequest, v1.Empty]
-	findAllStudentAssignments *connect.Client[v1.FindAllStudentAssignmentsRequest, v1.FindAllStudentAssignmentsResponse]
-	findStudentAssignment     *connect.Client[v1.FindByIDRequest, v1.StudentAssignment]
-	createStudentSubmission   *connect.Client[v1.CreateStudentSubmissionRequest, v1.CreatedResponse]
-	updateStudentSubmission   *connect.Client[v1.UpdateStudentSubmissionRequest, v1.Empty]
-	login                     *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	ping                           *connect.Client[v1.Empty, v1.PingResponse]
+	createManagedUser              *connect.Client[v1.CreateManagedUserRequest, v1.CreatedResponse]
+	activateManagedUser            *connect.Client[v1.ActivateManagedUserRequest, v1.Empty]
+	findAllManagedUsers            *connect.Client[v1.FindAllManagedUsersRequest, v1.FindAllManagedUsersResponse]
+	findAssignment                 *connect.Client[v1.FindByIDRequest, v1.Assignment]
+	findAllAssignments             *connect.Client[v1.FindAllAssignmentsRequest, v1.FindAllAssignmentsResponse]
+	findSubmission                 *connect.Client[v1.FindByIDRequest, v1.Submission]
+	findAllSubmissionForAssignment *connect.Client[v1.FindAllSubmissionsForAssignmentRequest, v1.FindAllSubmissionsForAssignmentResponse]
+	createAssignment               *connect.Client[v1.CreateAssignmentRequest, v1.CreatedResponse]
+	updateAssignment               *connect.Client[v1.UpdateAssignmentRequest, v1.Empty]
+	deleteAssignment               *connect.Client[v1.DeleteByIDRequest, v1.Empty]
+	createSubmission               *connect.Client[v1.CreateSubmissionRequest, v1.CreatedResponse]
+	updateSubmission               *connect.Client[v1.UpdateSubmissionRequest, v1.Empty]
+	deleteSubmission               *connect.Client[v1.DeleteByIDRequest, v1.Empty]
+	findAllStudentAssignments      *connect.Client[v1.FindAllStudentAssignmentsRequest, v1.FindAllStudentAssignmentsResponse]
+	findStudentAssignment          *connect.Client[v1.FindByIDRequest, v1.StudentAssignment]
+	createStudentSubmission        *connect.Client[v1.CreateStudentSubmissionRequest, v1.CreatedResponse]
+	updateStudentSubmission        *connect.Client[v1.UpdateStudentSubmissionRequest, v1.Empty]
+	login                          *connect.Client[v1.LoginRequest, v1.LoginResponse]
 }
 
 // Ping calls autograd.v1.AutogradService.Ping.
@@ -241,6 +261,11 @@ func (c *autogradServiceClient) Ping(ctx context.Context, req *connect.Request[v
 // CreateManagedUser calls autograd.v1.AutogradService.CreateManagedUser.
 func (c *autogradServiceClient) CreateManagedUser(ctx context.Context, req *connect.Request[v1.CreateManagedUserRequest]) (*connect.Response[v1.CreatedResponse], error) {
 	return c.createManagedUser.CallUnary(ctx, req)
+}
+
+// ActivateManagedUser calls autograd.v1.AutogradService.ActivateManagedUser.
+func (c *autogradServiceClient) ActivateManagedUser(ctx context.Context, req *connect.Request[v1.ActivateManagedUserRequest]) (*connect.Response[v1.Empty], error) {
+	return c.activateManagedUser.CallUnary(ctx, req)
 }
 
 // FindAllManagedUsers calls autograd.v1.AutogradService.FindAllManagedUsers.
@@ -261,6 +286,11 @@ func (c *autogradServiceClient) FindAllAssignments(ctx context.Context, req *con
 // FindSubmission calls autograd.v1.AutogradService.FindSubmission.
 func (c *autogradServiceClient) FindSubmission(ctx context.Context, req *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error) {
 	return c.findSubmission.CallUnary(ctx, req)
+}
+
+// FindAllSubmissionForAssignment calls autograd.v1.AutogradService.FindAllSubmissionForAssignment.
+func (c *autogradServiceClient) FindAllSubmissionForAssignment(ctx context.Context, req *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error) {
+	return c.findAllSubmissionForAssignment.CallUnary(ctx, req)
 }
 
 // CreateAssignment calls autograd.v1.AutogradService.CreateAssignment.
@@ -323,12 +353,14 @@ type AutogradServiceHandler interface {
 	Ping(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.PingResponse], error)
 	// User Management
 	CreateManagedUser(context.Context, *connect.Request[v1.CreateManagedUserRequest]) (*connect.Response[v1.CreatedResponse], error)
+	ActivateManagedUser(context.Context, *connect.Request[v1.ActivateManagedUserRequest]) (*connect.Response[v1.Empty], error)
 	FindAllManagedUsers(context.Context, *connect.Request[v1.FindAllManagedUsersRequest]) (*connect.Response[v1.FindAllManagedUsersResponse], error)
 	// Assignment Submission
 	// Assignment Queries
 	FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error)
 	FindAllAssignments(context.Context, *connect.Request[v1.FindAllAssignmentsRequest]) (*connect.Response[v1.FindAllAssignmentsResponse], error)
 	FindSubmission(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error)
+	FindAllSubmissionForAssignment(context.Context, *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error)
 	// Assignment Command
 	CreateAssignment(context.Context, *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error)
 	UpdateAssignment(context.Context, *connect.Request[v1.UpdateAssignmentRequest]) (*connect.Response[v1.Empty], error)
@@ -344,7 +376,7 @@ type AutogradServiceHandler interface {
 	CreateStudentSubmission(context.Context, *connect.Request[v1.CreateStudentSubmissionRequest]) (*connect.Response[v1.CreatedResponse], error)
 	UpdateStudentSubmission(context.Context, *connect.Request[v1.UpdateStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
 	// Auth
-	// Auth Queries
+	// Auth Mutation
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 }
 
@@ -362,6 +394,11 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 	autogradServiceCreateManagedUserHandler := connect.NewUnaryHandler(
 		AutogradServiceCreateManagedUserProcedure,
 		svc.CreateManagedUser,
+		opts...,
+	)
+	autogradServiceActivateManagedUserHandler := connect.NewUnaryHandler(
+		AutogradServiceActivateManagedUserProcedure,
+		svc.ActivateManagedUser,
 		opts...,
 	)
 	autogradServiceFindAllManagedUsersHandler := connect.NewUnaryHandler(
@@ -382,6 +419,11 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 	autogradServiceFindSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceFindSubmissionProcedure,
 		svc.FindSubmission,
+		opts...,
+	)
+	autogradServiceFindAllSubmissionForAssignmentHandler := connect.NewUnaryHandler(
+		AutogradServiceFindAllSubmissionForAssignmentProcedure,
+		svc.FindAllSubmissionForAssignment,
 		opts...,
 	)
 	autogradServiceCreateAssignmentHandler := connect.NewUnaryHandler(
@@ -445,6 +487,8 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 			autogradServicePingHandler.ServeHTTP(w, r)
 		case AutogradServiceCreateManagedUserProcedure:
 			autogradServiceCreateManagedUserHandler.ServeHTTP(w, r)
+		case AutogradServiceActivateManagedUserProcedure:
+			autogradServiceActivateManagedUserHandler.ServeHTTP(w, r)
 		case AutogradServiceFindAllManagedUsersProcedure:
 			autogradServiceFindAllManagedUsersHandler.ServeHTTP(w, r)
 		case AutogradServiceFindAssignmentProcedure:
@@ -453,6 +497,8 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 			autogradServiceFindAllAssignmentsHandler.ServeHTTP(w, r)
 		case AutogradServiceFindSubmissionProcedure:
 			autogradServiceFindSubmissionHandler.ServeHTTP(w, r)
+		case AutogradServiceFindAllSubmissionForAssignmentProcedure:
+			autogradServiceFindAllSubmissionForAssignmentHandler.ServeHTTP(w, r)
 		case AutogradServiceCreateAssignmentProcedure:
 			autogradServiceCreateAssignmentHandler.ServeHTTP(w, r)
 		case AutogradServiceUpdateAssignmentProcedure:
@@ -492,6 +538,10 @@ func (UnimplementedAutogradServiceHandler) CreateManagedUser(context.Context, *c
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.CreateManagedUser is not implemented"))
 }
 
+func (UnimplementedAutogradServiceHandler) ActivateManagedUser(context.Context, *connect.Request[v1.ActivateManagedUserRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.ActivateManagedUser is not implemented"))
+}
+
 func (UnimplementedAutogradServiceHandler) FindAllManagedUsers(context.Context, *connect.Request[v1.FindAllManagedUsersRequest]) (*connect.Response[v1.FindAllManagedUsersResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindAllManagedUsers is not implemented"))
 }
@@ -506,6 +556,10 @@ func (UnimplementedAutogradServiceHandler) FindAllAssignments(context.Context, *
 
 func (UnimplementedAutogradServiceHandler) FindSubmission(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindSubmission is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) FindAllSubmissionForAssignment(context.Context, *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindAllSubmissionForAssignment is not implemented"))
 }
 
 func (UnimplementedAutogradServiceHandler) CreateAssignment(context.Context, *connect.Request[v1.CreateAssignmentRequest]) (*connect.Response[v1.CreatedResponse], error) {

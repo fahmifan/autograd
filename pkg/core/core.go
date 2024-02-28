@@ -9,15 +9,28 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
+	"github.com/fahmifan/autograd/pkg/jobqueue"
+	"github.com/fahmifan/autograd/pkg/jobqueue/outbox"
+	"github.com/fahmifan/autograd/pkg/mailer"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 )
 
 type Ctx struct {
-	GormDB *gorm.DB
-	JWTKey string
 	MediaConfig
+	JWTKey      string
+	SenderEmail string
+	AppLink     string
+	LogoURL     string
+
+	GormDB         *gorm.DB
+	Mailer         mailer.Mailer
+	OutboxEnqueuer OutboxEnqueuer
+}
+
+type OutboxEnqueuer interface {
+	Enqueue(ctx context.Context, tx *gorm.DB, req outbox.EnqueueRequest) (item jobqueue.OutboxItem, err error)
 }
 
 type MediaConfig struct {
