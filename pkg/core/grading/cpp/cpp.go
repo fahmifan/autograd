@@ -7,9 +7,11 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/fahmifan/autograd/pkg/core/grading"
+	"github.com/fahmifan/autograd/pkg/logs"
 )
 
 var _ grading.Compiler = (*CPPCompiler)(nil)
@@ -17,20 +19,41 @@ var _ grading.Compiler = (*CPPCompiler)(nil)
 type CPPCompiler struct {
 }
 
-func (c *CPPCompiler) Compile(inputPath string) (outPath string, err error) {
+func (c *CPPCompiler) compile(inputPath grading.SourceCodePath) (outPath string, err error) {
 	outPath = path.Join(fmt.Sprintf("%s.bin", inputPath))
 	args := strings.Split(fmt.Sprintf("%s -o %s", inputPath, outPath), " ")
 	cmd := exec.Command("g++", args...)
-	bt, err := cmd.CombinedOutput()
+	_, err = cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("comile: %w", err)
 	}
 
-	return string(bt), nil
+	return outPath, nil
 }
 
-func (c *CPPCompiler) Run(bindPath string, input io.Reader, output io.Writer) (err error) {
-	cmd := exec.Command(bindPath)
+func (c *CPPCompiler) Run(srcCodePath grading.SourceCodePath, input io.Reader, output io.Writer) (err error) {
+	return c.run(srcCodePath, input, output)
+}
+
+func (c *CPPCompiler) run(srcCodePath grading.SourceCodePath, input io.Reader, output io.Writer) (err error) {
+	binPath, err := c.compile(srcCodePath)
+	if err != nil {
+		return fmt.Errorf("compile: %w", err)
+	}
+
+	defer func() {
+		if err := c.remove(binPath); err != nil {
+			logs.Err(err, "path", "binPath: ", string(binPath), "srcCodePath: ", string(srcCodePath))
+		}
+	}()
+
+	cmd := exec.Command(binPath)
+
+	if runtime.GOOS == "darwin" {
+		sandboxRulePath := grading.RuleName
+		cmd.Path = "/usr/bin/sandbox-exec"
+		cmd = exec.Command("/usr/bin/sandbox-exec", "-f", sandboxRulePath, binPath)
+	}
 
 	buffErr := bytes.NewBuffer(nil)
 
@@ -50,6 +73,6 @@ func (c *CPPCompiler) Run(bindPath string, input io.Reader, output io.Writer) (e
 	return
 }
 
-func (c *CPPCompiler) Remove(source string) error {
+func (c *CPPCompiler) remove(source string) error {
 	return os.Remove(source)
 }

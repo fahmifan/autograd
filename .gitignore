@@ -8,3 +8,4 @@ file_upload_path/*
 /node_modules
 /tmp
 /private
+/mac-sandbox-rule.sb

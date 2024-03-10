@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/google/uuid"
 )
 
@@ -18,14 +17,14 @@ const (
 )
 
 type Compiler interface {
-	Compile(inputPath string) (outPath string, err error)
-	Run(bindPath string, input io.Reader, output io.Writer) (err error)
-	Remove(source string) error
+	Run(srcCodePath SourceCodePath, input io.Reader, output io.Writer) (err error)
 }
+
+type SourceCodePath string
 
 type GradeRequest struct {
 	Compiler       Compiler
-	SourceCodePath string
+	SourceCodePath SourceCodePath
 	Expecteds      io.Reader
 	Inputs         io.Reader
 	Submission     Submission
@@ -38,22 +37,10 @@ type GradeResult struct {
 
 func Grade(arg GradeRequest) (GradeResult, error) {
 	compiler := arg.Compiler
-
-	binPath, err := compiler.Compile(arg.SourceCodePath)
-	if err != nil {
-		return GradeResult{}, fmt.Errorf("compile: %w", err)
-	}
-
-	defer func() {
-		if err := compiler.Remove(binPath); err != nil {
-			logs.Err(err, "path", binPath)
-		}
-	}()
-
 	result := GradeResult{}
 
 	stdout := bytes.NewBuffer(nil)
-	err = compiler.Run(binPath, arg.Inputs, stdout)
+	err := compiler.Run(arg.SourceCodePath, arg.Inputs, stdout)
 	if err != nil {
 		return GradeResult{}, fmt.Errorf("run: %w", err)
 	}

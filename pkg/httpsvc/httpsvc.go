@@ -38,6 +38,7 @@ func NewServer(port string, opts ...Option) *Server {
 // Run server
 func (s *Server) Run() {
 	s.routes()
+	s.service.InternalCreateMacSandBoxRules()
 	log.Fatal(s.echo.Start(":" + s.port))
 }
 

@@ -43,12 +43,20 @@ func (cmd *AuthCmd) InternalLogin(
 }
 
 func (cmd *AuthCmd) Login(ctx context.Context, req *connect.Request[autogradv1.LoginRequest]) (*connect.Response[autogradv1.LoginResponse], error) {
-	_, token, err := cmd.InternalLogin(ctx, InternalLoginRequest{
-		Email:    req.Msg.Email,
-		Password: req.Msg.Password,
-	})
+	authUser, cipherPassword, err := auth.AuthReader{}.FindUserByEmail(ctx, cmd.GormDB, req.Msg.GetEmail())
 	if err != nil {
-		logs.ErrCtx(ctx, err, "AuthCmd: Login: InternalLogin")
+		logs.ErrCtx(ctx, err, "AuthCmd: Login: FindUserByEmail")
+		return nil, core.ErrInternalServer
+	}
+
+	if !auth.CheckCipherPassword(req.Msg.GetPassword(), cipherPassword) {
+		cerr := connect.NewError(connect.CodeInvalidArgument, err)
+		return nil, cerr
+	}
+
+	token, err := auth.GenerateJWTToken(cmd.JWTKey, authUser, auth.CreateTokenExpiry())
+	if err != nil {
+		logs.ErrCtx(ctx, err, "AuthCmd: Login: GenerateJWTToken")
 		return nil, core.ErrInternalServer
 	}
 

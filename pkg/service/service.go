@@ -8,6 +8,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_cmd"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_query"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
+	"github.com/fahmifan/autograd/pkg/core/grading/grading_cmd"
 	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment/student_assignment_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment/student_assignment_query"
@@ -32,6 +33,7 @@ type Service struct {
 	*mediastore_cmd.MediaStoreCmd
 	*student_assignment_query.StudentAssignmentQuery
 	*student_assignment_cmd.StudentAssignmentCmd
+	*grading_cmd.GradingCmd
 
 	outboxService *outbox.OutboxService
 }
@@ -60,6 +62,7 @@ func NewService(
 
 	return &Service{
 		coreCtx:                coreCtx,
+		outboxService:          outboxService,
 		AuthCmd:                &auth_cmd.AuthCmd{Ctx: coreCtx},
 		UserManagementCmd:      &user_management_cmd.UserManagementCmd{Ctx: coreCtx},
 		UserManagementQuery:    &user_management_query.UserManagementQuery{Ctx: coreCtx},
@@ -68,7 +71,7 @@ func NewService(
 		MediaStoreCmd:          &mediastore_cmd.MediaStoreCmd{Ctx: coreCtx},
 		StudentAssignmentQuery: &student_assignment_query.StudentAssignmentQuery{Ctx: coreCtx},
 		StudentAssignmentCmd:   &student_assignment_cmd.StudentAssignmentCmd{Ctx: coreCtx},
-		outboxService:          outboxService,
+		GradingCmd:             &grading_cmd.GradingCmd{Ctx: coreCtx},
 	}
 }
 

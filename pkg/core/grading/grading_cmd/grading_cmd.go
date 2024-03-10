@@ -1,6 +1,7 @@
 package grading_cmd
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -23,7 +24,34 @@ type InternalGradeSubmissionRequest struct {
 }
 
 type InternalGradeSubmissionResult struct {
-	GradeResult grading.GradeResult
+	SubmissionID uuid.UUID
+}
+
+// InternalCreateMacSandBoxRules creates mac sandbox rules
+// and store it to local disk.
+// This function is not concurrency safe.
+func (cmd *GradingCmd) InternalCreateMacSandBoxRules() error {
+	ruleFile, err := os.OpenFile(grading.RuleName, os.O_CREATE|os.O_RDWR, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("create file: %w", err)
+	}
+
+	rd := bufio.NewReader(ruleFile)
+	line, _, err := rd.ReadLine()
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("read line: %w", err)
+	}
+
+	if string(line) != "" {
+		return nil
+	}
+
+	err = grading.CreateMacSandboxRules(ruleFile)
+	if err != nil {
+		return fmt.Errorf("create mac sandbox rules: %w", err)
+	}
+
+	return nil
 }
 
 func (cmd *GradingCmd) InternalGradeSubmission(
@@ -66,7 +94,7 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 
 	gradeRes, err := grading.Grade(grading.GradeRequest{
 		Compiler:       compiler,
-		SourceCodePath: submissionFilePath,
+		SourceCodePath: grading.SourceCodePath(submissionFilePath),
 		Inputs:         submission.Assignment.CaseInputFile.File,
 		Expecteds:      submission.Assignment.CaseOutputFile.File,
 	})
@@ -82,6 +110,6 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 	}
 
 	return InternalGradeSubmissionResult{
-		GradeResult: gradeRes,
+		SubmissionID: submission.ID,
 	}, nil
 }
