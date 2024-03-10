@@ -55,7 +55,7 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 			WithStudentID: true,
 		})
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: find assignment by id")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: SubmitStudentSubmission: find assignment by id")
 			return core.ErrInternalServer
 		}
 
@@ -65,13 +65,13 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 			MediaType: mediastore.MediaFileType(dbmodel.FileTypeSubmission),
 		})
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: save submission code")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: SubmitStudentSubmission: save submission code")
 			return core.ErrInternalServer
 		}
 
 		submissionFile, err := submissionFileReader.FindByID(ctx, tx, mediaRes.ID)
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: find submission file by id")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: SubmitStudentSubmission: find submission file by id")
 			return core.ErrInternalServer
 		}
 
@@ -96,7 +96,7 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 
 		err = submissionWriter.CreateSubmission(ctx, tx, &submission)
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: create student submission")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: SubmitStudentSubmission: create student submission")
 			return core.ErrInternalServer
 		}
 
@@ -141,7 +141,7 @@ func (cmd *StudentAssignmentCmd) ResubmitStudentSubmission(ctx context.Context, 
 	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
 		submission, err := submissionReader.FindByID(ctx, tx, submissionID)
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: find submission by id")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: ResubmitStudentSubmission: find submission by id")
 			return core.ErrInternalServer
 		}
 
@@ -151,13 +151,13 @@ func (cmd *StudentAssignmentCmd) ResubmitStudentSubmission(ctx context.Context, 
 			MediaType: mediastore.MediaFileType(dbmodel.FileTypeSubmission),
 		})
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: save submission code")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: ResubmitStudentSubmission: save submission code")
 			return core.ErrInternalServer
 		}
 
 		submissionFile, err := submissionFileReader.FindByID(ctx, tx, mediaRes.ID)
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: find submission file by id")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: ResubmitStudentSubmission: find submission file by id")
 			return core.ErrInternalServer
 		}
 
@@ -171,7 +171,7 @@ func (cmd *StudentAssignmentCmd) ResubmitStudentSubmission(ctx context.Context, 
 
 		err = submissionWriter.UpdateSubmission(ctx, tx, &submission)
 		if err != nil {
-			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: CreateStudentSubmission: create student submission")
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: ResubmitStudentSubmission: create student submission")
 			return core.ErrInternalServer
 		}
 
