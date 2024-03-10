@@ -341,7 +341,7 @@ export async function actionDetailAssignment({
 			const assignmentId = form.get("assignment_id") as string;
 			const submissionCode = form.get("submission_code") as string;
 
-			await AutogradServiceClient.createStudentSubmission({
+			await AutogradServiceClient.submitStudentSubmission({
 				assignmentId,
 				submissionCode,
 			});

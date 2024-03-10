@@ -22,7 +22,7 @@ type StudentAssignmentCmd struct {
 	*core.Ctx
 }
 
-func (cmd *StudentAssignmentCmd) CreateStudentSubmission(ctx context.Context, req *connect.Request[autogradv1.CreateStudentSubmissionRequest]) (
+func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, req *connect.Request[autogradv1.SubmitStudentSubmissionRequest]) (
 	*connect.Response[autogradv1.CreatedResponse], error,
 ) {
 	authUser, ok := auth.GetUserFromCtx(ctx)

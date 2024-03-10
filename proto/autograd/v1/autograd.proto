@@ -221,7 +221,7 @@ message StudentSubmission {
     string updated_at = 9;
 }
 
-message CreateStudentSubmissionRequest {
+message SubmitStudentSubmissionRequest {
     string assignment_id = 1;
     string submission_code = 2;
 }
@@ -263,7 +263,7 @@ service AutogradService {
     rpc FindAllStudentAssignments(FindAllStudentAssignmentsRequest) returns (FindAllStudentAssignmentsResponse) {}
     rpc FindStudentAssignment(FindByIDRequest) returns (StudentAssignment) {}
     // Student Assignment Command
-    rpc CreateStudentSubmission(CreateStudentSubmissionRequest) returns (CreatedResponse) {}
+    rpc SubmitStudentSubmission(SubmitStudentSubmissionRequest) returns (CreatedResponse) {}
     rpc UpdateStudentSubmission(UpdateStudentSubmissionRequest) returns (Empty) {}
 
     // Auth

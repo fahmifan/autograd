@@ -2124,7 +2124,7 @@ func (x *StudentSubmission) GetUpdatedAt() string {
 	return ""
 }
 
-type CreateStudentSubmissionRequest struct {
+type SubmitStudentSubmissionRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2133,8 +2133,8 @@ type CreateStudentSubmissionRequest struct {
 	SubmissionCode string `protobuf:"bytes,2,opt,name=submission_code,json=submissionCode,proto3" json:"submission_code,omitempty"`
 }
 
-func (x *CreateStudentSubmissionRequest) Reset() {
-	*x = CreateStudentSubmissionRequest{}
+func (x *SubmitStudentSubmissionRequest) Reset() {
+	*x = SubmitStudentSubmissionRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_autograd_v1_autograd_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2142,13 +2142,13 @@ func (x *CreateStudentSubmissionRequest) Reset() {
 	}
 }
 
-func (x *CreateStudentSubmissionRequest) String() string {
+func (x *SubmitStudentSubmissionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateStudentSubmissionRequest) ProtoMessage() {}
+func (*SubmitStudentSubmissionRequest) ProtoMessage() {}
 
-func (x *CreateStudentSubmissionRequest) ProtoReflect() protoreflect.Message {
+func (x *SubmitStudentSubmissionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_autograd_v1_autograd_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2160,19 +2160,19 @@ func (x *CreateStudentSubmissionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateStudentSubmissionRequest.ProtoReflect.Descriptor instead.
-func (*CreateStudentSubmissionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use SubmitStudentSubmissionRequest.ProtoReflect.Descriptor instead.
+func (*SubmitStudentSubmissionRequest) Descriptor() ([]byte, []int) {
 	return file_autograd_v1_autograd_proto_rawDescGZIP(), []int{32}
 }
 
-func (x *CreateStudentSubmissionRequest) GetAssignmentId() string {
+func (x *SubmitStudentSubmissionRequest) GetAssignmentId() string {
 	if x != nil {
 		return x.AssignmentId
 	}
 	return ""
 }
 
-func (x *CreateStudentSubmissionRequest) GetSubmissionCode() string {
+func (x *SubmitStudentSubmissionRequest) GetSubmissionCode() string {
 	if x != nil {
 		return x.SubmissionCode
 	}
@@ -2746,8 +2746,8 @@ var file_autograd_v1_autograd_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x64, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x73, 0x75, 0x62, 0x6d,
 	0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70,
 	0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
-	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x6e, 0x0a, 0x1e, 0x43, 0x72, 0x65,
-	0x61, 0x74, 0x65, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x6d, 0x69, 0x73,
+	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x6e, 0x0a, 0x1e, 0x53, 0x75, 0x62,
+	0x6d, 0x69, 0x74, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x6d, 0x69, 0x73,
 	0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x61,
 	0x73, 0x73, 0x69, 0x67, 0x6e, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x0c, 0x61, 0x73, 0x73, 0x69, 0x67, 0x6e, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x64,
@@ -2864,10 +2864,10 @@ var file_autograd_v1_autograd_proto_rawDesc = []byte{
 	0x6f, 0x67, 0x72, 0x61, 0x64, 0x2e, 0x76, 0x31, 0x2e, 0x46, 0x69, 0x6e, 0x64, 0x42, 0x79, 0x49,
 	0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x67,
 	0x72, 0x61, 0x64, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e, 0x74, 0x41, 0x73,
-	0x73, 0x69, 0x67, 0x6e, 0x6d, 0x65, 0x6e, 0x74, 0x22, 0x00, 0x12, 0x66, 0x0a, 0x17, 0x43, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x6d, 0x69,
+	0x73, 0x69, 0x67, 0x6e, 0x6d, 0x65, 0x6e, 0x74, 0x22, 0x00, 0x12, 0x66, 0x0a, 0x17, 0x53, 0x75,
+	0x62, 0x6d, 0x69, 0x74, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x6d, 0x69,
 	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x2b, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x64,
-	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e,
+	0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x6d, 0x69, 0x74, 0x53, 0x74, 0x75, 0x64, 0x65, 0x6e,
 	0x74, 0x53, 0x75, 0x62, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x64, 0x2e, 0x76, 0x31,
 	0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
@@ -2936,7 +2936,7 @@ var file_autograd_v1_autograd_proto_goTypes = []interface{}{
 	(*FindAllStudentAssignmentsResponse)(nil),                  // 30: autograd.v1.FindAllStudentAssignmentsResponse
 	(*StudentAssignment)(nil),                                  // 31: autograd.v1.StudentAssignment
 	(*StudentSubmission)(nil),                                  // 32: autograd.v1.StudentSubmission
-	(*CreateStudentSubmissionRequest)(nil),                     // 33: autograd.v1.CreateStudentSubmissionRequest
+	(*SubmitStudentSubmissionRequest)(nil),                     // 33: autograd.v1.SubmitStudentSubmissionRequest
 	(*UpdateStudentSubmissionRequest)(nil),                     // 34: autograd.v1.UpdateStudentSubmissionRequest
 	(*ActivateManagedUserRequest)(nil),                         // 35: autograd.v1.ActivateManagedUserRequest
 	(*FindAllSubmissionsForAssignmentResponse_Submission)(nil), // 36: autograd.v1.FindAllSubmissionsForAssignmentResponse.Submission
@@ -2982,7 +2982,7 @@ var file_autograd_v1_autograd_proto_depIdxs = []int32{
 	5,  // 36: autograd.v1.AutogradService.DeleteSubmission:input_type -> autograd.v1.DeleteByIDRequest
 	29, // 37: autograd.v1.AutogradService.FindAllStudentAssignments:input_type -> autograd.v1.FindAllStudentAssignmentsRequest
 	4,  // 38: autograd.v1.AutogradService.FindStudentAssignment:input_type -> autograd.v1.FindByIDRequest
-	33, // 39: autograd.v1.AutogradService.CreateStudentSubmission:input_type -> autograd.v1.CreateStudentSubmissionRequest
+	33, // 39: autograd.v1.AutogradService.SubmitStudentSubmission:input_type -> autograd.v1.SubmitStudentSubmissionRequest
 	34, // 40: autograd.v1.AutogradService.UpdateStudentSubmission:input_type -> autograd.v1.UpdateStudentSubmissionRequest
 	20, // 41: autograd.v1.AutogradService.Login:input_type -> autograd.v1.LoginRequest
 	3,  // 42: autograd.v1.AutogradService.Ping:output_type -> autograd.v1.PingResponse
@@ -3001,7 +3001,7 @@ var file_autograd_v1_autograd_proto_depIdxs = []int32{
 	1,  // 55: autograd.v1.AutogradService.DeleteSubmission:output_type -> autograd.v1.Empty
 	30, // 56: autograd.v1.AutogradService.FindAllStudentAssignments:output_type -> autograd.v1.FindAllStudentAssignmentsResponse
 	31, // 57: autograd.v1.AutogradService.FindStudentAssignment:output_type -> autograd.v1.StudentAssignment
-	2,  // 58: autograd.v1.AutogradService.CreateStudentSubmission:output_type -> autograd.v1.CreatedResponse
+	2,  // 58: autograd.v1.AutogradService.SubmitStudentSubmission:output_type -> autograd.v1.CreatedResponse
 	1,  // 59: autograd.v1.AutogradService.UpdateStudentSubmission:output_type -> autograd.v1.Empty
 	21, // 60: autograd.v1.AutogradService.Login:output_type -> autograd.v1.LoginResponse
 	42, // [42:61] is the sub-list for method output_type
@@ -3402,7 +3402,7 @@ func file_autograd_v1_autograd_proto_init() {
 			}
 		}
 		file_autograd_v1_autograd_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateStudentSubmissionRequest); i {
+			switch v := v.(*SubmitStudentSubmissionRequest); i {
 			case 0:
 				return &v.state
 			case 1:
