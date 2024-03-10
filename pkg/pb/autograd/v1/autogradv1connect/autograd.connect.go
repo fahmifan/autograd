@@ -83,9 +83,9 @@ const (
 	// AutogradServiceSubmitStudentSubmissionProcedure is the fully-qualified name of the
 	// AutogradService's SubmitStudentSubmission RPC.
 	AutogradServiceSubmitStudentSubmissionProcedure = "/autograd.v1.AutogradService/SubmitStudentSubmission"
-	// AutogradServiceUpdateStudentSubmissionProcedure is the fully-qualified name of the
-	// AutogradService's UpdateStudentSubmission RPC.
-	AutogradServiceUpdateStudentSubmissionProcedure = "/autograd.v1.AutogradService/UpdateStudentSubmission"
+	// AutogradServiceResubmitStudentSubmissionProcedure is the fully-qualified name of the
+	// AutogradService's ResubmitStudentSubmission RPC.
+	AutogradServiceResubmitStudentSubmissionProcedure = "/autograd.v1.AutogradService/ResubmitStudentSubmission"
 	// AutogradServiceLoginProcedure is the fully-qualified name of the AutogradService's Login RPC.
 	AutogradServiceLoginProcedure = "/autograd.v1.AutogradService/Login"
 )
@@ -116,7 +116,7 @@ type AutogradServiceClient interface {
 	FindStudentAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.StudentAssignment], error)
 	// Student Assignment Command
 	SubmitStudentSubmission(context.Context, *connect.Request[v1.SubmitStudentSubmissionRequest]) (*connect.Response[v1.CreatedResponse], error)
-	UpdateStudentSubmission(context.Context, *connect.Request[v1.UpdateStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
+	ResubmitStudentSubmission(context.Context, *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
 	// Auth
 	// Auth Mutation
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
@@ -217,9 +217,9 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			baseURL+AutogradServiceSubmitStudentSubmissionProcedure,
 			opts...,
 		),
-		updateStudentSubmission: connect.NewClient[v1.UpdateStudentSubmissionRequest, v1.Empty](
+		resubmitStudentSubmission: connect.NewClient[v1.ResubmitStudentSubmissionRequest, v1.Empty](
 			httpClient,
-			baseURL+AutogradServiceUpdateStudentSubmissionProcedure,
+			baseURL+AutogradServiceResubmitStudentSubmissionProcedure,
 			opts...,
 		),
 		login: connect.NewClient[v1.LoginRequest, v1.LoginResponse](
@@ -249,7 +249,7 @@ type autogradServiceClient struct {
 	findAllStudentAssignments      *connect.Client[v1.FindAllStudentAssignmentsRequest, v1.FindAllStudentAssignmentsResponse]
 	findStudentAssignment          *connect.Client[v1.FindByIDRequest, v1.StudentAssignment]
 	submitStudentSubmission        *connect.Client[v1.SubmitStudentSubmissionRequest, v1.CreatedResponse]
-	updateStudentSubmission        *connect.Client[v1.UpdateStudentSubmissionRequest, v1.Empty]
+	resubmitStudentSubmission      *connect.Client[v1.ResubmitStudentSubmissionRequest, v1.Empty]
 	login                          *connect.Client[v1.LoginRequest, v1.LoginResponse]
 }
 
@@ -338,9 +338,9 @@ func (c *autogradServiceClient) SubmitStudentSubmission(ctx context.Context, req
 	return c.submitStudentSubmission.CallUnary(ctx, req)
 }
 
-// UpdateStudentSubmission calls autograd.v1.AutogradService.UpdateStudentSubmission.
-func (c *autogradServiceClient) UpdateStudentSubmission(ctx context.Context, req *connect.Request[v1.UpdateStudentSubmissionRequest]) (*connect.Response[v1.Empty], error) {
-	return c.updateStudentSubmission.CallUnary(ctx, req)
+// ResubmitStudentSubmission calls autograd.v1.AutogradService.ResubmitStudentSubmission.
+func (c *autogradServiceClient) ResubmitStudentSubmission(ctx context.Context, req *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error) {
+	return c.resubmitStudentSubmission.CallUnary(ctx, req)
 }
 
 // Login calls autograd.v1.AutogradService.Login.
@@ -374,7 +374,7 @@ type AutogradServiceHandler interface {
 	FindStudentAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.StudentAssignment], error)
 	// Student Assignment Command
 	SubmitStudentSubmission(context.Context, *connect.Request[v1.SubmitStudentSubmissionRequest]) (*connect.Response[v1.CreatedResponse], error)
-	UpdateStudentSubmission(context.Context, *connect.Request[v1.UpdateStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
+	ResubmitStudentSubmission(context.Context, *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
 	// Auth
 	// Auth Mutation
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
@@ -471,9 +471,9 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 		svc.SubmitStudentSubmission,
 		opts...,
 	)
-	autogradServiceUpdateStudentSubmissionHandler := connect.NewUnaryHandler(
-		AutogradServiceUpdateStudentSubmissionProcedure,
-		svc.UpdateStudentSubmission,
+	autogradServiceResubmitStudentSubmissionHandler := connect.NewUnaryHandler(
+		AutogradServiceResubmitStudentSubmissionProcedure,
+		svc.ResubmitStudentSubmission,
 		opts...,
 	)
 	autogradServiceLoginHandler := connect.NewUnaryHandler(
@@ -517,8 +517,8 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 			autogradServiceFindStudentAssignmentHandler.ServeHTTP(w, r)
 		case AutogradServiceSubmitStudentSubmissionProcedure:
 			autogradServiceSubmitStudentSubmissionHandler.ServeHTTP(w, r)
-		case AutogradServiceUpdateStudentSubmissionProcedure:
-			autogradServiceUpdateStudentSubmissionHandler.ServeHTTP(w, r)
+		case AutogradServiceResubmitStudentSubmissionProcedure:
+			autogradServiceResubmitStudentSubmissionHandler.ServeHTTP(w, r)
 		case AutogradServiceLoginProcedure:
 			autogradServiceLoginHandler.ServeHTTP(w, r)
 		default:
@@ -598,8 +598,8 @@ func (UnimplementedAutogradServiceHandler) SubmitStudentSubmission(context.Conte
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.SubmitStudentSubmission is not implemented"))
 }
 
-func (UnimplementedAutogradServiceHandler) UpdateStudentSubmission(context.Context, *connect.Request[v1.UpdateStudentSubmissionRequest]) (*connect.Response[v1.Empty], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.UpdateStudentSubmission is not implemented"))
+func (UnimplementedAutogradServiceHandler) ResubmitStudentSubmission(context.Context, *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.ResubmitStudentSubmission is not implemented"))
 }
 
 func (UnimplementedAutogradServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {

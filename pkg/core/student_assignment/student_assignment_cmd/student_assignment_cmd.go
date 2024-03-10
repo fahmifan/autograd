@@ -75,7 +75,7 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 			return core.ErrInternalServer
 		}
 
-		submission, err := student_assignment.CreateStudentSubmission(student_assignment.CreateStudentSubmissionRequest{
+		submission, err := student_assignment.SubmitStudentSubmission(student_assignment.CreateStudentSubmissionRequest{
 			NewID: newID,
 			Now:   now,
 			Student: student_assignment.Student{
@@ -114,7 +114,7 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 	}, nil
 }
 
-func (cmd *StudentAssignmentCmd) UpdateStudentSubmission(ctx context.Context, req *connect.Request[autogradv1.UpdateStudentSubmissionRequest]) (
+func (cmd *StudentAssignmentCmd) ResubmitStudentSubmission(ctx context.Context, req *connect.Request[autogradv1.ResubmitStudentSubmissionRequest]) (
 	*connect.Response[autogradv1.Empty], error,
 ) {
 	authUser, ok := auth.GetUserFromCtx(ctx)
@@ -161,7 +161,7 @@ func (cmd *StudentAssignmentCmd) UpdateStudentSubmission(ctx context.Context, re
 			return core.ErrInternalServer
 		}
 
-		submission, err = submission.Update(student_assignment.UpdateStudentSubmissionRequest{
+		submission, err = submission.Resubmit(student_assignment.UpdateStudentSubmissionRequest{
 			Now:               now,
 			NewSubmissionFile: submissionFile,
 		})

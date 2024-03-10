@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ActivateManagedUserRequest, Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, StudentAssignment, Submission, SubmitStudentSubmissionRequest, UpdateAssignmentRequest, UpdateStudentSubmissionRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { ActivateManagedUserRequest, Assignment, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersRequest, FindAllManagedUsersResponse, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, ResubmitStudentSubmissionRequest, StudentAssignment, Submission, SubmitStudentSubmissionRequest, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -178,11 +178,11 @@ export const AutogradService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc autograd.v1.AutogradService.UpdateStudentSubmission
+     * @generated from rpc autograd.v1.AutogradService.ResubmitStudentSubmission
      */
-    updateStudentSubmission: {
-      name: "UpdateStudentSubmission",
-      I: UpdateStudentSubmissionRequest,
+    resubmitStudentSubmission: {
+      name: "ResubmitStudentSubmission",
+      I: ResubmitStudentSubmissionRequest,
       O: Empty,
       kind: MethodKind.Unary,
     },
