@@ -25,6 +25,8 @@ func UnmarshalPayload(payload Payload, v any) error {
 	return json.Unmarshal(payload, v)
 }
 
+const EmptyIDStr = "00000000000000000000000000"
+
 type ID ulids.ULID
 type Status string
 type IdempotentKey string
