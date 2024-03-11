@@ -34,12 +34,13 @@ func (r *OutboxItemReader) FindPendingByKey(ctx context.Context, tx *gorm.DB, ke
 
 	err = tx.Model(jobqueue.OutboxItem{}).
 		Where("idempotent_key = ? AND status = ?", key, jobqueue.StatusPending).
-		First(&outboxItem).
+		Take(&outboxItem).
 		Error
+	if err != nil {
+		return jobqueue.OutboxItem{}, err
+	}
 
-	item = outboxItemFromModel(outboxItem)
-	return item, err
-
+	return outboxItemFromModel(outboxItem), nil
 }
 
 type OutboxItemWriter struct{}

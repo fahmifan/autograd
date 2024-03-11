@@ -57,7 +57,7 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "find item")
 	}
 
-	hasPendingItem := oldItem.ID.String() != ""
+	hasPendingItem := oldItem.ID.String() != jobqueue.EmptyIDStr
 	if hasPendingItem {
 		return oldItem, nil
 	}
