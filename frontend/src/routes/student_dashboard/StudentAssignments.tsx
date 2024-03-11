@@ -218,7 +218,7 @@ export function DetailStudentAssignment() {
 								<input
 									type="hidden"
 									name="submission_code"
-									value={submisisonCode}
+									value={submisisonCode || res.submission?.submissionCode}
 								/>
 							</VisuallyHidden>
 							<Button

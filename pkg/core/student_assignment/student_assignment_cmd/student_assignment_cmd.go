@@ -2,6 +2,7 @@ package student_assignment_cmd
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -39,6 +40,10 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 	assignmentID, err := uuid.Parse(req.Msg.GetAssignmentId())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	if strings.TrimSpace(req.Msg.GetSubmissionCode()) == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("submission code is empty"))
 	}
 
 	submissionFileReader := student_assignment.SubmissionFileReader{}
@@ -143,6 +148,10 @@ func (cmd *StudentAssignmentCmd) ResubmitStudentSubmission(ctx context.Context, 
 	submissionID, err := uuid.Parse(req.Msg.GetSubmissionId())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	if strings.TrimSpace(req.Msg.GetSubmissionCode()) == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("submission code is empty"))
 	}
 
 	submissionFileReader := student_assignment.SubmissionFileReader{}

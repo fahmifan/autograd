@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"github.com/fahmifan/autograd/pkg/core/grading"
+	"github.com/fahmifan/autograd/pkg/logs"
 )
 
 var _ grading.Compiler = (*CPPCompiler)(nil)
@@ -39,9 +40,12 @@ func (c *CPPCompiler) run(srcCodePath grading.SourceCodePath, input io.Reader, o
 	}
 
 	defer func() {
-		// if err := c.remove(binPath); err != nil {
-		// 	logs.Err(err, "path", "binPath: ", string(binPath), "srcCodePath: ", string(srcCodePath))
-		// }
+		if err := c.remove(binPath); err != nil {
+			logs.Err(err, "path", "binPath: ", string(binPath))
+		}
+		if err := c.remove(string(srcCodePath)); err != nil {
+			logs.Err(err, "path", "srcCodePath: ", string(srcCodePath))
+		}
 	}()
 
 	cmd := exec.Command(binPath)
