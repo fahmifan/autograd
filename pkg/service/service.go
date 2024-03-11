@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
+	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_cmd"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_query"
@@ -54,8 +55,8 @@ func NewService(
 		JWTKey:         jwtKey,
 		MediaConfig:    mediaCfg,
 		SenderEmail:    senderEmail,
-		AppLink:        "http://localhost:5173",
-		LogoURL:        "http://localhost:5173/logo.png",
+		AppLink:        config.BaseURL(),
+		LogoURL:        config.BaseURL() + "/logo.png",
 		Mailer:         mailer,
 		OutboxEnqueuer: outboxService,
 	}
@@ -90,6 +91,7 @@ func (service *Service) RunOutboxService(ctx context.Context) error {
 func (service *Service) RegisterJobHandlers() {
 	handlers := []jobqueue.JobHandler{
 		&user_management_cmd.SendRegistrationEmailHandler{Ctx: service.coreCtx},
+		&student_assignment_cmd.GradeStudentSubmissionHandler{Ctx: service.coreCtx},
 	}
 
 	outbox.RegisterHandlers(service.coreCtx.GormDB, handlers)

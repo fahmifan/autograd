@@ -102,6 +102,7 @@ message UpdateAssignmentRequest {
     string description = 3;
     string case_input_file_id = 4;
     string case_output_file_id = 5;
+    string deadline_at = 6;
 }
 
 message CreateAssignmentRequest {

@@ -29,6 +29,30 @@ func (AssignmentWriter) Create(ctx context.Context, tx *gorm.DB, assignment Assi
 	return tx.Table("assignments").Create(&model).Error
 }
 
+func (AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
+	model := dbmodel.Assignment{
+		Base: dbmodel.Base{
+			ID: assignment.ID,
+		},
+		AssignedBy:       assignment.Assigner.ID,
+		Name:             assignment.Name,
+		Description:      assignment.Description,
+		CaseInputFileID:  assignment.CaseInputFile.ID,
+		CaseOutputFileID: assignment.CaseOutputFile.ID,
+		DeadlineAt:       assignment.DeadlineAt,
+	}
+
+	return tx.Table("assignments").Where("id = ?", assignment.ID).
+		UpdateColumns(map[string]any{
+			"assigned_by":         model.AssignedBy,
+			"name":                model.Name,
+			"description":         model.Description,
+			"case_input_file_id":  model.CaseInputFileID,
+			"case_output_file_id": model.CaseOutputFileID,
+			"deadline_at":         model.DeadlineAt,
+		}).Error
+}
+
 type AssignmentReader struct{}
 
 func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID) (Assignment, error) {

@@ -12,6 +12,8 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
+	"github.com/fahmifan/autograd/pkg/jobqueue"
+	"github.com/fahmifan/autograd/pkg/jobqueue/outbox"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/google/uuid"
@@ -100,6 +102,18 @@ func (cmd *StudentAssignmentCmd) SubmitStudentSubmission(ctx context.Context, re
 			return core.ErrInternalServer
 		}
 
+		_, err = cmd.OutboxEnqueuer.Enqueue(ctx, tx, outbox.EnqueueRequest{
+			JobType:       JobGradeSubmission,
+			IdempotentKey: jobqueue.IdempotentKey(newID.String()),
+			Payload: GradeStudentSubmissionPayload{
+				SubmissionID: newID,
+			},
+		})
+		if err != nil {
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: SubmitStudentSubmission: enqueue grade submission job")
+			return core.ErrInternalServer
+		}
+
 		return nil
 	})
 
@@ -172,6 +186,18 @@ func (cmd *StudentAssignmentCmd) ResubmitStudentSubmission(ctx context.Context, 
 		err = submissionWriter.UpdateSubmission(ctx, tx, &submission)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: ResubmitStudentSubmission: create student submission")
+			return core.ErrInternalServer
+		}
+
+		_, err = cmd.OutboxEnqueuer.Enqueue(ctx, tx, outbox.EnqueueRequest{
+			JobType:       JobGradeSubmission,
+			IdempotentKey: jobqueue.IdempotentKey(submissionID.String()),
+			Payload: GradeStudentSubmissionPayload{
+				SubmissionID: submissionID,
+			},
+		})
+		if err != nil {
+			logs.ErrCtx(ctx, err, "StudentAssignmentCmd: ResubmitStudentSubmission: enqueue grade submission job")
 			return core.ErrInternalServer
 		}
 

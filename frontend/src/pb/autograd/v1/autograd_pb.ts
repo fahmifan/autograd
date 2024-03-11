@@ -772,6 +772,11 @@ export class UpdateAssignmentRequest extends Message<UpdateAssignmentRequest> {
    */
   caseOutputFileId = "";
 
+  /**
+   * @generated from field: string deadline_at = 6;
+   */
+  deadlineAt = "";
+
   constructor(data?: PartialMessage<UpdateAssignmentRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -785,6 +790,7 @@ export class UpdateAssignmentRequest extends Message<UpdateAssignmentRequest> {
     { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "case_input_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "case_output_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateAssignmentRequest {

@@ -13,6 +13,7 @@ import {
 	DetailAssignment,
 	ListAssignments,
 	actionCreateAssignemnt,
+	actionUpdateAssignment,
 	loadEditAssignment,
 	loaderListAssignments,
 } from "./assignments/Assignment";
@@ -48,6 +49,7 @@ export const router: RouteObject[] = [
 				path: "/backoffice/assignments/detail",
 				element: <PrivateRoute element={<DetailAssignment />} />,
 				loader: loadEditAssignment,
+				action: actionUpdateAssignment,
 			},
 			{
 				path: "/backoffice/assignments/submissions",
@@ -95,6 +97,10 @@ export default function DashboardLayout() {
 				},
 			],
 		},
+		{
+			label: "Logout",
+			to: "/logout"
+		}
 	];
 
 	function navItemActive(path: string): boolean {

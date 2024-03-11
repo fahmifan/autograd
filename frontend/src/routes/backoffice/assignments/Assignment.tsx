@@ -3,7 +3,6 @@ import {
 	Breadcrumbs,
 	Button,
 	FileInput,
-	Flex,
 	Input,
 	Paper,
 	Stack,
@@ -322,6 +321,13 @@ export function DetailAssignment() {
 					<VisuallyHidden>
 						<Input
 							type="hidden"
+							name="id"
+							id="id"
+							value={res.id}
+						/>
+
+						<Input
+							type="hidden"
 							name="description"
 							id="description"
 							value={markdownRef.current?.getMarkdown() ?? ""}
@@ -386,7 +392,7 @@ export function DetailAssignment() {
 						required
 						name="deadline_at"
 						id="deadline_at"
-						value={new Date(res.deadlineAt)}
+						defaultValue={new Date(res.deadlineAt)}
 					/>
 				</Stack>
 
@@ -479,6 +485,32 @@ export async function actionCreateAssignemnt(
 	}
 
 	return null;
+}
+
+export async function actionUpdateAssignment(arg: ActionFunctionArgs): Promise<Response | null> {
+	const formData = await arg.request.formData();
+	const id = formData.get("id") as string;
+	const name = formData.get("name") as string;
+	const description = formData.get("description") as string;
+	const caseInputFileId = formData.get("case_input_file_id") as string;
+	const caseOutputFileId = formData.get("case_output_file_id") as string;
+	const deadlineAt = formData.get("deadline_at") as string;
+
+	const res = await AutogradServiceClient.updateAssignment({
+		id,
+		name,
+		description,
+		caseInputFileId,
+		caseOutputFileId,
+		deadlineAt
+	});
+
+	if (res) {
+		return redirect("/backoffice/assignments");
+	}
+
+	return null;
+
 }
 
 export async function loadEditAssignment({

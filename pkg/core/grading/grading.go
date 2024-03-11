@@ -42,18 +42,18 @@ func Grade(arg GradeRequest) (GradeResult, error) {
 	stdout := bytes.NewBuffer(nil)
 	err := compiler.Run(arg.SourceCodePath, arg.Inputs, stdout)
 	if err != nil {
-		return GradeResult{}, fmt.Errorf("run: %w", err)
+		return GradeResult{}, fmt.Errorf("Grade: run: %w", err)
 	}
 
 	outputs := strings.Split(stdout.String(), "\n")
 	expectedbuf, err := io.ReadAll(arg.Expecteds)
 	if err != nil {
-		return GradeResult{}, fmt.Errorf("read expecteds: %w", err)
+		return GradeResult{}, fmt.Errorf("Grade: read expecteds: %w", err)
 	}
 
 	expecteds := strings.Split(string(expectedbuf), "\n")
 	if len(outputs) != len(expecteds) {
-		return GradeResult{}, fmt.Errorf("expecteds and outputs length mismatch")
+		return GradeResult{}, fmt.Errorf("Grade: expecteds and outputs length mismatch")
 	}
 
 	for i, output := range outputs {

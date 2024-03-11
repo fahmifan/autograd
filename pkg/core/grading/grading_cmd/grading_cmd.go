@@ -13,6 +13,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/grading"
 	"github.com/fahmifan/autograd/pkg/core/grading/cpp"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type GradingCmd struct {
@@ -58,9 +59,25 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 	ctx context.Context,
 	req InternalGradeSubmissionRequest,
 ) (InternalGradeSubmissionResult, error) {
+	res := InternalGradeSubmissionResult{}
+	err := core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) (err error) {
+		res, err = cmd.InternalGradeSubmissionTx(ctx, tx, req)
+		if err != nil {
+			return fmt.Errorf("InternalGradeSubmission: Transaction: InternalGradeSubmissionTx: %w", err)
+		}
+		return nil
+	})
+	return res, err
+}
+
+func (cmd *GradingCmd) InternalGradeSubmissionTx(
+	ctx context.Context,
+	tx *gorm.DB,
+	req InternalGradeSubmissionRequest,
+) (InternalGradeSubmissionResult, error) {
 	submission, err := grading.SubmissionReader{}.FindByID(ctx, cmd.GormDB, cmd.ObjectStorer, cmd.RootDir, req.SubmissionID)
 	if err != nil {
-		return InternalGradeSubmissionResult{}, fmt.Errorf("find submission: %w", err)
+		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: find submission: %w", err)
 	}
 	defer func() {
 		submission.SubmissionFile.File.Close()
@@ -71,7 +88,7 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 	dir := path.Join(os.TempDir(), cmd.RootDir)
 	err = os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
-		return InternalGradeSubmissionResult{}, fmt.Errorf("create temp dir: %w", err)
+		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: create temp dir: %w", err)
 	}
 
 	submissionFilePath := path.Join(dir, submission.SubmissionFile.FileName)
@@ -80,13 +97,13 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 	{
 		file, err := os.Create(submissionFilePath)
 		if err != nil {
-			return InternalGradeSubmissionResult{}, fmt.Errorf("create temp submission file: %w", err)
+			return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: create temp submission file: %w", err)
 		}
 		defer file.Close()
 
 		_, err = io.Copy(file, submission.SubmissionFile.File)
 		if err != nil {
-			return InternalGradeSubmissionResult{}, fmt.Errorf("copy submission file: %w", err)
+			return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: copy submission file: %w", err)
 		}
 	}
 
@@ -99,14 +116,14 @@ func (cmd *GradingCmd) InternalGradeSubmission(
 		Expecteds:      submission.Assignment.CaseOutputFile.File,
 	})
 	if err != nil {
-		return InternalGradeSubmissionResult{}, fmt.Errorf("grade: %w", err)
+		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: grade: %w", err)
 	}
 
 	submission = submission.SaveGrade(time.Now(), gradeRes)
 
 	err = grading.SubmissionWriter{}.Update(ctx, cmd.GormDB, &submission)
 	if err != nil {
-		return InternalGradeSubmissionResult{}, fmt.Errorf("update submission: %w", err)
+		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: update submission: %w", err)
 	}
 
 	return InternalGradeSubmissionResult{
