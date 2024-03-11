@@ -49,12 +49,23 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "marshal body")
 	}
 
+	reader := OutboxItemReader{}
+	writer := OutboxItemWriter{}
+
+	oldItem, err := reader.FindPendingByKey(ctx, tx, string(req.IdempotentKey))
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "find item")
+	}
+
+	hasPendingItem := oldItem.ID.String() != ""
+	if hasPendingItem {
+		return oldItem, nil
+	}
+
 	item, err := jobqueue.NewOutboxItem(jobqueue.NewID(), req.JobType, req.IdempotentKey, payload)
 	if err != nil {
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "new item")
 	}
-
-	writer := OutboxItemWriter{}
 
 	err = writer.Create(ctx, tx, item)
 	if err != nil {

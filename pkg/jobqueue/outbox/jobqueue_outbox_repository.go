@@ -23,16 +23,23 @@ func (r *OutboxItemReader) FindAllPending(ctx context.Context, tx *gorm.DB, limi
 		Error
 
 	items = lo.Map(outboxItems, func(item dbmodel.OutboxItem, _ int) jobqueue.OutboxItem {
-		return jobqueue.OutboxItem{
-			ID:            jobqueue.ID(item.ID),
-			JobType:       jobqueue.JobType(item.JobType),
-			IdempotentKey: jobqueue.IdempotentKey(item.IdempotentKey),
-			Status:        jobqueue.Status(item.Status),
-			Payload:       jobqueue.Payload(item.Payload),
-		}
+		return outboxItemFromModel(item)
 	})
 
 	return items, err
+}
+
+func (r *OutboxItemReader) FindPendingByKey(ctx context.Context, tx *gorm.DB, key string) (item jobqueue.OutboxItem, err error) {
+	var outboxItem dbmodel.OutboxItem
+
+	err = tx.Model(jobqueue.OutboxItem{}).
+		Where("idempotent_key = ? AND status = ?", key, jobqueue.StatusPending).
+		First(&outboxItem).
+		Error
+
+	item = outboxItemFromModel(outboxItem)
+	return item, err
+
 }
 
 type OutboxItemWriter struct{}
@@ -62,4 +69,14 @@ func (r *OutboxItemWriter) UpdateAllStatus(ctx context.Context, tx *gorm.DB, ite
 		Error
 
 	return err
+}
+
+func outboxItemFromModel(model dbmodel.OutboxItem) jobqueue.OutboxItem {
+	return jobqueue.OutboxItem{
+		ID:            jobqueue.ID(model.ID),
+		JobType:       jobqueue.JobType(model.JobType),
+		IdempotentKey: jobqueue.IdempotentKey(model.IdempotentKey),
+		Status:        jobqueue.Status(model.Status),
+		Payload:       jobqueue.Payload(model.Payload),
+	}
 }
