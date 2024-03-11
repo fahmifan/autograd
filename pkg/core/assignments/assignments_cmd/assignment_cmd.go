@@ -129,6 +129,21 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
+	deadlineAt, err := time.Parse(time.RFC3339, req.Msg.GetDeadlineAt())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	caseInputFileID, err := uuid.Parse(req.Msg.GetCaseInputFileId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	caseOutputFileID, err := uuid.Parse(req.Msg.GetCaseOutputFileId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
 	now := time.Now()
 
 	assignerReader := assignments.AssignerReader{}
@@ -149,7 +164,7 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 			return core.ErrInternalServer
 		}
 
-		fileIDs := []uuid.UUID{assignment.CaseInputFile.ID, assignment.CaseOutputFile.ID}
+		fileIDs := []uuid.UUID{caseInputFileID, caseOutputFileID}
 		caseFiles, err := fileReader.FindCaseFiles(ctx, cmd.GormDB, fileIDs)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: FindCaseFiles")
@@ -177,12 +192,13 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 			Assigner:       assigner,
 			CaseInputFile:  caseInputFile,
 			CaseOutputFile: caseOutputFile,
+			DeadlineAt:     deadlineAt,
 		})
 		if err != nil {
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Create(ctx, tx, assignment)
+		err = assignmentWriter.Update(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: Save")
 			return core.ErrInternalServer

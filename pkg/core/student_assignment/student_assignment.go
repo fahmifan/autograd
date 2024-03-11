@@ -73,7 +73,7 @@ type CreateStudentSubmissionRequest struct {
 	SubmissionFile SubmissionFile
 }
 
-func CreateStudentSubmission(req CreateStudentSubmissionRequest) (StudentSubmission, error) {
+func SubmitStudentSubmission(req CreateStudentSubmissionRequest) (StudentSubmission, error) {
 	if !req.Student.Active {
 		return StudentSubmission{}, errors.New("student must active")
 	}
@@ -104,7 +104,7 @@ type UpdateStudentSubmissionRequest struct {
 	NewSubmissionFile SubmissionFile
 }
 
-func (studentSub StudentSubmission) Update(req UpdateStudentSubmissionRequest) (StudentSubmission, error) {
+func (studentSub StudentSubmission) Resubmit(req UpdateStudentSubmissionRequest) (StudentSubmission, error) {
 	if req.Now.After(studentSub.Assignment.DeadlineAt) {
 		return StudentSubmission{}, errors.New("assignment deadline has passed")
 	}

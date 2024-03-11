@@ -1,15 +1,17 @@
 #include <iostream>
-#include<stdio.h>
-#include<stdlib.h>
 using namespace std;
 
-int mul(int x, int y) {
-    return x*y;
-}
+int main() {
+    int n;
 
-int main(int argc, char *argv[]) {
-    int x, y;
-    cin >> x;
-    cin >> y;
-    cout << mul(x, y) << endl;
+    cin >> n;
+
+    for (int i = 0; i < n; ++i) {
+        int x, y;
+
+        cin >> x;
+        cin >> y;
+
+        cout << x*y << endl;
+    }
 }

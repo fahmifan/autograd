@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
+	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_cmd"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_query"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
+	"github.com/fahmifan/autograd/pkg/core/grading/grading_cmd"
 	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment/student_assignment_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment/student_assignment_query"
@@ -32,6 +34,7 @@ type Service struct {
 	*mediastore_cmd.MediaStoreCmd
 	*student_assignment_query.StudentAssignmentQuery
 	*student_assignment_cmd.StudentAssignmentCmd
+	*grading_cmd.GradingCmd
 
 	outboxService *outbox.OutboxService
 }
@@ -52,14 +55,15 @@ func NewService(
 		JWTKey:         jwtKey,
 		MediaConfig:    mediaCfg,
 		SenderEmail:    senderEmail,
-		AppLink:        "http://localhost:5173",
-		LogoURL:        "http://localhost:5173/logo.png",
+		AppLink:        config.BaseURL(),
+		LogoURL:        config.BaseURL() + "/logo.png",
 		Mailer:         mailer,
 		OutboxEnqueuer: outboxService,
 	}
 
 	return &Service{
 		coreCtx:                coreCtx,
+		outboxService:          outboxService,
 		AuthCmd:                &auth_cmd.AuthCmd{Ctx: coreCtx},
 		UserManagementCmd:      &user_management_cmd.UserManagementCmd{Ctx: coreCtx},
 		UserManagementQuery:    &user_management_query.UserManagementQuery{Ctx: coreCtx},
@@ -68,7 +72,7 @@ func NewService(
 		MediaStoreCmd:          &mediastore_cmd.MediaStoreCmd{Ctx: coreCtx},
 		StudentAssignmentQuery: &student_assignment_query.StudentAssignmentQuery{Ctx: coreCtx},
 		StudentAssignmentCmd:   &student_assignment_cmd.StudentAssignmentCmd{Ctx: coreCtx},
-		outboxService:          outboxService,
+		GradingCmd:             &grading_cmd.GradingCmd{Ctx: coreCtx},
 	}
 }
 
@@ -87,6 +91,7 @@ func (service *Service) RunOutboxService(ctx context.Context) error {
 func (service *Service) RegisterJobHandlers() {
 	handlers := []jobqueue.JobHandler{
 		&user_management_cmd.SendRegistrationEmailHandler{Ctx: service.coreCtx},
+		&student_assignment_cmd.GradeStudentSubmissionHandler{Ctx: service.coreCtx},
 	}
 
 	outbox.RegisterHandlers(service.coreCtx.GormDB, handlers)

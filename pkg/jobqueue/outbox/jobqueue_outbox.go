@@ -138,14 +138,13 @@ func handle(db *gorm.DB, handler jobqueue.JobHandler) event.ListenerFunc {
 			return logs.ErrWrapCtx(ctx, fmt.Errorf("invalid payload"), "outbox: handle: Get payload")
 		}
 
-		err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-			items := []jobqueue.OutboxItem{item}
+		items := []jobqueue.OutboxItem{item}
+		err := writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusPicked)
+		if err != nil {
+			return logs.ErrWrapCtx(ctx, err, "outbox: handle: Picked")
+		}
 
-			err := writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusPicked)
-			if err != nil {
-				return logs.ErrWrapCtx(ctx, err, "outbox: handle: Picked")
-			}
-
+		err = db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 			payload := jobqueue.Payload(item.Payload)
 
 			err = handler.Handle(ctx, tx, payload)
@@ -153,18 +152,18 @@ func handle(db *gorm.DB, handler jobqueue.JobHandler) event.ListenerFunc {
 				return logs.ErrWrapCtx(ctx, err, "outbox: handle: Handle")
 			}
 
-			err = writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusSuccess)
-			if err != nil {
-				// set status to failed
-				if err = writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusFailed); err != nil {
-					return logs.ErrWrapCtx(ctx, err, "outbox: handle: set status Failed")
-				}
-			}
-
 			return nil
 		})
 		if err != nil {
 			return logs.ErrWrapCtx(ctx, err, "outbox: handle: Transaction")
+		}
+
+		err = writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusSuccess)
+		if err != nil {
+			// set status to failed
+			if err = writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusFailed); err != nil {
+				return logs.ErrWrapCtx(ctx, err, "outbox: handle: set status Failed")
+			}
 		}
 
 		return nil

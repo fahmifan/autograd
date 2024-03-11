@@ -772,6 +772,11 @@ export class UpdateAssignmentRequest extends Message<UpdateAssignmentRequest> {
    */
   caseOutputFileId = "";
 
+  /**
+   * @generated from field: string deadline_at = 6;
+   */
+  deadlineAt = "";
+
   constructor(data?: PartialMessage<UpdateAssignmentRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -785,6 +790,7 @@ export class UpdateAssignmentRequest extends Message<UpdateAssignmentRequest> {
     { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "case_input_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "case_output_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateAssignmentRequest {
@@ -1741,9 +1747,9 @@ export class StudentSubmission extends Message<StudentSubmission> {
 }
 
 /**
- * @generated from message autograd.v1.CreateStudentSubmissionRequest
+ * @generated from message autograd.v1.SubmitStudentSubmissionRequest
  */
-export class CreateStudentSubmissionRequest extends Message<CreateStudentSubmissionRequest> {
+export class SubmitStudentSubmissionRequest extends Message<SubmitStudentSubmissionRequest> {
   /**
    * @generated from field: string assignment_id = 1;
    */
@@ -1754,39 +1760,39 @@ export class CreateStudentSubmissionRequest extends Message<CreateStudentSubmiss
    */
   submissionCode = "";
 
-  constructor(data?: PartialMessage<CreateStudentSubmissionRequest>) {
+  constructor(data?: PartialMessage<SubmitStudentSubmissionRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "autograd.v1.CreateStudentSubmissionRequest";
+  static readonly typeName = "autograd.v1.SubmitStudentSubmissionRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "assignment_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "submission_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateStudentSubmissionRequest {
-    return new CreateStudentSubmissionRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubmitStudentSubmissionRequest {
+    return new SubmitStudentSubmissionRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateStudentSubmissionRequest {
-    return new CreateStudentSubmissionRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubmitStudentSubmissionRequest {
+    return new SubmitStudentSubmissionRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateStudentSubmissionRequest {
-    return new CreateStudentSubmissionRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubmitStudentSubmissionRequest {
+    return new SubmitStudentSubmissionRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CreateStudentSubmissionRequest | PlainMessage<CreateStudentSubmissionRequest> | undefined, b: CreateStudentSubmissionRequest | PlainMessage<CreateStudentSubmissionRequest> | undefined): boolean {
-    return proto3.util.equals(CreateStudentSubmissionRequest, a, b);
+  static equals(a: SubmitStudentSubmissionRequest | PlainMessage<SubmitStudentSubmissionRequest> | undefined, b: SubmitStudentSubmissionRequest | PlainMessage<SubmitStudentSubmissionRequest> | undefined): boolean {
+    return proto3.util.equals(SubmitStudentSubmissionRequest, a, b);
   }
 }
 
 /**
- * @generated from message autograd.v1.UpdateStudentSubmissionRequest
+ * @generated from message autograd.v1.ResubmitStudentSubmissionRequest
  */
-export class UpdateStudentSubmissionRequest extends Message<UpdateStudentSubmissionRequest> {
+export class ResubmitStudentSubmissionRequest extends Message<ResubmitStudentSubmissionRequest> {
   /**
    * @generated from field: string submission_id = 1;
    */
@@ -1797,32 +1803,32 @@ export class UpdateStudentSubmissionRequest extends Message<UpdateStudentSubmiss
    */
   submissionCode = "";
 
-  constructor(data?: PartialMessage<UpdateStudentSubmissionRequest>) {
+  constructor(data?: PartialMessage<ResubmitStudentSubmissionRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "autograd.v1.UpdateStudentSubmissionRequest";
+  static readonly typeName = "autograd.v1.ResubmitStudentSubmissionRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "submission_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "submission_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateStudentSubmissionRequest {
-    return new UpdateStudentSubmissionRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResubmitStudentSubmissionRequest {
+    return new ResubmitStudentSubmissionRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateStudentSubmissionRequest {
-    return new UpdateStudentSubmissionRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResubmitStudentSubmissionRequest {
+    return new ResubmitStudentSubmissionRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateStudentSubmissionRequest {
-    return new UpdateStudentSubmissionRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResubmitStudentSubmissionRequest {
+    return new ResubmitStudentSubmissionRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UpdateStudentSubmissionRequest | PlainMessage<UpdateStudentSubmissionRequest> | undefined, b: UpdateStudentSubmissionRequest | PlainMessage<UpdateStudentSubmissionRequest> | undefined): boolean {
-    return proto3.util.equals(UpdateStudentSubmissionRequest, a, b);
+  static equals(a: ResubmitStudentSubmissionRequest | PlainMessage<ResubmitStudentSubmissionRequest> | undefined, b: ResubmitStudentSubmissionRequest | PlainMessage<ResubmitStudentSubmissionRequest> | undefined): boolean {
+    return proto3.util.equals(ResubmitStudentSubmissionRequest, a, b);
   }
 }
 

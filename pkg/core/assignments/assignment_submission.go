@@ -79,6 +79,7 @@ type UpdateAssignmentRequest struct {
 	Description    string
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
+	DeadlineAt     time.Time
 }
 
 func (assignment Assignment) Update(req UpdateAssignmentRequest) (Assignment, error) {
@@ -100,6 +101,7 @@ func (assignment Assignment) Update(req UpdateAssignmentRequest) (Assignment, er
 	assignment.CaseOutputFile = req.CaseOutputFile
 	assignment.Assigner = req.Assigner
 	assignment.UpdatedAt = req.Now
+	assignment.DeadlineAt = req.DeadlineAt
 
 	return assignment, nil
 }
