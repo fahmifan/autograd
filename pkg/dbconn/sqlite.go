@@ -9,7 +9,7 @@ import (
 
 // MustSQLite ..
 func MustSQLite() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("autograd.db?_pragma=foreign_keys=true&_journal_mode=WAL"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("autograd.db?sqlite_foreign_keys=true&_journal_mode=WAL&_busy_timeout=500&_txlock=immediate"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
