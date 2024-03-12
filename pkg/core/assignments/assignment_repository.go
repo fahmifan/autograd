@@ -160,15 +160,16 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 			Limit: req.Limit,
 			Total: int32(count),
 		},
+		Assignments: make([]Assignment, len(assignments)),
 	}
 
-	for _, assignment := range assignments {
+	for i, assignment := range assignments {
 		user := userMap[assignment.AssignedBy]
 		fileInput := fileMap[assignment.CaseInputFileID]
 		fileOutput := fileMap[assignment.CaseOutputFileID]
 
 		asg := toAssignment(assignment, user, fileInput, fileOutput)
-		result.Assignments = append(result.Assignments, asg)
+		result.Assignments[i] = asg
 	}
 
 	return result, nil

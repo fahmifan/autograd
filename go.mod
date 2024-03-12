@@ -1,6 +1,6 @@
 module github.com/fahmifan/autograd
 
-go 1.21
+go 1.22
 
 require (
 	connectrpc.com/connect v1.12.0
@@ -13,6 +13,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/mailgun/mailgun-go/v4 v4.12.0
+	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/rs/xid v1.2.1
 	github.com/rs/zerolog v1.15.0
 	github.com/samber/lo v1.38.1
@@ -43,7 +44,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
-	github.com/matcornic/hermes/v2 v2.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.3 // indirect
