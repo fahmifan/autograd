@@ -245,9 +245,9 @@ func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Req
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Create(ctx, tx, assignment)
+		err = assignmentWriter.Update(ctx, tx, assignment)
 		if err != nil {
-			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: Save")
+			logs.ErrCtx(ctx, err, "AssignmentCmd: DeleteAssignment: Save")
 			return core.ErrInternalServer
 		}
 

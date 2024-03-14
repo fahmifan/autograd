@@ -8,6 +8,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
+	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 )
 
@@ -33,6 +34,10 @@ func (AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assi
 	model := dbmodel.Assignment{
 		Base: dbmodel.Base{
 			ID: assignment.ID,
+			Metadata: dbmodel.Metadata{
+				DeletedAt: gorm.DeletedAt(assignment.DeletedAt.NullTime),
+				UpdatedAt: null.TimeFrom(assignment.UpdatedAt),
+			},
 		},
 		AssignedBy:       assignment.Assigner.ID,
 		Name:             assignment.Name,
@@ -50,6 +55,8 @@ func (AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assi
 			"case_input_file_id":  model.CaseInputFileID,
 			"case_output_file_id": model.CaseOutputFileID,
 			"deadline_at":         model.DeadlineAt,
+			"updated_at":          model.UpdatedAt,
+			"deleted_at":          model.DeletedAt,
 		}).Error
 }
 
