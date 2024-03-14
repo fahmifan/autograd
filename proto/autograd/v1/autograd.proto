@@ -85,6 +85,7 @@ message Assignment {
     AssignmentFile case_output_file = 6;
     string deadline_at = 7;
     TimestampMetadata timestamp_metadata = 8;
+    string template = 9;
 }
 
 message Submission {
@@ -103,6 +104,7 @@ message UpdateAssignmentRequest {
     string case_input_file_id = 4;
     string case_output_file_id = 5;
     string deadline_at = 6;
+    string template = 7;
 }
 
 message CreateAssignmentRequest {
@@ -111,6 +113,7 @@ message CreateAssignmentRequest {
     string case_input_file_id = 3;
     string case_output_file_id = 4;
     string deadline_at = 5;
+    string template = 6;
 }
 
 message CreateSubmissionRequest {
@@ -244,7 +247,7 @@ service AutogradService {
     rpc CreateManagedUser(CreateManagedUserRequest) returns (CreatedResponse) {}
     rpc ActivateManagedUser(ActivateManagedUserRequest) returns (Empty) {}
     rpc FindAllManagedUsers(FindAllManagedUsersRequest) returns (FindAllManagedUsersResponse) {}
-    
+
     // Assignment Submission
     // Assignment Queries
     rpc FindAssignment(FindByIDRequest) returns (Assignment) {}

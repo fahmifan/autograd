@@ -25,6 +25,7 @@ func (AssignmentWriter) Create(ctx context.Context, tx *gorm.DB, assignment Assi
 		CaseInputFileID:  assignment.CaseInputFile.ID,
 		CaseOutputFileID: assignment.CaseOutputFile.ID,
 		DeadlineAt:       assignment.DeadlineAt,
+		Template:         assignment.Template,
 	}
 
 	return tx.Table("assignments").Create(&model).Error
@@ -45,6 +46,7 @@ func (AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assi
 		CaseInputFileID:  assignment.CaseInputFile.ID,
 		CaseOutputFileID: assignment.CaseOutputFile.ID,
 		DeadlineAt:       assignment.DeadlineAt,
+		Template:         assignment.Template,
 	}
 
 	return tx.Table("assignments").Where("id = ?", assignment.ID).
@@ -57,6 +59,7 @@ func (AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assi
 			"deadline_at":         model.DeadlineAt,
 			"updated_at":          model.UpdatedAt,
 			"deleted_at":          model.DeletedAt,
+			"template":            model.Template,
 		}).Error
 }
 
@@ -220,6 +223,7 @@ func toAssignment(
 		CaseInputFile:     toCaseFile(inputFile),
 		CaseOutputFile:    toCaseFile(outputFile),
 		TimestampMetadata: toEntityMeta(model.Base),
+		Template:          model.Template,
 		DeadlineAt:        model.DeadlineAt,
 	}
 }

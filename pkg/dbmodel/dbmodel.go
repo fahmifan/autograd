@@ -58,6 +58,7 @@ type Assignment struct {
 	AssignedBy       uuid.UUID
 	Name             string
 	Description      string
+	Template         string
 	CaseInputFileID  uuid.UUID
 	CaseOutputFileID uuid.UUID
 	DeadlineAt       time.Time

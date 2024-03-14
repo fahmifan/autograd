@@ -193,6 +193,7 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 			CaseInputFile:  caseInputFile,
 			CaseOutputFile: caseOutputFile,
 			DeadlineAt:     deadlineAt,
+			Template:       req.Msg.GetTemplate(),
 		})
 		if err != nil {
 			return connect.NewError(connect.CodeInvalidArgument, err)

@@ -28,6 +28,7 @@ type Assignment struct {
 	ID             uuid.UUID
 	Name           string
 	Description    string
+	Template       string
 	Assigner       Assigner
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
@@ -42,6 +43,7 @@ type CreateAssignmentRequest struct {
 	Assigner       Assigner
 	Name           string
 	Description    string
+	Template       string
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
 	DeadlineAt     time.Time
@@ -69,6 +71,7 @@ func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
 		CaseOutputFile:    req.CaseOutputFile,
 		Assigner:          req.Assigner,
 		DeadlineAt:        req.DeadlineAt,
+		Template:          req.Template,
 	}, nil
 }
 
@@ -77,6 +80,7 @@ type UpdateAssignmentRequest struct {
 	Assigner       Assigner
 	Name           string
 	Description    string
+	Template       string
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
 	DeadlineAt     time.Time
@@ -102,6 +106,7 @@ func (assignment Assignment) Update(req UpdateAssignmentRequest) (Assignment, er
 	assignment.Assigner = req.Assigner
 	assignment.UpdatedAt = req.Now
 	assignment.DeadlineAt = req.DeadlineAt
+	assignment.Template = req.Template
 
 	return assignment, nil
 }

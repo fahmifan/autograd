@@ -4,6 +4,7 @@ import {
 	Box,
 	Breadcrumbs,
 	Button,
+	Card,
 	FileInput,
 	Flex,
 	Input,
@@ -28,6 +29,7 @@ import {
 	thematicBreakPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
+import { Editor } from "@monaco-editor/react";
 import { IconExternalLink, IconNote, IconTrash, IconUpload } from "@tabler/icons-react";
 import { forwardRef, useRef, useState } from "react";
 import { useMutation } from "react-query";
@@ -276,6 +278,7 @@ export function DetailAssignment() {
 	const [stdoutFileID, setStdoutFileID] = useState(
 		res.caseOutputFile?.id ?? "",
 	);
+	const [template, setTemplate] = useState("");
 	const markdownRef = useRef<MDXEditorMethods>(null);
 	const submit = useSubmit();
 
@@ -390,6 +393,13 @@ export function DetailAssignment() {
 							id="case_output_file_id"
 							value={stdoutFileID}
 						/>
+
+						<Input 
+							type="hidden"
+							name="template"
+							value={template}
+							defaultValue={res.template}
+						/>
 					</VisuallyHidden>
 
 					<FileInput
@@ -439,6 +449,20 @@ export function DetailAssignment() {
 						defaultValue={new Date(res.deadlineAt)}
 					/>
 				</Stack>
+
+				<Text mt="sm">Template</Text>
+				<Card shadow="sm" padding="lg" radius="md" withBorder maw={800}>
+					<Editor
+						onChange={(value) => {
+							setTemplate(value as string);
+						}}
+						height="300px"
+						defaultLanguage="cpp"
+						language="cpp"
+						value={template}
+						defaultValue={res.template ? res.template : `// ${res.name}`}
+					/>
+				</Card>
 
 				<Text py="lg">Description</Text>
 
@@ -532,6 +556,7 @@ export async function actionCreateAssignemnt(
 	const caseInputFileId = formData.get("case_input_file_id") as string;
 	const caseOutputFileId = formData.get("case_output_file_id") as string;
 	const deadlineAt = formData.get("deadline_at") as string;
+	const template = formData.get("template") as string;
 
 	const res = await AutogradServiceClient.createAssignment({
 		name,
@@ -539,6 +564,7 @@ export async function actionCreateAssignemnt(
 		caseInputFileId,
 		caseOutputFileId,
 		deadlineAt,
+		template,
 	});
 
 	if (res) {
@@ -574,6 +600,7 @@ async function doUpdateAssignment(form: FormData): Promise<Response | null> {
 	const caseInputFileId = form.get("case_input_file_id") as string;
 	const caseOutputFileId = form.get("case_output_file_id") as string;
 	const deadlineAt = form.get("deadline_at") as string;
+	const template = form.get("template") as string;
 
 	const res = await AutogradServiceClient.updateAssignment({
 		id,
@@ -581,7 +608,8 @@ async function doUpdateAssignment(form: FormData): Promise<Response | null> {
 		description,
 		caseInputFileId,
 		caseOutputFileId,
-		deadlineAt
+		deadlineAt,
+		template
 	});
 
 	if (res) {
