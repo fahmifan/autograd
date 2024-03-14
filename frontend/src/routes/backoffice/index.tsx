@@ -1,4 +1,4 @@
-import { AppShell, Container, NavLink, Text } from "@mantine/core";
+import { AppShell, Box, Button, Container, Flex, NavLink, Text } from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
@@ -13,7 +13,8 @@ import {
 	DetailAssignment,
 	ListAssignments,
 	actionCreateAssignemnt,
-	actionUpdateAssignment,
+	actionDetailAssignment,
+	actionListAssignments,
 	loadEditAssignment,
 	loaderListAssignments,
 } from "./assignments/Assignment";
@@ -39,6 +40,7 @@ export const router: RouteObject[] = [
 				path: "/backoffice/assignments",
 				element: <PrivateRoute element={<ListAssignments />} />,
 				loader: loaderListAssignments,
+				action: actionListAssignments,
 			},
 			{
 				path: "/backoffice/assignments/create",
@@ -49,7 +51,7 @@ export const router: RouteObject[] = [
 				path: "/backoffice/assignments/detail",
 				element: <PrivateRoute element={<DetailAssignment />} />,
 				loader: loadEditAssignment,
-				action: actionUpdateAssignment,
+				action: actionDetailAssignment,
 			},
 			{
 				path: "/backoffice/assignments/submissions",
@@ -96,10 +98,6 @@ export default function DashboardLayout() {
 					to: "/backoffice/assignments/create",
 				},
 			],
-		},
-		{
-			label: "Logout",
-			to: "/logout"
 		}
 	];
 
@@ -129,9 +127,14 @@ export default function DashboardLayout() {
 			padding="md"
 		>
 			<AppShell.Header>
-				<Text py="sm" px="sm" size="lg">
-					Autograd Dashboard
-				</Text>
+				<Flex direction="row" justify="space-between" align="center">
+					<Text py="sm" px="sm" size="lg">
+						Autograd Dashboard
+					</Text>
+					<Link to="/logout">
+						<Button mr="sm" size="compact-sm" color="gray" variant="outline">Logout</Button>
+					</Link>
+				</Flex>
 			</AppShell.Header>
 
 			<AppShell.Navbar p="md">

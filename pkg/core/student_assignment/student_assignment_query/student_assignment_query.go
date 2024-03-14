@@ -137,6 +137,7 @@ func toStudentAssignmentProto(assignment student_assignment.StudentAssignment, s
 		Id:           assignment.ID.String(),
 		Name:         assignment.Name,
 		Description:  assignment.Description,
+		CodeTemplate: assignment.CodeTemplate,
 		AssignerId:   assignment.Assigner.ID.String(),
 		AssignerName: assignment.Assigner.Name,
 		UpdatedAt:    assignment.UpdatedAt.Format(time.RFC3339),

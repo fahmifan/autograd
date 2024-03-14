@@ -273,9 +273,10 @@ func toStudentAssignments(
 
 func toStudentAssignment(assignmentModel dbmodel.Assignment, assigner dbmodel.User, submission dbmodel.Submission) StudentAssignment {
 	return StudentAssignment{
-		ID:          assignmentModel.ID,
-		Name:        assignmentModel.Name,
-		Description: assignmentModel.Description,
+		ID:           assignmentModel.ID,
+		Name:         assignmentModel.Name,
+		Description:  assignmentModel.Description,
+		CodeTemplate: assignmentModel.Template,
 		Assigner: Assigner{
 			ID:   assignmentModel.AssignedBy,
 			Name: assigner.Name,

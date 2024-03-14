@@ -28,6 +28,7 @@ type StudentAssignment struct {
 	DeadlineAt    time.Time
 	UpdatedAt     time.Time
 	Submission    StudentSubmissionForAssignment
+	CodeTemplate  string
 	HasSubmission bool
 }
 
@@ -51,6 +52,7 @@ type SubmissionFile struct {
 type Assignment struct {
 	ID            uuid.UUID
 	DeadlineAt    time.Time
+	Template      string
 	HasAssignment bool
 }
 

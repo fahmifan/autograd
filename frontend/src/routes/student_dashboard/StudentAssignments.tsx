@@ -285,7 +285,7 @@ export function DetailStudentAssignment() {
 						height="300px"
 						defaultLanguage="cpp"
 						language="cpp"
-						defaultValue={res?.submission?.submissionCode ?? "// some comment"}
+						defaultValue={res?.hasSubmission ? res.submission?.submissionCode : res.codeTemplate}
 					/>
 				</Box>
 			</Box>

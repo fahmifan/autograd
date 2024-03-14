@@ -1,8 +1,12 @@
 import {
+	ActionIcon,
 	Anchor,
+	Box,
 	Breadcrumbs,
 	Button,
+	Card,
 	FileInput,
+	Flex,
 	Input,
 	Paper,
 	Stack,
@@ -25,7 +29,8 @@ import {
 	thematicBreakPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
-import { IconExternalLink, IconNote, IconUpload } from "@tabler/icons-react";
+import { Editor } from "@monaco-editor/react";
+import { IconExternalLink, IconNote, IconTrash, IconUpload } from "@tabler/icons-react";
 import { forwardRef, useRef, useState } from "react";
 import { useMutation } from "react-query";
 import {
@@ -45,6 +50,7 @@ import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
 
 export function ListAssignments() {
 	const res = useLoaderData() as FindAllAssignmentsResponse;
+	const submit = useSubmit();
 
 	if (!res || res.assignments.length === 0) {
 		return (
@@ -67,8 +73,7 @@ export function ListAssignments() {
 						<Table.Th>ID</Table.Th>
 						<Table.Th>Name</Table.Th>
 						<Table.Th>Assigner</Table.Th>
-						<Table.Th>Detail</Table.Th>
-						<Table.Th>Submissions</Table.Th>
+						<Table.Th className="text-center">Action</Table.Th>
 					</Table.Tr>
 				</Table.Thead>
 
@@ -80,26 +85,45 @@ export function ListAssignments() {
 								<Table.Td>{assignment.name}</Table.Td>
 								<Table.Td>{assignment.assigner?.name ?? ""}</Table.Td>
 								<Table.Td>
+									<Flex direction="row">
+										<Anchor
+												component={Link}
+												to={`/backoffice/assignments/detail?id=${assignment.id}`}
+												size="sm"
+												mr="sm"
+											>
+												<Tooltip label={`Detail Assignment for ${assignment.name}`}>
+													<IconExternalLink color="#339AF0" />
+												</Tooltip>
+											</Anchor>
 										<Anchor
 											component={Link}
-											to={`/backoffice/assignments/detail?id=${assignment.id}`}
+											to={`/backoffice/assignments/submissions?assignmentID=${assignment.id}`}
 											size="sm"
+											mr="sm"
 										>
-											<Tooltip label={`Detail Assignment for ${assignment.name}`}>
-												<IconExternalLink color="#339AF0" />
+											<Tooltip label={`Submission for ${assignment.name}`}>
+												<IconNote color="#339AF0" />
 											</Tooltip>
 										</Anchor>
-								</Table.Td>
-								<Table.Td>
-									<Anchor
-										component={Link}
-										to={`/backoffice/assignments/submissions?assignmentID=${assignment.id}`}
-										size="sm"
-									>
-										<Tooltip label={`Submission for ${assignment.name}`}>
-											<IconNote color="#339AF0" />
-										</Tooltip>
-									</Anchor>
+										<Form method="POST" id="delete-assignment" onSubmit={e => {
+											e.preventDefault();
+											const ok = confirm(`Are you sure you want to delete assignment "${assignment.name}"?`);
+											if (!ok) {
+												return;
+											}
+											submit(e.currentTarget)
+										}}>
+											<VisuallyHidden>
+												<input name="id" value={assignment.id} />
+											</VisuallyHidden>
+											<Tooltip label={`Delete assignment ${assignment.name}`}>
+												<ActionIcon type="submit" name="intent" value="delete-assignment" variant="outline" aria-label="Delete assignment" color="red.5" size="sm">
+													<IconTrash />
+												</ActionIcon>
+											</Tooltip>
+										</Form>
+									</Flex>
 								</Table.Td>
 							</Table.Tr>
 						);
@@ -254,6 +278,7 @@ export function DetailAssignment() {
 	const [stdoutFileID, setStdoutFileID] = useState(
 		res.caseOutputFile?.id ?? "",
 	);
+	const [template, setTemplate] = useState(res.template);
 	const markdownRef = useRef<MDXEditorMethods>(null);
 	const submit = useSubmit();
 
@@ -304,10 +329,32 @@ export function DetailAssignment() {
 		<>
 			<Breadcrumbs mb="lg">{items}</Breadcrumbs>
 
-			<Title order={3} mb="lg">
-				{res.name}
-			</Title>
-			<Form method="post" id="edit-assignment">
+			<Flex direction="row" justify="space-between">
+				<Title order={3} mb="lg">
+					{res.name}
+				</Title>
+				<Form method="POST" id="delete-assignment"
+					onSubmit={e => {
+						e.preventDefault();
+
+						const ok = confirm(`Are you sure you want to delete assignment "${res.name}"?`);
+						if (!ok) {
+							return;
+						}
+
+						submit(e.currentTarget);
+					}}>
+					<VisuallyHidden>
+						<input name="id" value={res.id} />
+					</VisuallyHidden>
+					<Tooltip label="Delete Assignment">
+						<ActionIcon type="submit" variant="outline" color="red.5" size="md">
+							<IconTrash aria-label="Delete assignment" />
+						</ActionIcon>
+					</Tooltip>
+				</Form>
+			</Flex>
+			<Form method="post" id="update-assignment">
 				<Stack maw={400}>
 					<TextInput
 						label="Name"
@@ -315,7 +362,7 @@ export function DetailAssignment() {
 						name="name"
 						title="Name"
 						id="name"
-						value={res.name}
+						defaultValue={res.name}
 					/>
 
 					<VisuallyHidden>
@@ -346,13 +393,20 @@ export function DetailAssignment() {
 							id="case_output_file_id"
 							value={stdoutFileID}
 						/>
+
+						<Input 
+							type="hidden"
+							name="template"
+							value={template}
+							defaultValue={res.template}
+						/>
 					</VisuallyHidden>
 
 					<FileInput
 						required
 						label="Case Input/Stdin"
 						title="Case Input/Stdin"
-						placeholder="Select file"
+						placeholder={res?.caseInputFile? res?.caseInputFile?.id : "Select file"}
 						rightSection={
 							<IconUpload
 								style={{ width: rem(18), height: rem(18) }}
@@ -371,7 +425,7 @@ export function DetailAssignment() {
 						required
 						label="Case Output/Stdout"
 						title="Case Output/Stdout"
-						placeholder="Select file"
+						placeholder={res?.caseOutputFile? res?.caseOutputFile?.id : "Select file"}
 						rightSection={
 							<IconUpload
 								style={{ width: rem(18), height: rem(18) }}
@@ -396,6 +450,20 @@ export function DetailAssignment() {
 					/>
 				</Stack>
 
+				<Text mt="sm">Template</Text>
+				<Card shadow="sm" padding="lg" radius="md" withBorder maw={800}>
+					<Editor
+						onChange={(value) => {
+							setTemplate(value as string);
+						}}
+						height="300px"
+						defaultLanguage="cpp"
+						language="cpp"
+						value={template}
+						defaultValue={res.template ? res.template : `// ${res.name}`}
+					/>
+				</Card>
+
 				<Text py="lg">Description</Text>
 
 				<MarkdownEditor ref={markdownRef} defaultValue={res.description} />
@@ -403,6 +471,8 @@ export function DetailAssignment() {
 				<Button
 					mt="md"
 					type="submit"
+					name="intent" 
+					value="update-assignment"
 					onClick={(event) => {
 						event.preventDefault();
 						const ok = confirm(
@@ -462,6 +532,21 @@ export async function loaderListAssignments(): Promise<FindAllAssignmentsRespons
 	});
 }
 
+export async function actionListAssignments(arg: ActionFunctionArgs,): Promise<Response | null> {
+	const formData = await arg.request.formData();
+	const id = formData.get("id") as string;
+
+	const res = await AutogradServiceClient.deleteAssignment({
+		id,
+	})
+
+	if (res) {
+		return redirect("/backoffice/assignments");
+	}
+
+	return null;
+}
+
 export async function actionCreateAssignemnt(
 	arg: ActionFunctionArgs,
 ): Promise<Response | null> {
@@ -471,6 +556,7 @@ export async function actionCreateAssignemnt(
 	const caseInputFileId = formData.get("case_input_file_id") as string;
 	const caseOutputFileId = formData.get("case_output_file_id") as string;
 	const deadlineAt = formData.get("deadline_at") as string;
+	const template = formData.get("template") as string;
 
 	const res = await AutogradServiceClient.createAssignment({
 		name,
@@ -478,6 +564,7 @@ export async function actionCreateAssignemnt(
 		caseInputFileId,
 		caseOutputFileId,
 		deadlineAt,
+		template,
 	});
 
 	if (res) {
@@ -487,14 +574,33 @@ export async function actionCreateAssignemnt(
 	return null;
 }
 
-export async function actionUpdateAssignment(arg: ActionFunctionArgs): Promise<Response | null> {
-	const formData = await arg.request.formData();
-	const id = formData.get("id") as string;
-	const name = formData.get("name") as string;
-	const description = formData.get("description") as string;
-	const caseInputFileId = formData.get("case_input_file_id") as string;
-	const caseOutputFileId = formData.get("case_output_file_id") as string;
-	const deadlineAt = formData.get("deadline_at") as string;
+export async function actionDetailAssignment(arg: ActionFunctionArgs): Promise<Response | null> {
+	const form = await arg.request.formData();
+	const intent = form.get("intent");
+	switch (intent) {
+		case "delete-assignment": return await doDeleteAssignment(form);
+		case "update-assignment": return await doUpdateAssignment(form);
+	}
+
+	return null;
+}
+
+async function doDeleteAssignment(form: FormData): Promise<Response | null> {
+	const id = form.get("id") as string;
+	await AutogradServiceClient.deleteAssignment({
+		id,
+	});
+	return redirect("/backoffice/assignments");
+}
+
+async function doUpdateAssignment(form: FormData): Promise<Response | null> {
+	const id = form.get("id") as string;
+	const name = form.get("name") as string;
+	const description = form.get("description") as string;
+	const caseInputFileId = form.get("case_input_file_id") as string;
+	const caseOutputFileId = form.get("case_output_file_id") as string;
+	const deadlineAt = form.get("deadline_at") as string;
+	const template = form.get("template") as string;
 
 	const res = await AutogradServiceClient.updateAssignment({
 		id,
@@ -502,11 +608,12 @@ export async function actionUpdateAssignment(arg: ActionFunctionArgs): Promise<R
 		description,
 		caseInputFileId,
 		caseOutputFileId,
-		deadlineAt
+		deadlineAt,
+		template
 	});
 
 	if (res) {
-		return redirect("/backoffice/assignments");
+		return redirect(`/backoffice/assignments/detail?id=${id}`);
 	}
 
 	return null;

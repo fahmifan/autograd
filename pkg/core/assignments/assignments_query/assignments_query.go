@@ -245,6 +245,7 @@ func toAssignmentProto(assignment assignments.Assignment) *autogradv1.Assignment
 		Id:                assignment.ID.String(),
 		Name:              assignment.Name,
 		Description:       assignment.Description,
+		Template:          assignment.Template,
 		TimestampMetadata: assignment.ProtoTimestampMetadata(),
 		DeadlineAt:        assignment.DeadlineAt.Format(time.RFC3339),
 		Assigner: &autogradv1.Assigner{

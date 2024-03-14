@@ -641,6 +641,11 @@ export class Assignment extends Message<Assignment> {
    */
   timestampMetadata?: TimestampMetadata;
 
+  /**
+   * @generated from field: string template = 9;
+   */
+  template = "";
+
   constructor(data?: PartialMessage<Assignment>) {
     super();
     proto3.util.initPartial(data, this);
@@ -657,6 +662,7 @@ export class Assignment extends Message<Assignment> {
     { no: 6, name: "case_output_file", kind: "message", T: AssignmentFile },
     { no: 7, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "timestamp_metadata", kind: "message", T: TimestampMetadata },
+    { no: 9, name: "template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Assignment {
@@ -777,6 +783,11 @@ export class UpdateAssignmentRequest extends Message<UpdateAssignmentRequest> {
    */
   deadlineAt = "";
 
+  /**
+   * @generated from field: string template = 7;
+   */
+  template = "";
+
   constructor(data?: PartialMessage<UpdateAssignmentRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -791,6 +802,7 @@ export class UpdateAssignmentRequest extends Message<UpdateAssignmentRequest> {
     { no: 4, name: "case_input_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "case_output_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateAssignmentRequest {
@@ -839,6 +851,11 @@ export class CreateAssignmentRequest extends Message<CreateAssignmentRequest> {
    */
   deadlineAt = "";
 
+  /**
+   * @generated from field: string template = 6;
+   */
+  template = "";
+
   constructor(data?: PartialMessage<CreateAssignmentRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -852,6 +869,7 @@ export class CreateAssignmentRequest extends Message<CreateAssignmentRequest> {
     { no: 3, name: "case_input_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "case_output_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateAssignmentRequest {
@@ -1564,6 +1582,11 @@ export class StudentAssignment extends Message<StudentAssignment> {
    */
   hasSubmission = false;
 
+  /**
+   * @generated from field: string code_template = 10;
+   */
+  codeTemplate = "";
+
   constructor(data?: PartialMessage<StudentAssignment>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1581,6 +1604,7 @@ export class StudentAssignment extends Message<StudentAssignment> {
     { no: 7, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "submission", kind: "message", T: StudentAssignment_Submission },
     { no: 9, name: "has_submission", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "code_template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StudentAssignment {
