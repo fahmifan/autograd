@@ -211,6 +211,7 @@ message StudentAssignment {
     string deadline_at = 7;
     Submission submission = 8;
     bool has_submission = 9;
+    string code_template = 10;
 }
 
 message StudentSubmission {

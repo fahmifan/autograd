@@ -278,7 +278,7 @@ export function DetailAssignment() {
 	const [stdoutFileID, setStdoutFileID] = useState(
 		res.caseOutputFile?.id ?? "",
 	);
-	const [template, setTemplate] = useState("");
+	const [template, setTemplate] = useState(res.template);
 	const markdownRef = useRef<MDXEditorMethods>(null);
 	const submit = useSubmit();
 
@@ -406,7 +406,7 @@ export function DetailAssignment() {
 						required
 						label="Case Input/Stdin"
 						title="Case Input/Stdin"
-						placeholder="Select file"
+						placeholder={res?.caseInputFile? res?.caseInputFile?.id : "Select file"}
 						rightSection={
 							<IconUpload
 								style={{ width: rem(18), height: rem(18) }}
@@ -425,7 +425,7 @@ export function DetailAssignment() {
 						required
 						label="Case Output/Stdout"
 						title="Case Output/Stdout"
-						placeholder="Select file"
+						placeholder={res?.caseOutputFile? res?.caseOutputFile?.id : "Select file"}
 						rightSection={
 							<IconUpload
 								style={{ width: rem(18), height: rem(18) }}

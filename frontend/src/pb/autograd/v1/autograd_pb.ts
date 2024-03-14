@@ -1582,6 +1582,11 @@ export class StudentAssignment extends Message<StudentAssignment> {
    */
   hasSubmission = false;
 
+  /**
+   * @generated from field: string code_template = 10;
+   */
+  codeTemplate = "";
+
   constructor(data?: PartialMessage<StudentAssignment>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1599,6 +1604,7 @@ export class StudentAssignment extends Message<StudentAssignment> {
     { no: 7, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "submission", kind: "message", T: StudentAssignment_Submission },
     { no: 9, name: "has_submission", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "code_template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StudentAssignment {
