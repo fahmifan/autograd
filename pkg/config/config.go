@@ -54,6 +54,14 @@ func BaseURL() string {
 	return fmt.Sprintf("http://localhost:%s", os.Getenv("PORT"))
 }
 
+func WebBaseURL() string {
+	if val, ok := os.LookupEnv("WEB_BASE_URL"); ok {
+		return val
+	}
+
+	return fmt.Sprintf("http://localhost:%s", os.Getenv("PORT"))
+}
+
 // PostgresDSN ..
 func PostgresDSN() string {
 	port := os.Getenv("DB_PORT")

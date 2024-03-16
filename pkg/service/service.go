@@ -55,7 +55,7 @@ func NewService(
 		JWTKey:         jwtKey,
 		MediaConfig:    mediaCfg,
 		SenderEmail:    senderEmail,
-		AppLink:        config.BaseURL(),
+		AppLink:        config.WebBaseURL(),
 		LogoURL:        config.BaseURL() + "/logo.png",
 		Mailer:         mailer,
 		OutboxEnqueuer: outboxService,

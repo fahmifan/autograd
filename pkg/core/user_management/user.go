@@ -203,12 +203,12 @@ func (u ManagedUser) Activate(now time.Time, token string) (ManagedUser, error) 
 	return u, nil
 }
 
-func createUserActivationLink(baseURL string, userID uuid.UUID, activationToken string) string {
+func createUserActivationLink(webBaseURL string, userID uuid.UUID, activationToken string) string {
 	urlVal := url.Values{}
 	urlVal.Add("userID", userID.String())
 	urlVal.Add("activationToken", activationToken)
 
-	return baseURL + "/api/v1/rpc/activateManagedUser?" + urlVal.Encode()
+	return webBaseURL + "/account-activation?" + urlVal.Encode()
 }
 
 func CheckPassword(password, passwordConfirmation string) error {
