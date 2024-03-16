@@ -210,3 +210,19 @@ func createUserActivationLink(baseURL string, userID uuid.UUID, activationToken 
 
 	return baseURL + "/api/v1/rpc/activateManagedUser?" + urlVal.Encode()
 }
+
+func CheckPassword(password, passwordConfirmation string) error {
+	if password == "" {
+		return errors.New("password is required")
+	}
+
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	if password != passwordConfirmation {
+		return errors.New("password does not match")
+	}
+
+	return nil
+}

@@ -1870,6 +1870,16 @@ export class ActivateManagedUserRequest extends Message<ActivateManagedUserReque
    */
   activationToken = "";
 
+  /**
+   * @generated from field: string password = 3;
+   */
+  password = "";
+
+  /**
+   * @generated from field: string password_confirmation = 4;
+   */
+  passwordConfirmation = "";
+
   constructor(data?: PartialMessage<ActivateManagedUserRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1880,6 +1890,8 @@ export class ActivateManagedUserRequest extends Message<ActivateManagedUserReque
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "activation_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "password", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "password_confirmation", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ActivateManagedUserRequest {

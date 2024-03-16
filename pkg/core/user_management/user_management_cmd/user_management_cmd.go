@@ -119,7 +119,18 @@ func (cmd *UserManagementCmd) ActivateManagedUser(
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = user_management.ManagedUserWriter{}.SaveUser(ctx, tx, user)
+		err = user_management.CheckPassword(req.Msg.GetPassword(), req.Msg.GetPassword())
+		if err != nil {
+			return connect.NewError(connect.CodeInvalidArgument, err)
+		}
+
+		cipherPassword, err := auth.EncryptPassword(req.Msg.GetPassword())
+		if err != nil {
+			logs.ErrCtx(ctx, err, "UserManagementCmd: ActivateManagedUser: EncryptPassword")
+			return core.ErrInternalServer
+		}
+
+		err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, tx, user, cipherPassword)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "UserManagementCmd: ActivateManagedUser: SaveUser")
 			return core.ErrInternalServer
