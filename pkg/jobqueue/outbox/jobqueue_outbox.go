@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/fahmifan/autograd/pkg/config"
+	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/jobqueue"
 	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/gookit/event"
@@ -20,12 +22,14 @@ type EnqueueRequest struct {
 }
 
 type OutboxService struct {
-	db *gorm.DB
+	db    *gorm.DB
+	debug bool
 }
 
-func NewOutboxService(db *gorm.DB) *OutboxService {
+func NewOutboxService(db *gorm.DB, debug bool) *OutboxService {
 	return &OutboxService{
-		db: db,
+		db:    db,
+		debug: debug,
 	}
 }
 
@@ -52,14 +56,21 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 	reader := OutboxItemReader{}
 	writer := OutboxItemWriter{}
 
-	oldItem, err := reader.FindPendingByKey(ctx, tx, string(req.IdempotentKey))
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "find item")
+	dbtx, ok := dbconn.DBTxFromGorm(tx)
+	if !ok {
+		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, errors.New("transaction is invalid"), "OutboxService: Enqueue", "get dbtx")
 	}
 
-	hasPendingItem := oldItem.ID.String() != jobqueue.EmptyIDStr
-	if hasPendingItem {
-		return oldItem, nil
+	if req.IdempotentKey != "" {
+		oldItem, err := reader.FindPendingByKey(ctx, tx, string(req.IdempotentKey))
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "find item")
+		}
+
+		hasPendingItem := oldItem.ID.String() != jobqueue.EmptyIDStr
+		if hasPendingItem {
+			return oldItem, nil
+		}
 	}
 
 	item, err := jobqueue.NewOutboxItem(jobqueue.NewID(), req.JobType, req.IdempotentKey, payload)
@@ -67,7 +78,7 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "new item")
 	}
 
-	err = writer.Create(ctx, tx, item)
+	err = writer.CreateV2(ctx, dbtx, item)
 	if err != nil {
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "save item to db")
 	}
@@ -77,7 +88,7 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 
 // Run will run blocking the OutboxService
 func (svc *OutboxService) Run(ctx context.Context) error {
-	const maxFetch = 20
+	const maxFetch = 100
 
 	for {
 		time.Sleep(5 * time.Second)
@@ -92,7 +103,9 @@ func (svc *OutboxService) Run(ctx context.Context) error {
 }
 
 func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error {
-	logs.InfoCtx(ctx, "OutboxService: run", "start")
+	if svc.debug {
+		logs.InfoCtx(ctx, "OutboxService: run", "start")
+	}
 
 	reader := OutboxItemReader{}
 
@@ -105,6 +118,7 @@ func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error
 		return nil
 	}
 
+	// FIXME: should be in transaction
 	for _, item := range items {
 		err, event := event.Fire(string(item.JobType), map[string]any{
 			"item": item,
@@ -112,7 +126,9 @@ func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error
 		if err != nil {
 			return logs.ErrWrapCtx(ctx, err, "Run: OutboxService", "fire event", event.Name())
 		}
-		logs.InfoCtx(ctx, "OutboxService: run", "fire items", event.Name())
+		if svc.debug {
+			logs.InfoCtx(ctx, "OutboxService: run", "fire items", event.Name())
+		}
 	}
 
 	itemIDs := lo.Map(items, func(item jobqueue.OutboxItem, _ int) jobqueue.ID {
@@ -125,7 +141,9 @@ func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error
 	if err != nil {
 		return logs.ErrWrapCtx(ctx, err, "Run: OutboxService", "update items")
 	}
-	logs.InfoCtx(ctx, "OutboxService: run", "update status: count:", fmt.Sprint(len(itemIDs)))
+	if svc.debug {
+		logs.InfoCtx(ctx, "OutboxService: run", "update status: count:", fmt.Sprint(len(itemIDs)))
+	}
 
 	return nil
 }
@@ -133,13 +151,14 @@ func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error
 // RegisterHandlers register all job queue handler.
 // This method is not thread safe, should be called only inside one goroutine.
 func RegisterHandlers(db *gorm.DB, handlers []jobqueue.JobHandler) {
+	debug := config.Debug()
 	for _, handler := range handlers {
 		registerValidJob(handler.JobType())
-		event.On(string(handler.JobType()), handle(db, handler))
+		event.On(string(handler.JobType()), handle(db, debug, handler))
 	}
 }
 
-func handle(db *gorm.DB, handler jobqueue.JobHandler) event.ListenerFunc {
+func handle(db *gorm.DB, debug bool, handler jobqueue.JobHandler) event.ListenerFunc {
 	return func(e event.Event) error {
 		ctx := context.Background()
 		writer := OutboxItemWriter{}
@@ -147,6 +166,10 @@ func handle(db *gorm.DB, handler jobqueue.JobHandler) event.ListenerFunc {
 		item, ok := e.Get("item").(jobqueue.OutboxItem)
 		if !ok {
 			return logs.ErrWrapCtx(ctx, fmt.Errorf("invalid payload"), "outbox: handle: Get payload")
+		}
+
+		if debug {
+			logs.InfoCtx(ctx, "outbox: handle", "item", string(item.JobType), "id", item.ID.String())
 		}
 
 		items := []jobqueue.OutboxItem{item}

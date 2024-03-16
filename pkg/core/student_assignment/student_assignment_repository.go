@@ -18,7 +18,7 @@ type AssignmentReader struct{}
 
 func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID) (Assignment, error) {
 	assignmentModel := dbmodel.Assignment{}
-	err := tx.Where("id = ?", id).First(&assignmentModel).Error
+	err := tx.Where("id = ?", id).Take(&assignmentModel).Error
 	if err != nil {
 		return Assignment{}, fmt.Errorf("find assignment: %w", err)
 	}
@@ -77,18 +77,21 @@ func (StudentAssignmentReader) FindAllAssignments(ctx context.Context, tx *gorm.
 		return FindAllAssignmentResponse{}, fmt.Errorf("find assignments: %w", err)
 	}
 
-	assignmnetIDs := []uuid.UUID{}
-	for _, assignmentModel := range assignmentModels {
-		assignmnetIDs = append(assignmnetIDs, assignmentModel.ID)
+	assignmnetIDs := make([]uuid.UUID, len(assignmentModels))
+	for i := range assignmentModels {
+		assignmnetIDs[i] = assignmentModels[i].ID
 	}
 
-	assignerIDs := []uuid.UUID{}
-	for _, assignmentModel := range assignmentModels {
-		assignerIDs = append(assignerIDs, assignmentModel.AssignedBy)
+	assignerIDs := make([]uuid.UUID, len(assignmentModels))
+	for i := range assignmentModels {
+		assignerIDs[i] = assignmentModels[i].AssignedBy
 	}
 
-	assignerModels := []dbmodel.User{}
-	err = tx.Where("id IN (?) ", assignerIDs).Find(&assignerModels).Error
+	var assigners []Assigner
+	err = tx.Model(dbmodel.User{}).
+		Select("id", "name").
+		Where("id IN (?) and deleted_at is null", assignerIDs).
+		Find(&assigners).Error
 	if err != nil {
 		return FindAllAssignmentResponse{}, fmt.Errorf("find assigners: %w", err)
 	}
@@ -102,7 +105,7 @@ func (StudentAssignmentReader) FindAllAssignments(ctx context.Context, tx *gorm.
 	}
 
 	return FindAllAssignmentResponse{
-		Assignments: toStudentAssignments(assignmentModels, assignerModels, submissionModels),
+		Assignments: toStudentAssignments(assignmentModels, assigners, submissionModels),
 		Pagination: core.Pagination{
 			Page:  req.Page,
 			Limit: req.Limit,
@@ -138,11 +141,15 @@ func (StudentAssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, req Fi
 		return StudentAssignment{}, fmt.Errorf("find assignment: %w", err)
 	}
 
-	assignerModel := dbmodel.User{}
-	err = tx.Where("id = ?", assignmentModel.AssignedBy).First(&assignerModel).Error
+	assigner := Assigner{}
+	err = tx.Model(dbmodel.User{}).
+		Select("id", "name").
+		Where("id = ? and deleted_at is null", assignmentModel.AssignedBy).
+		Take(&assigner).Error
 	if err != nil {
 		return StudentAssignment{}, fmt.Errorf("find assigner: %w", err)
 	}
+
 	submissionModel := dbmodel.Submission{}
 	if req.WithStudentID {
 		err = tx.Debug().Where("assignment_id = ? and submitted_by = ?", assignmentModel.ID, req.StudentID).
@@ -152,7 +159,7 @@ func (StudentAssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, req Fi
 		}
 	}
 
-	return toStudentAssignment(assignmentModel, assignerModel, submissionModel), nil
+	return toStudentAssignment(assignmentModel, assigner, submissionModel), nil
 }
 
 type StudentSubmissionWriter struct{}
@@ -213,7 +220,7 @@ func (StudentSubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, id uui
 	}
 
 	assignmentModel := dbmodel.Assignment{}
-	err = tx.Where("id = ?", submissionModel.AssignmentID).First(&assignmentModel).Error
+	err = tx.Model(dbmodel.User{}).Where("id = ?", submissionModel.AssignmentID).Take(&assignmentModel).Error
 	if err != nil {
 		return StudentSubmission{}, fmt.Errorf("find assignment: %w", err)
 	}
@@ -249,15 +256,15 @@ func (StudentSubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, id uui
 
 func toStudentAssignments(
 	assignmentModels []dbmodel.Assignment,
-	assigners []dbmodel.User,
+	assigners []Assigner,
 	submissions []dbmodel.Submission,
 ) []StudentAssignment {
-	mapAssigner := map[uuid.UUID]dbmodel.User{}
+	mapAssigner := make(map[uuid.UUID]Assigner, len(assigners))
 	for _, assigner := range assigners {
 		mapAssigner[assigner.ID] = assigner
 	}
 
-	assignmentTosubmissionMap := map[uuid.UUID]dbmodel.Submission{}
+	assignmentTosubmissionMap := make(map[uuid.UUID]dbmodel.Submission, len(submissions))
 	for _, submission := range submissions {
 		assignmentTosubmissionMap[submission.AssignmentID] = submission
 	}
@@ -271,18 +278,15 @@ func toStudentAssignments(
 	return assignments
 }
 
-func toStudentAssignment(assignmentModel dbmodel.Assignment, assigner dbmodel.User, submission dbmodel.Submission) StudentAssignment {
+func toStudentAssignment(assignmentModel dbmodel.Assignment, assigner Assigner, submission dbmodel.Submission) StudentAssignment {
 	return StudentAssignment{
 		ID:           assignmentModel.ID,
 		Name:         assignmentModel.Name,
 		Description:  assignmentModel.Description,
 		CodeTemplate: assignmentModel.Template,
-		Assigner: Assigner{
-			ID:   assignmentModel.AssignedBy,
-			Name: assigner.Name,
-		},
-		DeadlineAt: assignmentModel.DeadlineAt,
-		UpdatedAt:  assignmentModel.UpdatedAt.Time,
+		Assigner:     assigner,
+		DeadlineAt:   assignmentModel.DeadlineAt,
+		UpdatedAt:    assignmentModel.UpdatedAt.Time,
 		Submission: StudentSubmissionForAssignment{
 			ID:               submission.ID,
 			StudentID:        submission.SubmittedBy,

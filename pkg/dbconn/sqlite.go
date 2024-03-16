@@ -13,6 +13,10 @@ func MustSQLite() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = db.Exec(`PRAGMA journal_mode=WAL;`).Error
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return db
 }

@@ -1,14 +1,14 @@
 
 -- +migrate Up
 
-PRAGMA foreign_keys = ON;
+-- PRAGMA foreign_keys = ON;
 
 CREATE TABLE "users" (
     "id" TEXT PRIMARY KEY NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" INT NOT NULL,
+    "role" TEXT NOT NULL,
     "active" INT NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE "submissions" (
     "created_at" TIMESTAMP NOT NULL,
     "updated_at" TIMESTAMP NOT NULL,
     "deleted_at" TIMESTAMP,
-    FOREIGN KEY (submitted_by) REFERENCES users(id)
+    FOREIGN KEY (submitted_by) REFERENCES users(id),
     FOREIGN KEY (assignment_id) REFERENCES assignments(id)
 );
 

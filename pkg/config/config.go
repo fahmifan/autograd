@@ -54,6 +54,14 @@ func BaseURL() string {
 	return fmt.Sprintf("http://localhost:%s", os.Getenv("PORT"))
 }
 
+func WebBaseURL() string {
+	if val, ok := os.LookupEnv("WEB_BASE_URL"); ok {
+		return val
+	}
+
+	return fmt.Sprintf("http://localhost:%s", os.Getenv("PORT"))
+}
+
 // PostgresDSN ..
 func PostgresDSN() string {
 	port := os.Getenv("DB_PORT")
@@ -131,6 +139,11 @@ func SMTPConfig() smtp.Config {
 		Username: os.Getenv("SMTP_USERNAME"),
 		Password: os.Getenv("SMTP_PASSWORD"),
 	}
+}
+
+func Debug() bool {
+	val, _ := os.LookupEnv("DEBUG")
+	return val == "true"
 }
 
 func parseInt(s string) int {

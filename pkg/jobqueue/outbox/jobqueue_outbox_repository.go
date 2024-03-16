@@ -5,6 +5,7 @@ import (
 
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/fahmifan/autograd/pkg/jobqueue"
+	"github.com/fahmifan/autograd/pkg/xsqlc"
 	"github.com/fahmifan/ulids"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -55,6 +56,26 @@ func (r *OutboxItemWriter) Create(ctx context.Context, tx *gorm.DB, item jobqueu
 	}
 
 	err := tx.Create(&outboxItem).Error
+	return err
+}
+
+func (r *OutboxItemWriter) CreateV2(ctx context.Context, tx xsqlc.DBTX, item jobqueue.OutboxItem) error {
+	outboxItem := dbmodel.OutboxItem{
+		ID:            ulids.ULID(item.ID),
+		JobType:       string(item.JobType),
+		IdempotentKey: string(item.IdempotentKey),
+		Status:        string(item.Status),
+		Payload:       string(item.Payload),
+	}
+
+	_, err := xsqlc.New(tx).CreateOutboxItem(ctx, xsqlc.CreateOutboxItemParams{
+		ID:            outboxItem.ID.String(),
+		IdempotentKey: outboxItem.IdempotentKey,
+		Status:        outboxItem.Status,
+		JobType:       outboxItem.JobType,
+		Payload:       outboxItem.Payload,
+	})
+
 	return err
 }
 

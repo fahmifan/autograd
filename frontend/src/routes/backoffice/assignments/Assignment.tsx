@@ -138,6 +138,7 @@ export function CreateAssignment() {
 	const [stdinFileID, setStdinFileID] = useState("");
 	const [stdoutFileID, setStdoutFileID] = useState("");
 	const markdownRef = useRef<MDXEditorMethods>(null);
+	const [template, setTemplate] = useState("");
 	const submit = useSubmit();
 
 	const mutateUploadStdin = useMutation({
@@ -200,6 +201,13 @@ export function CreateAssignment() {
 							id="case_output_file_id"
 							value={stdoutFileID}
 						/>
+
+						<Input 
+							type="hidden"
+							name="template"
+							id="template"
+							value={template}
+						/>
 					</VisuallyHidden>
 
 					<FileInput
@@ -248,6 +256,20 @@ export function CreateAssignment() {
 						id="deadline_at"
 					/>
 				</Stack>
+
+				<Text mt="sm">Template</Text>
+				<Card shadow="sm" padding="lg" radius="md" withBorder maw={800}>
+					<Editor
+						onChange={(value) => {
+							setTemplate(value as string);
+						}}
+						height="300px"
+						defaultLanguage="cpp"
+						language="cpp"
+						value={template}
+						defaultValue={""}
+					/>
+				</Card>
 
 				<Text py="lg">Description</Text>
 				<MarkdownEditor ref={markdownRef} />

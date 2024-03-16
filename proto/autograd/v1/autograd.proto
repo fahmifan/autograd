@@ -239,6 +239,8 @@ message ResubmitStudentSubmissionRequest {
 message ActivateManagedUserRequest {
     string user_id = 1;
     string activation_token = 2;
+    string password = 3;
+    string password_confirmation = 4;
 }
 
 service AutogradService {

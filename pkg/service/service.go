@@ -48,14 +48,14 @@ func NewService(
 	senderEmail string,
 	mailer mailer.Mailer,
 ) *Service {
-	outboxService := outbox.NewOutboxService(gormDB)
+	outboxService := outbox.NewOutboxService(gormDB, config.Debug())
 
 	coreCtx := &core.Ctx{
 		GormDB:         gormDB,
 		JWTKey:         jwtKey,
 		MediaConfig:    mediaCfg,
 		SenderEmail:    senderEmail,
-		AppLink:        config.BaseURL(),
+		AppLink:        config.WebBaseURL(),
 		LogoURL:        config.BaseURL() + "/logo.png",
 		Mailer:         mailer,
 		OutboxEnqueuer: outboxService,

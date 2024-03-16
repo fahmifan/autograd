@@ -9,14 +9,17 @@ import (
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
+	"github.com/fahmifan/autograd/pkg/xsqlc"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
+	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 )
 
 type ManagedUserWriter struct{}
 
-func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, user ManagedUser, password auth.CipherPassword) error {
+func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, new bool, user ManagedUser, password auth.CipherPassword) error {
 	active := 0
 	if user.Active {
 		active = 1
@@ -34,7 +37,13 @@ func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, 
 		Active:   active,
 	}
 
-	err := tx.Save(&model).Error
+	var err error
+	if new {
+		err = tx.Create(&model).Error
+	} else {
+		err = tx.Save(&model).Error
+	}
+
 	if err != nil {
 		return fmt.Errorf("SaveUserWithPassword: save user: %w", err)
 	}
@@ -48,7 +57,11 @@ func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, 
 		ExpiredAt: user.ActivationToken.ExpiresAt,
 	}
 
-	err = tx.Save(&tokenModel).Error
+	if new {
+		err = tx.Create(&tokenModel).Error
+	} else {
+		err = tx.Save(&tokenModel).Error
+	}
 	if err != nil {
 		return fmt.Errorf("SaveUserWithPassword: save activation token: %w", err)
 	}
@@ -57,12 +70,103 @@ func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, 
 		UserID:            user.ID,
 		ActivationTokenID: user.ActivationToken.ID,
 	}
-	err = tx.Save(&relModel).Error
+
+	if new {
+		err = tx.Create(&relModel).Error
+	} else {
+		err = tx.Save(&relModel).Error
+	}
 	if err != nil {
 		return fmt.Errorf("SaveUserWithPassword: save relation: %w", err)
 	}
 
 	return nil
+}
+
+func (ManagedUserWriter) SaveUserWithPasswordV2(ctx context.Context, tx xsqlc.DBTX, new bool, user ManagedUser, password auth.CipherPassword) error {
+	active := 0
+	if user.Active {
+		active = 1
+	}
+
+	model := dbmodel.User{
+		Base: dbmodel.Base{
+			ID:       user.ID,
+			Metadata: core.NewModelMetadata(user.TimestampMetadata),
+		},
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: string(password),
+		Role:     string(user.Role),
+		Active:   active,
+	}
+
+	query := xsqlc.New(tx)
+
+	_, err := query.SaveUser(ctx, xsqlc.SaveUserParams{
+		ID:        model.ID.String(),
+		Name:      model.Name,
+		Email:     model.Email,
+		Role:      model.Role,
+		Password:  model.Password,
+		Active:    int32(active),
+		CreatedAt: model.CreatedAt.Time,
+		UpdatedAt: model.UpdatedAt.Time,
+	})
+	if err != nil {
+		return fmt.Errorf("SaveUserWithPassword: save user: %w", err)
+	}
+
+	tokenModel := dbmodel.ActivationToken{
+		Base: dbmodel.Base{
+			ID:       user.ActivationToken.ID,
+			Metadata: core.NewModelMetadata(user.ActivationToken.TimestampMetadata),
+		},
+		Token:     user.ActivationToken.Token,
+		ExpiredAt: user.ActivationToken.ExpiresAt,
+	}
+
+	_, err = query.SaveActivationToken(ctx, xsqlc.SaveActivationTokenParams{
+		ID:        tokenModel.ID.String(),
+		Token:     tokenModel.Token,
+		ExpiredAt: tokenModel.ExpiredAt,
+		CreatedAt: tokenModel.CreatedAt.Time,
+		UpdatedAt: tokenModel.UpdatedAt.Time,
+	})
+	if err != nil {
+		return fmt.Errorf("SaveUserWithPassword: save activation token: %w", err)
+	}
+
+	relModel := dbmodel.RelUserToActivationToken{
+		UserID:            user.ID,
+		ActivationTokenID: user.ActivationToken.ID,
+	}
+
+	_, err = query.SaveRelUserToActivationToken(ctx, xsqlc.SaveRelUserToActivationTokenParams{
+		UserID:            relModel.UserID.String(),
+		ActivationTokenID: relModel.ActivationTokenID.String(),
+	})
+	if err != nil {
+		return fmt.Errorf("SaveUserWithPassword: save relation: %w", err)
+	}
+
+	return nil
+}
+
+func timestampFromNull(tt null.Time, infinityModifier pgtype.InfinityModifier) pgtype.Timestamp {
+	return pgtype.Timestamp{
+		Time:             tt.Time,
+		InfinityModifier: infinityModifier,
+		Valid:            tt.Valid,
+	}
+}
+
+func timestampFromTime(tt time.Time, infinityModifier pgtype.InfinityModifier) pgtype.Timestamp {
+	return pgtype.Timestamp{
+		Time:             tt,
+		InfinityModifier: infinityModifier,
+		Valid:            true,
+	}
 }
 
 func (ManagedUserWriter) SaveUser(ctx context.Context, tx *gorm.DB, user ManagedUser) error {
@@ -96,7 +200,7 @@ func (ManagedUserWriter) SaveUser(ctx context.Context, tx *gorm.DB, user Managed
 		ExpiredAt: user.ActivationToken.ExpiresAt,
 	}
 
-	err = tx.Save(&tokenModel).Error
+	err = tx.Create(&tokenModel).Error
 	if err != nil {
 		return fmt.Errorf("SaveUserWithPassword: save activation token: %w", err)
 	}
