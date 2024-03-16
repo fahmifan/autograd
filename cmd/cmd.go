@@ -43,7 +43,7 @@ func Execute() error {
 }
 
 func mustInitService() *service.Service {
-	gormDB := dbconn.MustSQLite()
+	gormDB := dbconn.MustPostgres()
 	mediaCfg := core.MediaConfig{
 		RootDir:      config.FileUploadPath(),
 		ObjectStorer: fs.NewLocalStorage(),

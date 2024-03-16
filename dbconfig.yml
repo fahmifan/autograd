@@ -1,4 +1,9 @@
+# development:
+#   dialect: sqlite3
+#   datasource: autograd.db
+#   dir: db/migrations
+
 development:
-  dialect: sqlite3
-  datasource: autograd.db
+  dialect: postgres
+  datasource: host=localhost user=postgres dbname=autograd port=5432 sslmode=disable
   dir: db/migrations

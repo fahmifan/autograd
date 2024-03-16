@@ -8,9 +8,12 @@ import (
 	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
 	"github.com/fahmifan/autograd/pkg/service"
+	"github.com/labstack/echo-contrib/pprof"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	_ "net/http/pprof"
 )
 
 // Server ..
@@ -68,6 +71,8 @@ func (s *Server) routes() {
 	apiV1 := s.echo.Group("/api/v1")
 	apiV1.POST("/rpc/saveMedia", s.handleSaveMedia)
 	apiV1.GET("/rpc/activateManagedUser", s.handleActivateManagedUser)
+
+	pprof.Register(s.echo, "/debug/pprof")
 
 	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
 		s.service,

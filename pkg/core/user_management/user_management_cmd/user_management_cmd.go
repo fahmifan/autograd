@@ -2,12 +2,14 @@ package user_management_cmd
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/core/user_management"
+	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/jobqueue/outbox"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
@@ -65,7 +67,12 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 	}
 
 	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
-		err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, tx, newUser, cipherPassword)
+		dbtx, ok := dbconn.DBTxFromGorm(tx)
+		if !ok {
+			return connect.NewError(connect.CodeInternal, errors.New("transaction is invalid"))
+		}
+
+		err = user_management.ManagedUserWriter{}.SaveUserWithPasswordV2(ctx, dbtx, true, newUser, cipherPassword)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "UserManagementCmd: CreateManagedUser: SaveUserWithPassword")
 			return connect.NewError(connect.CodeInternal, err)
@@ -130,7 +137,7 @@ func (cmd *UserManagementCmd) ActivateManagedUser(
 			return core.ErrInternalServer
 		}
 
-		err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, tx, user, cipherPassword)
+		err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, tx, false, user, cipherPassword)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "UserManagementCmd: ActivateManagedUser: SaveUser")
 			return core.ErrInternalServer
@@ -180,7 +187,7 @@ func (cmd *UserManagementCmd) InternalCreateAdminUser(
 		return uuid.Nil, core.ErrInternalServer
 	}
 
-	err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, newAdmin, cipher)
+	err = user_management.ManagedUserWriter{}.SaveUserWithPassword(ctx, cmd.GormDB, true, newAdmin, cipher)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "UserManagementCmd: InternalCreateAdminUser: SaveUserWithPassword")
 		return uuid.Nil, core.ErrInternalServer
