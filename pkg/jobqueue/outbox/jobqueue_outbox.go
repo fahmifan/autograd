@@ -20,12 +20,14 @@ type EnqueueRequest struct {
 }
 
 type OutboxService struct {
-	db *gorm.DB
+	db    *gorm.DB
+	debug bool
 }
 
-func NewOutboxService(db *gorm.DB) *OutboxService {
+func NewOutboxService(db *gorm.DB, debug bool) *OutboxService {
 	return &OutboxService{
-		db: db,
+		db:    db,
+		debug: debug,
 	}
 }
 
@@ -92,7 +94,9 @@ func (svc *OutboxService) Run(ctx context.Context) error {
 }
 
 func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error {
-	logs.InfoCtx(ctx, "OutboxService: run", "start")
+	if svc.debug {
+		logs.InfoCtx(ctx, "OutboxService: run", "start")
+	}
 
 	reader := OutboxItemReader{}
 
@@ -112,7 +116,9 @@ func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error
 		if err != nil {
 			return logs.ErrWrapCtx(ctx, err, "Run: OutboxService", "fire event", event.Name())
 		}
-		logs.InfoCtx(ctx, "OutboxService: run", "fire items", event.Name())
+		if svc.debug {
+			logs.InfoCtx(ctx, "OutboxService: run", "fire items", event.Name())
+		}
 	}
 
 	itemIDs := lo.Map(items, func(item jobqueue.OutboxItem, _ int) jobqueue.ID {
@@ -125,7 +131,9 @@ func (svc *OutboxService) run(ctx context.Context, tx *gorm.DB, limit int) error
 	if err != nil {
 		return logs.ErrWrapCtx(ctx, err, "Run: OutboxService", "update items")
 	}
-	logs.InfoCtx(ctx, "OutboxService: run", "update status: count:", fmt.Sprint(len(itemIDs)))
+	if svc.debug {
+		logs.InfoCtx(ctx, "OutboxService: run", "update status: count:", fmt.Sprint(len(itemIDs)))
+	}
 
 	return nil
 }
@@ -148,6 +156,8 @@ func handle(db *gorm.DB, handler jobqueue.JobHandler) event.ListenerFunc {
 		if !ok {
 			return logs.ErrWrapCtx(ctx, fmt.Errorf("invalid payload"), "outbox: handle: Get payload")
 		}
+
+		logs.InfoCtx(ctx, "outbox: handle", "item", string(item.JobType), "id", item.ID.String())
 
 		items := []jobqueue.OutboxItem{item}
 		err := writer.UpdateAllStatus(ctx, db, items, jobqueue.StatusPicked)

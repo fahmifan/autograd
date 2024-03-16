@@ -141,6 +141,11 @@ func SMTPConfig() smtp.Config {
 	}
 }
 
+func Debug() bool {
+	val, _ := os.LookupEnv("DEBUG")
+	return val == "true"
+}
+
 func parseInt(s string) int {
 	i, _ := strconv.Atoi(s)
 	return i
