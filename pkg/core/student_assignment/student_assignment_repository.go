@@ -77,14 +77,14 @@ func (StudentAssignmentReader) FindAllAssignments(ctx context.Context, tx *gorm.
 		return FindAllAssignmentResponse{}, fmt.Errorf("find assignments: %w", err)
 	}
 
-	assignmnetIDs := []uuid.UUID{}
-	for _, assignmentModel := range assignmentModels {
-		assignmnetIDs = append(assignmnetIDs, assignmentModel.ID)
+	assignmnetIDs := make([]uuid.UUID, len(assignmentModels))
+	for i := range assignmentModels {
+		assignmnetIDs[i] = assignmentModels[i].ID
 	}
 
-	assignerIDs := []uuid.UUID{}
-	for _, assignmentModel := range assignmentModels {
-		assignerIDs = append(assignerIDs, assignmentModel.AssignedBy)
+	assignerIDs := make([]uuid.UUID, len(assignmentModels))
+	for i := range assignmentModels {
+		assignerIDs[i] = assignmentModels[i].AssignedBy
 	}
 
 	var assigners []Assigner
@@ -149,6 +149,7 @@ func (StudentAssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, req Fi
 	if err != nil {
 		return StudentAssignment{}, fmt.Errorf("find assigner: %w", err)
 	}
+
 	submissionModel := dbmodel.Submission{}
 	if req.WithStudentID {
 		err = tx.Debug().Where("assignment_id = ? and submitted_by = ?", assignmentModel.ID, req.StudentID).

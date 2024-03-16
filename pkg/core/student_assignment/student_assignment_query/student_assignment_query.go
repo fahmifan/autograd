@@ -125,9 +125,9 @@ func (query *StudentAssignmentQuery) FindStudentAssignment(ctx context.Context, 
 }
 
 func toStudentAssignmentProtos(assignments []student_assignment.StudentAssignment) []*autogradv1.StudentAssignment {
-	var assignmentProtos []*autogradv1.StudentAssignment
-	for _, assignment := range assignments {
-		assignmentProtos = append(assignmentProtos, toStudentAssignmentProto(assignment, nil))
+	assignmentProtos := make([]*autogradv1.StudentAssignment, len(assignments))
+	for i := range assignments {
+		assignmentProtos[i] = toStudentAssignmentProto(assignments[i], nil)
 	}
 	return assignmentProtos
 }
