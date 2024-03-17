@@ -9,29 +9,28 @@ import (
 	"context"
 )
 
-const findPendingByKey = `-- name: FindPendingByKey :many
-SELECT id, idempotent_key, status, job_type, payload FROM outbox_items WHERE idempotent_key = $1 AND "status" = 'pending' LIMIT 1
+const findAllOutboxItemIDsByStatus = `-- name: FindAllOutboxItemIDsByStatus :many
+SELECT id FROM outbox_items WHERE "status" = $1 LIMIT $2
 `
 
-func (q *Queries) FindPendingByKey(ctx context.Context, idempotentKey string) ([]OutboxItem, error) {
-	rows, err := q.db.QueryContext(ctx, findPendingByKey, idempotentKey)
+type FindAllOutboxItemIDsByStatusParams struct {
+	Status    string
+	SizeLimit int32
+}
+
+func (q *Queries) FindAllOutboxItemIDsByStatus(ctx context.Context, arg FindAllOutboxItemIDsByStatusParams) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, findAllOutboxItemIDsByStatus, arg.Status, arg.SizeLimit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OutboxItem
+	var items []string
 	for rows.Next() {
-		var i OutboxItem
-		if err := rows.Scan(
-			&i.ID,
-			&i.IdempotentKey,
-			&i.Status,
-			&i.JobType,
-			&i.Payload,
-		); err != nil {
+		var id string
+		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, id)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -40,4 +39,45 @@ func (q *Queries) FindPendingByKey(ctx context.Context, idempotentKey string) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const findOutboxItemByByKey = `-- name: FindOutboxItemByByKey :one
+SELECT id, idempotent_key, status, job_type, payload, version FROM outbox_items WHERE idempotent_key = $1 AND "status" = $2 LIMIT 1
+`
+
+type FindOutboxItemByByKeyParams struct {
+	IdempotentKey string
+	Status        string
+}
+
+func (q *Queries) FindOutboxItemByByKey(ctx context.Context, arg FindOutboxItemByByKeyParams) (OutboxItem, error) {
+	row := q.db.QueryRowContext(ctx, findOutboxItemByByKey, arg.IdempotentKey, arg.Status)
+	var i OutboxItem
+	err := row.Scan(
+		&i.ID,
+		&i.IdempotentKey,
+		&i.Status,
+		&i.JobType,
+		&i.Payload,
+		&i.Version,
+	)
+	return i, err
+}
+
+const findOutboxItemByID = `-- name: FindOutboxItemByID :one
+SELECT id, idempotent_key, status, job_type, payload, version FROM outbox_items WHERE id = $1
+`
+
+func (q *Queries) FindOutboxItemByID(ctx context.Context, id string) (OutboxItem, error) {
+	row := q.db.QueryRowContext(ctx, findOutboxItemByID, id)
+	var i OutboxItem
+	err := row.Scan(
+		&i.ID,
+		&i.IdempotentKey,
+		&i.Status,
+		&i.JobType,
+		&i.Payload,
+		&i.Version,
+	)
+	return i, err
 }

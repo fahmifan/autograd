@@ -60,7 +60,8 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	cipherPassword, err := auth.EncryptPassword(password)
+	// the password is a generated, user will have to change it, should be ok?
+	cipherPassword, err := auth.WeakEncryptPassword(password)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "UserManagementCmd: CreateManagedUser: EncryptPassword")
 		return nil, connect.NewError(connect.CodeInternal, err)

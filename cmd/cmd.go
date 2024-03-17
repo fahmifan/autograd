@@ -55,9 +55,18 @@ func mustInitService() *service.Service {
 		log.Fatal("init mailer failed:", err)
 	}
 
+	sqlDB, err := gormDB.DB()
+	if err != nil {
+		log.Fatal("get sql db failed:", err)
+	}
+
+	debug := config.Debug()
+
 	svc := service.NewService(
 		gormDB,
+		sqlDB,
 		config.JWTKey(),
+		debug,
 		mediaCfg,
 		config.SenderEmail(),
 		mailer,
@@ -89,7 +98,7 @@ func serverCmd() *cobra.Command {
 			go func() {
 				logs.Info("run outbox service")
 				service.RegisterJobHandlers()
-				service.RunOutboxService(ctx)
+				service.RunOutboxService()
 			}()
 
 			// Wait for a signal to quit:
@@ -102,11 +111,9 @@ func serverCmd() *cobra.Command {
 			defer cancel()
 			server.Stop(ctx)
 
-			logs.Info("stopping worker")
-			time.AfterFunc(time.Second*30, func() {
-				os.Exit(1)
-			})
-			logs.Info("worker stopped")
+			logs.Info("stopping outbox service")
+			service.StopOutboxService()
+			logs.Info("outbox service stopped")
 
 			return nil
 		},

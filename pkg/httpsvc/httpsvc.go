@@ -2,7 +2,7 @@ package httpsvc
 
 import (
 	"context"
-	"log"
+	"errors"
 	"strings"
 
 	"github.com/fahmifan/autograd/pkg/logs"
@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"net/http"
 	_ "net/http/pprof"
 )
 
@@ -42,13 +43,16 @@ func NewServer(port string, opts ...Option) *Server {
 func (s *Server) Run() {
 	s.routes()
 	s.service.InternalCreateMacSandBoxRules()
-	log.Fatal(s.echo.Start(":" + s.port))
+	err := s.echo.Start(":" + s.port)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logs.Err(err, "Server: Start")
+	}
 }
 
 // Stop server gracefully
 func (s *Server) Stop(ctx context.Context) {
-	if err := s.echo.Shutdown(ctx); err != nil {
-		log.Fatal(err)
+	if err := s.echo.Shutdown(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logs.ErrCtx(ctx, err, "Server: Stop")
 	}
 }
 

@@ -35,3 +35,42 @@ func (q *Queries) CreateOutboxItem(ctx context.Context, arg CreateOutboxItemPara
 	err := row.Scan(&id)
 	return id, err
 }
+
+const updateOutboxItem = `-- name: UpdateOutboxItem :exec
+UPDATE outbox_items
+SET 
+    "status" = $1,
+    idempotent_key = $2,
+    job_type = $3,
+    payload = $4,
+    "version" = "version" + 1
+WHERE id = $5
+    AND "version" = $6
+RETURNING id, "version"
+`
+
+type UpdateOutboxItemParams struct {
+	Status        string
+	IdempotentKey string
+	JobType       string
+	Payload       string
+	ID            string
+	Version       int32
+}
+
+type UpdateOutboxItemRow struct {
+	ID      string
+	Version int32
+}
+
+func (q *Queries) UpdateOutboxItem(ctx context.Context, arg UpdateOutboxItemParams) error {
+	_, err := q.db.ExecContext(ctx, updateOutboxItem,
+		arg.Status,
+		arg.IdempotentKey,
+		arg.JobType,
+		arg.Payload,
+		arg.ID,
+		arg.Version,
+	)
+	return err
+}

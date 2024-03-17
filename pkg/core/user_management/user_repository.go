@@ -254,11 +254,6 @@ func (ManagedUserReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllMa
 		res.Users[i] = managedUserFromModel(model, dbmodel.ActivationToken{})
 	}
 
-	userIDs := lo.Map(models, func(m dbmodel.User, _ int) uuid.UUID {
-		return m.ID
-	})
-	findAllActivationTokenByUserIDs(tx, userIDs)
-
 	pagination.Total = int32(count)
 	res.Pagination = pagination
 	return res, nil

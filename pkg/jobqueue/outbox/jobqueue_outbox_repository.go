@@ -30,6 +30,19 @@ func (r *OutboxItemReader) FindAllPending(ctx context.Context, tx *gorm.DB, limi
 	return items, err
 }
 
+func (r *OutboxItemReader) FindAllPendingIDs(ctx context.Context, tx xsqlc.DBTX, limit int) (ids []jobqueue.ID, err error) {
+	idStrs, err := xsqlc.New(tx).FindAllOutboxItemIDsByStatus(ctx, xsqlc.FindAllOutboxItemIDsByStatusParams{
+		Status:    string(jobqueue.StatusPending),
+		SizeLimit: int32(limit),
+	})
+
+	ids = lo.Map(idStrs, func(id string, _ int) jobqueue.ID {
+		return mustParseID(id)
+	})
+
+	return ids, err
+}
+
 func (r *OutboxItemReader) FindPendingByKey(ctx context.Context, tx *gorm.DB, key string) (item jobqueue.OutboxItem, err error) {
 	var outboxItem dbmodel.OutboxItem
 
@@ -42,6 +55,23 @@ func (r *OutboxItemReader) FindPendingByKey(ctx context.Context, tx *gorm.DB, ke
 	}
 
 	return outboxItemFromModel(outboxItem), nil
+}
+
+func (r *OutboxItemReader) FindPendingByKeyV2(ctx context.Context, tx xsqlc.DBTX, key string) (item jobqueue.OutboxItem, err error) {
+	outboxItem, err := xsqlc.New(tx).FindOutboxItemByByKey(ctx, xsqlc.FindOutboxItemByByKeyParams{
+		IdempotentKey: key,
+		Status:        string(jobqueue.StatusPending),
+	})
+
+	return outboxItemFromSQLCModel(outboxItem), err
+}
+
+func (r *OutboxItemReader) FindByID(ctx context.Context, tx xsqlc.DBTX, id jobqueue.ID) (item jobqueue.OutboxItem, err error) {
+	outboxItem, err := xsqlc.New(tx).FindOutboxItemByID(ctx, id.String())
+	if err != nil {
+		return jobqueue.OutboxItem{}, err
+	}
+	return outboxItemFromSQLCModel(outboxItem), err
 }
 
 type OutboxItemWriter struct{}
@@ -93,6 +123,19 @@ func (r *OutboxItemWriter) UpdateAllStatus(ctx context.Context, tx *gorm.DB, ite
 	return err
 }
 
+func (r *OutboxItemWriter) Update(ctx context.Context, tx xsqlc.DBTX, item jobqueue.OutboxItem) error {
+	err := xsqlc.New(tx).UpdateOutboxItem(ctx, xsqlc.UpdateOutboxItemParams{
+		ID:            item.ID.String(),
+		Status:        string(item.Status),
+		IdempotentKey: string(item.IdempotentKey),
+		JobType:       string(item.JobType),
+		Payload:       string(item.Payload),
+		Version:       int32(item.Version),
+	})
+
+	return err
+}
+
 func outboxItemFromModel(model dbmodel.OutboxItem) jobqueue.OutboxItem {
 	return jobqueue.OutboxItem{
 		ID:            jobqueue.ID(model.ID),
@@ -100,5 +143,29 @@ func outboxItemFromModel(model dbmodel.OutboxItem) jobqueue.OutboxItem {
 		IdempotentKey: jobqueue.IdempotentKey(model.IdempotentKey),
 		Status:        jobqueue.Status(model.Status),
 		Payload:       jobqueue.Payload(model.Payload),
+		Version:       model.Version,
 	}
+}
+
+func outboxItemFromSQLCModel(model xsqlc.OutboxItem) jobqueue.OutboxItem {
+	return jobqueue.OutboxItem{
+		ID:            mustParseID(model.ID),
+		JobType:       jobqueue.JobType(model.JobType),
+		IdempotentKey: jobqueue.IdempotentKey(model.IdempotentKey),
+		Status:        jobqueue.Status(model.Status),
+		Payload:       jobqueue.Payload(model.Payload),
+		Version:       model.Version,
+	}
+}
+
+func mustParseID(id string) jobqueue.ID {
+	return jobqueue.ID(MustParseULID(id))
+}
+
+func MustParseULID(id string) ulids.ULID {
+	ulid, err := ulids.Parse(id)
+	if err != nil {
+		panic(err)
+	}
+	return ulid
 }
