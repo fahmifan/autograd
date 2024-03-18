@@ -49,6 +49,7 @@ type OutboxItem struct {
 	Status        string
 	JobType       string
 	Payload       string
+	Version       int32
 }
 
 type RelUserToActivationToken struct {

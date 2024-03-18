@@ -60,7 +60,8 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	cipherPassword, err := auth.EncryptPassword(password)
+	// the password is a generated, user will have to change it, should be ok?
+	cipherPassword, err := auth.WeakEncryptPassword(password)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "UserManagementCmd: CreateManagedUser: EncryptPassword")
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -72,7 +73,7 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 			return connect.NewError(connect.CodeInternal, errors.New("transaction is invalid"))
 		}
 
-		err = user_management.ManagedUserWriter{}.SaveUserWithPasswordV2(ctx, dbtx, true, newUser, cipherPassword)
+		err = user_management.ManagedUserWriter{}.SaveUserWithPasswordV2(ctx, dbtx, &newUser, cipherPassword)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "UserManagementCmd: CreateManagedUser: SaveUserWithPassword")
 			return connect.NewError(connect.CodeInternal, err)

@@ -19,12 +19,14 @@ import (
 
 type Ctx struct {
 	MediaConfig
+	Debug       bool
 	JWTKey      string
 	SenderEmail string
 	AppLink     string
 	LogoURL     string
 
 	GormDB         *gorm.DB
+	SqlDB          *sql.DB
 	Mailer         mailer.Mailer
 	OutboxEnqueuer OutboxEnqueuer
 }

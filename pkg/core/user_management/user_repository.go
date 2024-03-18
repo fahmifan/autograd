@@ -83,7 +83,7 @@ func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, 
 	return nil
 }
 
-func (ManagedUserWriter) SaveUserWithPasswordV2(ctx context.Context, tx xsqlc.DBTX, new bool, user ManagedUser, password auth.CipherPassword) error {
+func (ManagedUserWriter) SaveUserWithPasswordV2(ctx context.Context, tx xsqlc.DBTX, user *ManagedUser, password auth.CipherPassword) error {
 	active := 0
 	if user.Active {
 		active = 1
@@ -253,11 +253,6 @@ func (ManagedUserReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllMa
 	for i, model := range models {
 		res.Users[i] = managedUserFromModel(model, dbmodel.ActivationToken{})
 	}
-
-	userIDs := lo.Map(models, func(m dbmodel.User, _ int) uuid.UUID {
-		return m.ID
-	})
-	findAllActivationTokenByUserIDs(tx, userIDs)
 
 	pagination.Total = int32(count)
 	res.Pagination = pagination

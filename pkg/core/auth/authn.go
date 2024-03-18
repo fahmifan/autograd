@@ -35,6 +35,12 @@ func EncryptPassword(password string) (CipherPassword, error) {
 	return CipherPassword(bytes), err
 }
 
+// WeakEncryptPassword is to encrypt password with minimum cost
+func WeakEncryptPassword(password string) (CipherPassword, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+	return CipherPassword(bytes), err
+}
+
 func CheckCipherPassword(password string, hash CipherPassword) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/config"
@@ -43,12 +44,14 @@ var _ autogradv1connect.AutogradServiceHandler = &Service{}
 
 func NewService(
 	gormDB *gorm.DB,
+	sqlDB *sql.DB,
 	jwtKey string,
+	debug bool,
 	mediaCfg core.MediaConfig,
 	senderEmail string,
 	mailer mailer.Mailer,
 ) *Service {
-	outboxService := outbox.NewOutboxService(gormDB, config.Debug())
+	outboxService := outbox.NewOutboxService(gormDB, sqlDB, config.Debug())
 
 	coreCtx := &core.Ctx{
 		GormDB:         gormDB,
@@ -59,6 +62,8 @@ func NewService(
 		LogoURL:        config.BaseURL() + "/logo.png",
 		Mailer:         mailer,
 		OutboxEnqueuer: outboxService,
+		SqlDB:          sqlDB,
+		Debug:          debug,
 	}
 
 	return &Service{
@@ -84,8 +89,12 @@ func (service *Service) Ping(ctx context.Context, req *connect.Request[autogradv
 	}, nil
 }
 
-func (service *Service) RunOutboxService(ctx context.Context) error {
-	return service.outboxService.Run(ctx)
+func (service *Service) RunOutboxService() error {
+	return service.outboxService.Run()
+}
+
+func (service *Service) StopOutboxService() {
+	service.outboxService.Stop()
 }
 
 func (service *Service) RegisterJobHandlers() {
@@ -94,5 +103,5 @@ func (service *Service) RegisterJobHandlers() {
 		&student_assignment_cmd.GradeStudentSubmissionHandler{Ctx: service.coreCtx},
 	}
 
-	outbox.RegisterHandlers(service.coreCtx.GormDB, handlers)
+	outbox.RegisterHandlers(service.coreCtx.GormDB, service.coreCtx.SqlDB, service.coreCtx.Debug, handlers)
 }

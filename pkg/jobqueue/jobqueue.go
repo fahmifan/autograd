@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 
 	"github.com/fahmifan/ulids"
 	"gorm.io/gorm"
@@ -49,6 +50,7 @@ type OutboxItem struct {
 	Status        Status
 	JobType       JobType
 	Payload       Payload
+	Version       int32
 }
 
 func NewOutboxItem(id ID, jobType JobType, key IdempotentKey, body Payload) (OutboxItem, error) {
@@ -73,4 +75,36 @@ func NewOutboxItem(id ID, jobType JobType, key IdempotentKey, body Payload) (Out
 	}
 
 	return item, nil
+}
+
+func (item OutboxItem) IsEmpty() bool {
+	return item.ID.String() == EmptyIDStr
+}
+
+type From = Status
+type To = Status
+
+var _statusFSM = map[From][]To{
+	StatusPending: {StatusSent},
+	StatusSent:    {StatusPicked},
+	StatusPicked:  {StatusSuccess, StatusFailed},
+	StatusFailed:  nil,
+	StatusSuccess: nil,
+}
+
+func (item OutboxItem) MoveTo(nextStatus Status) (OutboxItem, error) {
+	if !item.canTransitionTo(nextStatus) {
+		return item, errors.New("invalid status transition")
+	}
+	item.Status = nextStatus
+	return item, nil
+}
+
+func (item OutboxItem) canTransitionTo(nextStatus Status) bool {
+	allowedStatues := _statusFSM[item.Status]
+	if len(allowedStatues) == 0 {
+		return false
+	}
+
+	return slices.Contains(allowedStatues, nextStatus)
 }
