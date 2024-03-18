@@ -89,7 +89,7 @@ func (r *OutboxItemWriter) Create(ctx context.Context, tx *gorm.DB, item jobqueu
 	return err
 }
 
-func (r *OutboxItemWriter) CreateV2(ctx context.Context, tx xsqlc.DBTX, item jobqueue.OutboxItem) error {
+func (r *OutboxItemWriter) CreateV2(ctx context.Context, tx xsqlc.DBTX, item *jobqueue.OutboxItem) error {
 	outboxItem := dbmodel.OutboxItem{
 		ID:            ulids.ULID(item.ID),
 		JobType:       string(item.JobType),
@@ -98,13 +98,15 @@ func (r *OutboxItemWriter) CreateV2(ctx context.Context, tx xsqlc.DBTX, item job
 		Payload:       string(item.Payload),
 	}
 
-	_, err := xsqlc.New(tx).CreateOutboxItem(ctx, xsqlc.CreateOutboxItemParams{
+	res, err := xsqlc.New(tx).CreateOutboxItem(ctx, xsqlc.CreateOutboxItemParams{
 		ID:            outboxItem.ID.String(),
 		IdempotentKey: outboxItem.IdempotentKey,
 		Status:        outboxItem.Status,
 		JobType:       outboxItem.JobType,
 		Payload:       outboxItem.Payload,
 	})
+
+	res.Version = outboxItem.Version
 
 	return err
 }
@@ -123,8 +125,8 @@ func (r *OutboxItemWriter) UpdateAllStatus(ctx context.Context, tx *gorm.DB, ite
 	return err
 }
 
-func (r *OutboxItemWriter) Update(ctx context.Context, tx xsqlc.DBTX, item jobqueue.OutboxItem) error {
-	err := xsqlc.New(tx).UpdateOutboxItem(ctx, xsqlc.UpdateOutboxItemParams{
+func (r *OutboxItemWriter) Update(ctx context.Context, tx xsqlc.DBTX, item *jobqueue.OutboxItem) error {
+	res, err := xsqlc.New(tx).UpdateOutboxItem(ctx, xsqlc.UpdateOutboxItemParams{
 		ID:            item.ID.String(),
 		Status:        string(item.Status),
 		IdempotentKey: string(item.IdempotentKey),
@@ -132,6 +134,8 @@ func (r *OutboxItemWriter) Update(ctx context.Context, tx xsqlc.DBTX, item jobqu
 		Payload:       string(item.Payload),
 		Version:       int32(item.Version),
 	})
+
+	item.Version = res.Version
 
 	return err
 }

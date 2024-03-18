@@ -73,7 +73,7 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 			return connect.NewError(connect.CodeInternal, errors.New("transaction is invalid"))
 		}
 
-		err = user_management.ManagedUserWriter{}.SaveUserWithPasswordV2(ctx, dbtx, true, newUser, cipherPassword)
+		err = user_management.ManagedUserWriter{}.SaveUserWithPasswordV2(ctx, dbtx, &newUser, cipherPassword)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "UserManagementCmd: CreateManagedUser: SaveUserWithPassword")
 			return connect.NewError(connect.CodeInternal, err)

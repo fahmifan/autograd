@@ -1,9 +1,9 @@
 -- name: CreateOutboxItem :one
 INSERT INTO outbox_items (id, idempotent_key, "status", job_type, payload)
 VALUES (@id, @idempotent_key, @status, @job_type, @payload)
-RETURNING id;
+RETURNING id, "version";
 
--- name: UpdateOutboxItem :exec
+-- name: UpdateOutboxItem :one
 UPDATE outbox_items
 SET 
     "status" = @status,
@@ -12,5 +12,7 @@ SET
     payload = @payload,
     "version" = "version" + 1
 WHERE id = @id
+    -- do optimistic locking
+    AND "version" = "version"
     AND "version" = @version
 RETURNING id, "version";

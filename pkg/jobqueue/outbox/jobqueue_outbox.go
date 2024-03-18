@@ -87,7 +87,7 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "new item")
 	}
 
-	err = writer.CreateV2(ctx, dbtx, item)
+	err = writer.CreateV2(ctx, dbtx, &item)
 	if err != nil {
 		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "save item to db")
 	}
@@ -190,6 +190,9 @@ func (svc *OutboxService) run(ctx context.Context, limit int) error {
 	}
 
 	if len(ids) == 0 {
+		if svc.debug {
+			logs.InfoCtx(ctx, "OutboxService: FindAllPendingIDs: empty", fmt.Sprint(ids))
+		}
 		return nil
 	}
 
@@ -200,7 +203,11 @@ func (svc *OutboxService) run(ctx context.Context, limit int) error {
 	delay := 2 * time.Millisecond
 	idChan := make(chan jobqueue.ID, limit)
 	wg := sync.WaitGroup{}
+	// we need minimum worker of 2
 	nworker := runtime.NumCPU()
+	if nworker <= 0 {
+		nworker = 2
+	}
 
 	workerFn := func(wg *sync.WaitGroup, workedID int, idChan <-chan jobqueue.ID) {
 		defer wg.Done()
@@ -249,7 +256,7 @@ func (svc *OutboxService) sendItem(ctx context.Context, workerID int, id jobqueu
 			return logs.ErrWrapCtx(ctx, err, "Run: OutboxService", "move item")
 		}
 
-		err = writer.Update(ctx, tx, item)
+		err = writer.Update(ctx, tx, &item)
 		if err != nil {
 			return logs.ErrWrapCtx(ctx, err, "Run: OutboxService", "update item")
 		}
@@ -314,7 +321,7 @@ func handle(db *gorm.DB, _ *sql.DB, debug bool, handler jobqueue.JobHandler) Han
 				return logs.ErrWrapCtx(ctx, err, "outbox: handle: MoveTo Picked")
 			}
 
-			err = writer.Update(ctx, dbtx, item)
+			err = writer.Update(ctx, dbtx, &item)
 			if err != nil {
 				return logs.ErrWrapCtx(ctx, err, "outbox: handle: Update Picked")
 			}
@@ -325,7 +332,7 @@ func handle(db *gorm.DB, _ *sql.DB, debug bool, handler jobqueue.JobHandler) Han
 					return logs.ErrWrapCtx(ctx, fmt.Errorf("%w: %w", handleErr, err), "outbox: handle: MoveTo Failed")
 				}
 
-				if err = writer.Update(ctx, dbtx, item); err != nil {
+				if err = writer.Update(ctx, dbtx, &item); err != nil {
 					return logs.ErrWrapCtx(ctx, err, "outbox: handle: Update Failed")
 				}
 
@@ -335,6 +342,10 @@ func handle(db *gorm.DB, _ *sql.DB, debug bool, handler jobqueue.JobHandler) Han
 			item, err = item.MoveTo(jobqueue.StatusSuccess)
 			if err != nil {
 				return logs.ErrWrapCtx(ctx, err, "outbox: handle: MoveTo Success")
+			}
+
+			if err = writer.Update(ctx, dbtx, &item); err != nil {
+				return logs.ErrWrapCtx(ctx, err, "outbox: handle: Update Success")
 			}
 
 			return nil

@@ -83,7 +83,7 @@ func (ManagedUserWriter) SaveUserWithPassword(ctx context.Context, tx *gorm.DB, 
 	return nil
 }
 
-func (ManagedUserWriter) SaveUserWithPasswordV2(ctx context.Context, tx xsqlc.DBTX, new bool, user ManagedUser, password auth.CipherPassword) error {
+func (ManagedUserWriter) SaveUserWithPasswordV2(ctx context.Context, tx xsqlc.DBTX, user *ManagedUser, password auth.CipherPassword) error {
 	active := 0
 	if user.Active {
 		active = 1

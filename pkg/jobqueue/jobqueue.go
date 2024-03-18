@@ -102,5 +102,9 @@ func (item OutboxItem) MoveTo(nextStatus Status) (OutboxItem, error) {
 
 func (item OutboxItem) canTransitionTo(nextStatus Status) bool {
 	allowedStatues := _statusFSM[item.Status]
+	if len(allowedStatues) == 0 {
+		return false
+	}
+
 	return slices.Contains(allowedStatues, nextStatus)
 }

@@ -12,7 +12,7 @@ import (
 const createOutboxItem = `-- name: CreateOutboxItem :one
 INSERT INTO outbox_items (id, idempotent_key, "status", job_type, payload)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id
+RETURNING id, "version"
 `
 
 type CreateOutboxItemParams struct {
@@ -23,7 +23,12 @@ type CreateOutboxItemParams struct {
 	Payload       string
 }
 
-func (q *Queries) CreateOutboxItem(ctx context.Context, arg CreateOutboxItemParams) (string, error) {
+type CreateOutboxItemRow struct {
+	ID      string
+	Version int32
+}
+
+func (q *Queries) CreateOutboxItem(ctx context.Context, arg CreateOutboxItemParams) (CreateOutboxItemRow, error) {
 	row := q.db.QueryRowContext(ctx, createOutboxItem,
 		arg.ID,
 		arg.IdempotentKey,
@@ -31,12 +36,12 @@ func (q *Queries) CreateOutboxItem(ctx context.Context, arg CreateOutboxItemPara
 		arg.JobType,
 		arg.Payload,
 	)
-	var id string
-	err := row.Scan(&id)
-	return id, err
+	var i CreateOutboxItemRow
+	err := row.Scan(&i.ID, &i.Version)
+	return i, err
 }
 
-const updateOutboxItem = `-- name: UpdateOutboxItem :exec
+const updateOutboxItem = `-- name: UpdateOutboxItem :one
 UPDATE outbox_items
 SET 
     "status" = $1,
@@ -45,6 +50,8 @@ SET
     payload = $4,
     "version" = "version" + 1
 WHERE id = $5
+    -- do optimistic locking
+    AND "version" = "version"
     AND "version" = $6
 RETURNING id, "version"
 `
@@ -63,8 +70,8 @@ type UpdateOutboxItemRow struct {
 	Version int32
 }
 
-func (q *Queries) UpdateOutboxItem(ctx context.Context, arg UpdateOutboxItemParams) error {
-	_, err := q.db.ExecContext(ctx, updateOutboxItem,
+func (q *Queries) UpdateOutboxItem(ctx context.Context, arg UpdateOutboxItemParams) (UpdateOutboxItemRow, error) {
+	row := q.db.QueryRowContext(ctx, updateOutboxItem,
 		arg.Status,
 		arg.IdempotentKey,
 		arg.JobType,
@@ -72,5 +79,7 @@ func (q *Queries) UpdateOutboxItem(ctx context.Context, arg UpdateOutboxItemPara
 		arg.ID,
 		arg.Version,
 	)
-	return err
+	var i UpdateOutboxItemRow
+	err := row.Scan(&i.ID, &i.Version)
+	return i, err
 }
