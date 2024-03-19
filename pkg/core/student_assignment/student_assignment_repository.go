@@ -32,7 +32,7 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 type StudentAssignmentReader struct{}
 
 type FindAllAssignmentRequest struct {
-	core.PaginationRequest
+	core.Pagination
 	StudentID uuid.UUID
 	From      time.Time
 	To        time.Time

@@ -16,7 +16,7 @@ type UserManagementQuery struct {
 
 func (query *UserManagementQuery) FindAllManagedUsers(
 	ctx context.Context,
-	req *connect.Request[autogradv1.FindAllManagedUsersRequest],
+	req *connect.Request[autogradv1.FindAllPaginationRequest],
 ) (*connect.Response[autogradv1.FindAllManagedUsersResponse], error) {
 	authUser, ok := auth.GetUserFromCtx(ctx)
 	if !ok {
@@ -28,7 +28,7 @@ func (query *UserManagementQuery) FindAllManagedUsers(
 	}
 
 	res, err := user_management.ManagedUserReader{}.FindAll(ctx, query.GormDB, user_management.FindAllManagedUsersRequest{
-		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
+		Pagination: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
 	})
 
 	if err != nil {

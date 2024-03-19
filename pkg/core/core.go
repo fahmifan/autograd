@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -47,7 +48,11 @@ type ObjectStorer interface {
 }
 
 func IsDBNotFoundErr(err error) bool {
-	return errors.Is(err, gorm.ErrRecordNotFound)
+	if ok := errors.Is(err, gorm.ErrRecordNotFound); ok {
+		return ok
+	}
+
+	return errors.Is(err, sql.ErrNoRows)
 }
 
 func Transaction(ctx context.Context, coreCtx *Ctx, fn func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
@@ -113,27 +118,14 @@ func TimestampMetaFromModel(meta dbmodel.Metadata) TimestampMetadata {
 	}
 }
 
-type PaginationRequest struct {
-	Page  int32
-	Limit int32
-}
-
-func PaginationRequestFromProto(p *autogradv1.PaginationRequest) PaginationRequest {
-	return PaginationRequest{
+func PaginationRequestFromProto(p *autogradv1.PaginationRequest) Pagination {
+	return Pagination{
 		Page:  p.GetPage(),
 		Limit: p.GetLimit(),
 	}
 }
 
-func (p PaginationRequest) Offset() int32 {
-	if p.Page <= 1 {
-		return 0
-	}
-
-	return (p.Page - 1) * p.Limit
-}
-
-func (p PaginationRequest) PaginateScope(tx *gorm.DB) *gorm.DB {
+func (p Pagination) PaginateScope(tx *gorm.DB) *gorm.DB {
 	return tx.Limit(int(p.Limit)).Offset(int(p.Offset()))
 }
 
@@ -160,6 +152,11 @@ func (p Pagination) Offset() int32 {
 	return (p.Page - 1) * p.Limit
 }
 
+func (p Pagination) WithTotal(total int32) Pagination {
+	p.Total = total
+	return p
+}
+
 func (p Pagination) TotalPage() int32 {
 	if p.Total < p.Limit {
 		return 1
@@ -178,3 +175,16 @@ var (
 	ErrUnauthenticated  = connect.NewError(connect.CodeUnauthenticated, errors.New("unauthenticated"))
 	ErrPermissionDenied = connect.NewError(connect.CodePermissionDenied, errors.New("unauthorized"))
 )
+
+type CoreError struct {
+	Code connect.Code
+	Msg  string
+}
+
+func NewError(code connect.Code, msg string) CoreError {
+	return CoreError{Code: code, Msg: msg}
+}
+
+func (e CoreError) Error() string {
+	return fmt.Sprintf("code: %s, error: %s", e.Code.String(), e.Msg)
+}

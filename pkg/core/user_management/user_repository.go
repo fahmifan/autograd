@@ -225,7 +225,7 @@ func (ManagedUserReader) FindUserByID(ctx context.Context, tx *gorm.DB, id uuid.
 }
 
 type FindAllManagedUsersRequest struct {
-	core.PaginationRequest
+	core.Pagination
 }
 
 type FindAllManagedUsersResponse struct {

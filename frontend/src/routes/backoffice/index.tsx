@@ -13,6 +13,7 @@ import {
 	loaderListAssignments,
 } from "./assignments/Assignment";
 import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./assignments/Submissions";
+import { PageCourses } from "./courses/PageCourses";
 import {
 	CreateManagedUser,
 	ListManagedUsers,
@@ -63,6 +64,10 @@ export const router: RouteObject[] = [
 				element: <PrivateRoute element={<SubmissionDetail />} />,
 				loader: loaderSubmissionDetail,
 			},
+			{
+				path: "/backoffice/courses",
+				element: <PrivateRoute element={<PageCourses />} />,
+			}
 		]
 	},
 ];
@@ -98,6 +103,10 @@ export default function DashboardLayout() {
 					to: "/backoffice/assignments/create",
 				},
 			],
+		},
+		{
+			label: "Courses",
+			to: "/backoffice/courses"
 		}
 	];
 

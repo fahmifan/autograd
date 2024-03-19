@@ -7,6 +7,8 @@ import (
 	"connectrpc.com/connect"
 	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
+	"github.com/fahmifan/autograd/pkg/core/admin_courses/admin_courses_cmd"
+	"github.com/fahmifan/autograd/pkg/core/admin_courses/admin_courses_query"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_cmd"
 	"github.com/fahmifan/autograd/pkg/core/assignments/assignments_query"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
@@ -36,6 +38,8 @@ type Service struct {
 	*student_assignment_query.StudentAssignmentQuery
 	*student_assignment_cmd.StudentAssignmentCmd
 	*grading_cmd.GradingCmd
+	*admin_courses_query.AdminCoursesQuery
+	*admin_courses_cmd.AdminCoursesCmd
 
 	outboxService *outbox.OutboxService
 }
@@ -78,6 +82,8 @@ func NewService(
 		StudentAssignmentQuery: &student_assignment_query.StudentAssignmentQuery{Ctx: coreCtx},
 		StudentAssignmentCmd:   &student_assignment_cmd.StudentAssignmentCmd{Ctx: coreCtx},
 		GradingCmd:             &grading_cmd.GradingCmd{Ctx: coreCtx},
+		AdminCoursesQuery:      &admin_courses_query.AdminCoursesQuery{Ctx: coreCtx},
+		AdminCoursesCmd:        &admin_courses_cmd.AdminCoursesCmd{Ctx: coreCtx},
 	}
 }
 
