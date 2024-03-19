@@ -32,6 +32,16 @@ type Assignment struct {
 	Template         string
 }
 
+type Course struct {
+	ID          string
+	Name        string
+	Description string
+	IsActive    bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   sql.NullTime
+}
+
 type File struct {
 	ID        string
 	Name      string
@@ -50,6 +60,12 @@ type OutboxItem struct {
 	JobType       string
 	Payload       string
 	Version       int32
+}
+
+type RelCourseUser struct {
+	CourseID string
+	UserID   string
+	UserType string
 }
 
 type RelUserToActivationToken struct {

@@ -54,10 +54,10 @@ func (query *StudentAssignmentQuery) FindAllStudentAssignments(ctx context.Conte
 
 	reader := student_assignment.StudentAssignmentReader{}
 	res, err := reader.FindAllAssignments(ctx, query.GormDB, student_assignment.FindAllAssignmentRequest{
-		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
-		From:              from,
-		To:                to,
-		StudentID:         authUser.UserID,
+		Pagination: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
+		From:       from,
+		To:         to,
+		StudentID:  authUser.UserID,
 	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "StudentAssignmentQuery: FindAllStudentAssignments: FindAllAssignments")

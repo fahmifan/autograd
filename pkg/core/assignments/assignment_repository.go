@@ -107,7 +107,7 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 }
 
 type FindAllAssignmentsRequest struct {
-	core.PaginationRequest
+	core.Pagination
 }
 
 type FindAllAssignmentsResponse struct {

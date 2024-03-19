@@ -34,7 +34,7 @@ func (query *AssignmentsQuery) FindAllAssignments(
 	}
 
 	res, err := assignments.AssignmentReader{}.FindAll(ctx, query.GormDB, assignments.FindAllAssignmentsRequest{
-		PaginationRequest: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
+		Pagination: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
 	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: FindAll")

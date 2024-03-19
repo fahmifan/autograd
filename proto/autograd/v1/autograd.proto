@@ -146,16 +146,16 @@ message FindAllAssignmentsResponse {
     PaginationMetadata pagination_metadata = 2;
 }
 
+message FindAllPaginationRequest {
+    PaginationRequest pagination_request = 1;
+}
+
 message ManagedUser {
     string id = 1;
     string name = 2;
     string email = 3;
     string role = 4;
     TimestampMetadata timestamp_metadata = 5;
-}
-
-message FindAllManagedUsersRequest {
-    PaginationRequest pagination_request = 1;
 }
 
 message FindAllManagedUsersResponse {
@@ -243,13 +243,37 @@ message ActivateManagedUserRequest {
     string password_confirmation = 4;
 }
 
+message FindAllAdminCoursesResponse {
+    message Course {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+        bool active = 4;
+    }
+
+    repeated Course courses = 1;
+    PaginationMetadata pagination_metadata = 2;
+}
+
+message CreateAdminCourseRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message UpdateAdminCourseRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    bool active = 4;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
 
     // User Management
     rpc CreateManagedUser(CreateManagedUserRequest) returns (CreatedResponse) {}
     rpc ActivateManagedUser(ActivateManagedUserRequest) returns (Empty) {}
-    rpc FindAllManagedUsers(FindAllManagedUsersRequest) returns (FindAllManagedUsersResponse) {}
+    rpc FindAllManagedUsers(FindAllPaginationRequest) returns (FindAllManagedUsersResponse) {}
 
     // Assignment Submission
     // Assignment Queries
@@ -264,6 +288,11 @@ service AutogradService {
     rpc CreateSubmission(CreateSubmissionRequest) returns (CreatedResponse) {}
     rpc UpdateSubmission(UpdateSubmissionRequest) returns (Empty) {}
     rpc DeleteSubmission(DeleteByIDRequest) returns (Empty) {}
+
+    // Admin Courses
+    rpc FindAllAdminCourses(FindAllPaginationRequest) returns (FindAllAdminCoursesResponse) {}
+    rpc CreateAdminCourse(CreateAdminCourseRequest) returns (CreatedResponse) {}
+    rpc UpdateAdminCourse(UpdateAdminCourseRequest) returns (Empty) {}
 
     // Student Assignment
     // Student Assignment Queries

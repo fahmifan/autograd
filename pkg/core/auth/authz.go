@@ -53,6 +53,10 @@ const (
 	CreateUser
 
 	CreateMedia
+
+	ViewCourse
+	CreateCourse
+	UpdateCourse
 )
 
 var policy = map[Role]map[Permission]bool{
@@ -70,6 +74,9 @@ var policy = map[Role]map[Permission]bool{
 		CreateAnyUser:            _ok,
 		CreateSubmissionForOther: _ok,
 		CreateMedia:              _ok,
+		ViewCourse:               _ok,
+		CreateCourse:             _ok,
+		UpdateCourse:             _ok,
 	},
 	RoleStudent: {
 		ViewAssignment:   _ok,
@@ -78,6 +85,7 @@ var policy = map[Role]map[Permission]bool{
 		UpdateUser:       _ok,
 		CreateMedia:      _ok,
 		CreateSubmission: _ok,
+		ViewCourse:       _ok,
 	},
 }
 
