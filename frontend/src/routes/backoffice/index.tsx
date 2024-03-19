@@ -3,12 +3,6 @@ import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
 import {
-	CreateManagedUser,
-	ListManagedUsers,
-	actionCreateManagedUser,
-	loaderUserManagement,
-} from "./UserManagement";
-import {
 	CreateAssignment,
 	DetailAssignment,
 	ListAssignments,
@@ -19,6 +13,12 @@ import {
 	loaderListAssignments,
 } from "./assignments/Assignment";
 import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./assignments/Submissions";
+import {
+	CreateManagedUser,
+	ListManagedUsers,
+	actionCreateManagedUser,
+	loaderUserManagement,
+} from "./user_management/UserManagement";
 
 export const router: RouteObject[] = [
 	{
