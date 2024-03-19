@@ -17,8 +17,8 @@ import {
 	useNavigate,
 	useSubmit,
 } from "react-router-dom";
-import { FindAllManagedUsersResponse } from "../../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../../service";
+import { FindAllManagedUsersResponse } from "../../../pb/autograd/v1/autograd_pb";
+import { AutogradServiceClient } from "../../../service";
 
 export function ListManagedUsers() {
 	const { managedUsers, paginationMetadata } =
