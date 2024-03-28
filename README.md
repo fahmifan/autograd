@@ -1,6 +1,6 @@
 # Autograde
 
-Autograd is a web app provide autograd for schools and university programming course.
+Autograd is a web app that provides code autograding for schools and university programming course.
 Currently it supports c++ language only.
 
 ## Installation
