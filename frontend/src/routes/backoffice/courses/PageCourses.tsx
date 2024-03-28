@@ -1,10 +1,9 @@
 import { Box, Button, Flex, Loader, LoadingOverlay, Modal, Pagination, Table, Text, TextInput, Title } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "react-query";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { CreateAdminCourseRequest, FindAllAdminCoursesResponse_Course, PaginationMetadata } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
 
@@ -19,7 +18,6 @@ function useListCourses(arg: {
     error: unknown;
     courses: FindAllAdminCoursesResponse_Course[];
     paginationMetadata: PaginationMetadata;
-    invalidateQueries: () => Promise<void>;
     isEmpty: () => boolean;
 } {
     const queryKeys = ["courses", arg.page, arg.limit]
@@ -50,7 +48,6 @@ function useListCourses(arg: {
         error,
         courses: data?.courses || [],
         paginationMetadata: data?.paginationMetadata || new PaginationMetadata(),
-        invalidateQueries,
         isEmpty,
     }
 }
@@ -105,21 +102,21 @@ function useCreateCourse(arg: {
 export function PageCourses() {
     const [overlayVisible, overlayMethod] = useDisclosure(false);
 
-    const navigate = useNavigate()
     const queryClient = useQueryClient()
     const [modalOpen, modalMethod] = useDisclosure(false);
 
-
+    const [searchParams] = useSearchParams()
+    const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
+    const limit = parseInt(searchParams.get('limit') || '10')
     const hookListCourses = useListCourses({
         queryClient,
-        page: 1,
-        limit: 10,
+        page,
+        limit,
     })
 
     const hookCreateCourse = useCreateCourse({
         queryClient,
-        onSuccess: ({ id }) => {
-            console.log("Course success", id)
+        onSuccess: () => {
             overlayMethod.toggle()
             modalMethod.close()
         },
@@ -218,11 +215,8 @@ export function PageCourses() {
         <Pagination
             mb="lg"
             total={hookListCourses.paginationMetadata?.totalPage as number}
-            onChange={(page) => {
-                navigate(
-                    `/backoffice/user-management?page=${page}&limit=${hookListCourses.paginationMetadata?.limit}`,
-                );
-            }}
+            value={page}
+            onChange={setPage}
             siblings={1}
             boundaries={2}
         />
