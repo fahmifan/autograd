@@ -12,6 +12,7 @@ import (
 	"github.com/rs/xid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	sqldblogger "github.com/simukti/sqldb-logger"
 )
 
 const RequestIDHeaderKey string = "X-Request-ID"
@@ -127,4 +128,24 @@ func Info(label string, msg ...string) {
 
 func Warn(label string, msg ...string) {
 	log.Warn().Str("label", label).Msg(strings.Join(msg, ". "))
+}
+
+type SQLLogger struct{}
+
+func (l SQLLogger) Log(ctx context.Context, level sqldblogger.Level, msg string, data map[string]any) {
+	logger := zerolog.
+		New(os.Stdout).
+		With().
+		Fields(data).
+		Str(string(RequestIDHeaderKey), GetRequestID(ctx)).
+		Logger()
+
+	switch level {
+	case sqldblogger.LevelError:
+		logger.WithLevel(zerolog.ErrorLevel).Msg(msg)
+	case sqldblogger.LevelInfo:
+		logger.WithLevel(zerolog.InfoLevel).Msg(msg)
+	case sqldblogger.LevelDebug:
+		logger.WithLevel(zerolog.DebugLevel).Msg(msg)
+	}
 }
