@@ -143,8 +143,15 @@ message FindAllAssignmentsRequest {
 }
 
 message FindAllAssignmentsResponse {
+    message Course {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+    }
+
     repeated Assignment assignments = 1;
     PaginationMetadata pagination_metadata = 2;
+    Course course = 3;
 }
 
 message FindAllPaginationRequest {

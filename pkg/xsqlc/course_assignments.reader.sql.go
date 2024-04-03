@@ -58,3 +58,20 @@ func (q *Queries) FindAllAssignmentsByCourseID(ctx context.Context, arg FindAllA
 	}
 	return items, nil
 }
+
+const findCourseDetailForAssignmentByCourseID = `-- name: FindCourseDetailForAssignmentByCourseID :one
+SELECT id, "name", "description" FROM courses WHERE id = $1
+`
+
+type FindCourseDetailForAssignmentByCourseIDRow struct {
+	ID          string
+	Name        string
+	Description string
+}
+
+func (q *Queries) FindCourseDetailForAssignmentByCourseID(ctx context.Context, id string) (FindCourseDetailForAssignmentByCourseIDRow, error) {
+	row := q.db.QueryRowContext(ctx, findCourseDetailForAssignmentByCourseID, id)
+	var i FindCourseDetailForAssignmentByCourseIDRow
+	err := row.Scan(&i.ID, &i.Name, &i.Description)
+	return i, err
+}

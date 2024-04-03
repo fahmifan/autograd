@@ -2,7 +2,6 @@ package user_management_cmd
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"connectrpc.com/connect"
@@ -68,9 +67,9 @@ func (cmd *UserManagementCmd) CreateManagedUser(
 	}
 
 	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
-		dbtx, ok := dbconn.DBTxFromGorm(tx)
-		if !ok {
-			return connect.NewError(connect.CodeInternal, errors.New("transaction is invalid"))
+		dbtx, err := dbconn.DBTxFromGorm(tx)
+		if err != nil {
+			return connect.NewError(connect.CodeInternal, err)
 		}
 
 		err = user_management.ManagedUserWriter{}.SaveUserWithPasswordV2(ctx, dbtx, &newUser, cipherPassword)

@@ -1,4 +1,4 @@
-import { ActionIcon, Anchor, Breadcrumbs, Button, Card, FileInput, Flex, Input, Stack, Text, TextInput, Title, Tooltip, VisuallyHidden, rem } from "@mantine/core";
+import { ActionIcon, Anchor, Button, Card, FileInput, Flex, Input, Stack, Text, TextInput, Title, Tooltip, VisuallyHidden, rem } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { Editor } from "@monaco-editor/react";
@@ -6,6 +6,7 @@ import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useMutation } from "react-query";
 import { ActionFunctionArgs, Form, Link, LoaderFunctionArgs, redirect, useLoaderData, useSearchParams, useSubmit } from "react-router-dom";
+import { Breadcrumbs } from "../../../components/Breadcrumbs";
 import { Assignment } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
 import { MarkdownEditor } from "./Assignment";
@@ -58,20 +59,14 @@ export function DetailAssignment() {
 
 	const items = [
 		{ title: "Course Assignments", to: `/backoffice/courses/detail?courseID=${courseID}` },
-		{ title: res.name, to: `/backoffice/assignments/detail?id=${res.id}` },
-	].map((item) => {
-		return (
-			<Anchor key={item.to} component={Link} to={item.to}>
-				{item.title}
-			</Anchor>
-		);
-	});
+		{ title: res.name, to: `/backoffice/courses/assignments/detail?courseID=${courseID}&id=${res.id}` },
+	]
 
 	return (
 		<>
-			<Breadcrumbs mb="lg">{items}</Breadcrumbs>
+			<Breadcrumbs items={items} />
 
-			<Flex direction="row" justify="space-between">
+			<Flex mt="lg" direction="row" justify="space-between">
 				<Title order={3} mb="lg">
 					{res.name}
 				</Title>

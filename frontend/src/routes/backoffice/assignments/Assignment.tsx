@@ -37,14 +37,11 @@ import {
 	ActionFunctionArgs,
 	Form,
 	Link,
-	LoaderFunctionArgs,
 	redirect,
 	useLoaderData,
-	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
 import {
-	Assignment,
 	FindAllAssignmentsResponse,
 } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
@@ -89,7 +86,7 @@ export function ListAssignments() {
 									<Flex direction="row">
 										<Anchor
 												component={Link}
-												to={`/backoffice/assignments/detail?id=${assignment.id}`}
+												to={`/backoffice/courses/assignments/detail?id=${assignment.id}`}
 												size="sm"
 												mr="sm"
 											>
@@ -99,7 +96,7 @@ export function ListAssignments() {
 											</Anchor>
 										<Anchor
 											component={Link}
-											to={`/backoffice/assignments/submissions?assignmentID=${assignment.id}`}
+											to={`/backoffice/courses/assignments/submissions?assignmentID=${assignment.id}`}
 											size="sm"
 											mr="sm"
 										>

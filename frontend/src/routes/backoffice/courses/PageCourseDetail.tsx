@@ -1,9 +1,11 @@
 import {
 	ActionIcon,
 	Anchor,
+	Button,
 	Flex,
 	Pagination,
 	Table,
+	Text,
 	Title,
 	Tooltip,
 	VisuallyHidden,
@@ -18,6 +20,7 @@ import {
 	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
+import { Breadcrumbs } from "../../../components/Breadcrumbs";
 import {
 	FindAllAssignmentsResponse,
     PaginationMetadata,
@@ -70,21 +73,31 @@ export function PageCourseDetail() {
 	const { res } = hookListAssignment;
 	const submit = useSubmit();
 
+	const items = [
+		{ title: "Courses", to: "/backoffice/courses" },
+		{ title: res?.course?.name ?? '', to: `/backoffice/courses/detail?courseID=${courseID}` },
+	]
+
 	if (!res || res.assignments.length === 0) {
 		return (
 			<>
-				<p>
+				<Breadcrumbs items={items} />
+
+				<Text mt="lg">
 					<i>No Assignments</i>
-				</p>
+				</Text>
 			</>
 		);
 	}
 
 	return (
 		<section>
-			<Title order={2} mb="lg">
-				Course Assignments
-			</Title>
+			<Breadcrumbs items={items} />
+			<Title order={3} mt="lg">Assignments</Title>
+			<Link to={`/backoffice/courses/assignments/new?courseID=${courseID}`}>
+				<Button size="compact-md" my="lg">Create</Button>
+			</Link>
+
 			<Table striped highlightOnHover maw={800} mb="lg">
 				<Table.Thead>
 					<Table.Tr>
@@ -106,7 +119,7 @@ export function PageCourseDetail() {
 									<Flex direction="row">
 										<Anchor
 												component={Link}
-												to={`/backoffice/assignments/detail?courseID=${courseID}&id=${assignment.id}`}
+												to={`/backoffice/courses/assignments/detail?courseID=${courseID}&id=${assignment.id}`}
 												size="sm"
 												mr="sm"
 											>
@@ -116,7 +129,7 @@ export function PageCourseDetail() {
 											</Anchor>
 										<Anchor
 											component={Link}
-											to={`/backoffice/assignments/submissions?assignmentID=${assignment.id}`}
+											to={`/backoffice/courses/assignments/submissions?courseID=${courseID}&assignmentID=${assignment.id}`}
 											size="sm"
 											mr="sm"
 										>

@@ -5,3 +5,6 @@ SELECT * FROM assignments WHERE id IN (
 ORDER BY updated_at DESC
 LIMIT @page_limit
 OFFSET @page_offset;
+
+-- name: FindCourseDetailForAssignmentByCourseID :one
+SELECT id, "name", "description" FROM courses WHERE id = @id;

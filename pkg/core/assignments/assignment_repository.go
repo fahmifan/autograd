@@ -3,7 +3,6 @@ package assignments
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/dbconn"
@@ -122,9 +121,9 @@ type FindAllAssignmentsResponse struct {
 }
 
 func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAssignmentsRequest) (FindAllAssignmentsResponse, error) {
-	sqldb, ok := dbconn.DBTxFromGorm(tx)
-	if !ok {
-		return FindAllAssignmentsResponse{}, logs.ErrWrapCtx(ctx, fmt.Errorf("failed cast dbtx"), "AssignmentReader: FindAll: cast dbtx")
+	sqldb, err := dbconn.DBTxFromGorm(tx)
+	if err != nil {
+		return FindAllAssignmentsResponse{}, logs.ErrWrapCtx(ctx, err, "AssignmentReader: FindAll: cast dbtx")
 	}
 
 	query := xsqlc.New(sqldb)

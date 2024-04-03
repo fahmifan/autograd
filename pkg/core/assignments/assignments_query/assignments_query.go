@@ -10,9 +10,11 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/assignments"
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_query"
+	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
+	"github.com/fahmifan/autograd/pkg/xsqlc"
 	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
 )
@@ -45,13 +47,34 @@ func (query *AssignmentsQuery) FindAllAssignments(
 	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: FindAll")
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, core.ErrInternalServer
+	}
+
+	sqldb, err := dbconn.DBTxFromGorm(query.GormDB)
+	if err != nil {
+		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: DBTxFromGorm")
+		return nil, core.ErrInternalServer
+	}
+
+	sqlcQuery := xsqlc.New(sqldb)
+
+	course, err := sqlcQuery.FindCourseDetailForAssignmentByCourseID(ctx, courseID.String())
+	if core.IsDBNotFoundErr(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+	if err != nil {
+		return nil, core.ErrInternalServer
 	}
 
 	return &connect.Response[autogradv1.FindAllAssignmentsResponse]{
 		Msg: &autogradv1.FindAllAssignmentsResponse{
 			Assignments:        toAssignmentProtos(res.Assignments),
 			PaginationMetadata: res.ProtoPagination(),
+			Course: &autogradv1.FindAllAssignmentsResponse_Course{
+				Id:          course.ID,
+				Name:        course.Name,
+				Description: course.Description,
+			},
 		},
 	}, nil
 }

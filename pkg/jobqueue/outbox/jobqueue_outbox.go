@@ -65,9 +65,9 @@ func (svc *OutboxService) Enqueue(ctx context.Context, tx *gorm.DB, req EnqueueR
 	reader := OutboxItemReader{}
 	writer := OutboxItemWriter{}
 
-	dbtx, ok := dbconn.DBTxFromGorm(tx)
-	if !ok {
-		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, errors.New("transaction is invalid"), "OutboxService: Enqueue", "get dbtx")
+	dbtx, err := dbconn.DBTxFromGorm(tx)
+	if err != nil {
+		return jobqueue.OutboxItem{}, logs.ErrWrapCtx(ctx, err, "OutboxService: Enqueue", "get dbtx")
 	}
 
 	if req.IdempotentKey != "" {
@@ -311,9 +311,9 @@ func handle(db *gorm.DB, _ *sql.DB, debug bool, handler jobqueue.JobHandler) Han
 		}
 
 		err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) (err error) {
-			dbtx, ok := dbconn.DBTxFromGorm(tx)
-			if !ok {
-				return logs.ErrWrapCtx(ctx, errors.New("transaction is invalid"), "outbox: handle: Get dbtx")
+			dbtx, err := dbconn.DBTxFromGorm(tx)
+			if err != nil {
+				return logs.ErrWrapCtx(ctx, err, "outbox: handle: Get dbtx")
 			}
 
 			item, err = item.MoveTo(jobqueue.StatusPicked)

@@ -3,6 +3,7 @@ package dbconn
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/fahmifan/autograd/pkg/logs"
@@ -30,13 +31,17 @@ func MustPostgres() *gorm.DB {
 	return db
 }
 
-func DBTxFromGorm(tx *gorm.DB) (xsqlc.DBTX, bool) {
+func DBTxFromGorm(tx *gorm.DB) (xsqlc.DBTX, error) {
 	dbtx, ok := tx.Statement.ConnPool.(*sql.Tx)
 	if !ok {
 		db, ok := tx.Statement.ConnPool.(*sql.DB)
-		return db, ok
+		if !ok {
+			return nil, errors.New("cast to *sql.DB")
+		}
+		return db, nil
 	}
-	return dbtx, ok
+
+	return dbtx, nil
 }
 
 func SqlcTransaction(ctx context.Context, db *sql.DB, fn func(xsqlc.DBTX) error) error {

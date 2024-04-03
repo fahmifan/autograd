@@ -45,29 +45,29 @@ export const router: RouteObject[] = [
 				element: <PrivateRoute element={<PageCourseDetail />} />,
 			},
 			{
-				path: "/backoffice/assignments",
+				path: "/backoffice/courses/assignments",
 				element: <PrivateRoute element={<ListAssignments />} />,
 				loader: loaderListAssignments,
 				action: actionDeleteAssignment,
 			},
 			{
-				path: "/backoffice/assignments/create",
+				path: "/backoffice/courses/assignments/new",
 				element: <PrivateRoute element={<CreateAssignment />} />,
 				action: actionCreateAssignemnt,
 			},
 			{
-				path: "/backoffice/assignments/detail",
+				path: "/backoffice/courses/assignments/detail",
 				element: <PrivateRoute element={<DetailAssignment />} />,
 				loader: loadEditAssignment,
 				action: actionDetailAssignment,
 			},
 			{
-				path: "/backoffice/assignments/submissions",
+				path: "/backoffice/courses/assignments/submissions",
 				element: <PrivateRoute element={<ListSubmissions />} />,
 				loader: loaderListSubmissions,
 			},
 			{
-				path: "/backoffice/assignments/submissions/detail",
+				path: "/backoffice/courses/assignments/submissions/detail",
 				element: <PrivateRoute element={<SubmissionDetail />} />,
 				loader: loaderSubmissionDetail,
 			}
@@ -99,15 +99,15 @@ export default function DashboardLayout() {
 		},
 		{
 			label: "Assignment Submission",
-			to: "/backoffice/assignments",
+			to: "/backoffice/courses/assignments",
 			children: [
 				{
 					label: "List Assignments",
-					to: "/backoffice/assignments",
+					to: "/backoffice/courses/assignments",
 				},
 				{
 					label: "Create Assignment",
-					to: "/backoffice/assignments/create",
+					to: "/backoffice/courses/assignments/create",
 				},
 			],
 		}
