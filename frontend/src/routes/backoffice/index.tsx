@@ -4,15 +4,14 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
 import {
 	CreateAssignment,
-	DetailAssignment,
 	ListAssignments,
 	actionCreateAssignemnt,
-	actionDetailAssignment,
-	actionListAssignments,
-	loadEditAssignment,
+	actionDeleteAssignment,
 	loaderListAssignments,
 } from "./assignments/Assignment";
+import { DetailAssignment, actionDetailAssignment, loadEditAssignment } from "./assignments/DetailAssignment";
 import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./assignments/Submissions";
+import { PageCourseDetail } from "./courses/PageCourseDetail";
 import { PageCourses } from "./courses/PageCourses";
 import {
 	CreateManagedUser,
@@ -38,10 +37,18 @@ export const router: RouteObject[] = [
 				action: actionCreateManagedUser,
 			},
 			{
+				path: "/backoffice/courses",
+				element: <PrivateRoute element={<PageCourses />} />,
+			},
+			{
+				path: "/backoffice/courses/detail",
+				element: <PrivateRoute element={<PageCourseDetail />} />,
+			},
+			{
 				path: "/backoffice/assignments",
 				element: <PrivateRoute element={<ListAssignments />} />,
 				loader: loaderListAssignments,
-				action: actionListAssignments,
+				action: actionDeleteAssignment,
 			},
 			{
 				path: "/backoffice/assignments/create",
@@ -63,10 +70,6 @@ export const router: RouteObject[] = [
 				path: "/backoffice/assignments/submissions/detail",
 				element: <PrivateRoute element={<SubmissionDetail />} />,
 				loader: loaderSubmissionDetail,
-			},
-			{
-				path: "/backoffice/courses",
-				element: <PrivateRoute element={<PageCourses />} />,
 			}
 		]
 	},
@@ -91,6 +94,10 @@ export default function DashboardLayout() {
 			],
 		},
 		{
+			label: "Courses",
+			to: "/backoffice/courses"
+		},
+		{
 			label: "Assignment Submission",
 			to: "/backoffice/assignments",
 			children: [
@@ -103,10 +110,6 @@ export default function DashboardLayout() {
 					to: "/backoffice/assignments/create",
 				},
 			],
-		},
-		{
-			label: "Courses",
-			to: "/backoffice/courses"
 		}
 	];
 

@@ -3,9 +3,14 @@ package assignments
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/fahmifan/autograd/pkg/core"
+	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
+	"github.com/fahmifan/autograd/pkg/logs"
+	"github.com/fahmifan/autograd/pkg/xsqlc"
+	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"gopkg.in/guregu/null.v4"
@@ -108,6 +113,7 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 
 type FindAllAssignmentsRequest struct {
 	core.Pagination
+	CourseID ulids.ULID
 }
 
 type FindAllAssignmentsResponse struct {
@@ -116,14 +122,20 @@ type FindAllAssignmentsResponse struct {
 }
 
 func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAssignmentsRequest) (FindAllAssignmentsResponse, error) {
-	assignments := []dbmodel.Assignment{}
-	err := tx.Table("assignments").
-		Limit(int(req.Limit)).
-		Offset(int(req.Offset())).
-		Find(&assignments).Error
+	sqldb, ok := dbconn.DBTxFromGorm(tx)
+	if !ok {
+		return FindAllAssignmentsResponse{}, logs.ErrWrapCtx(ctx, fmt.Errorf("failed cast dbtx"), "AssignmentReader: FindAll: cast dbtx")
+	}
 
+	query := xsqlc.New(sqldb)
+
+	assignments, err := query.FindAllAssignmentsByCourseID(ctx, xsqlc.FindAllAssignmentsByCourseIDParams{
+		CourseID:   req.CourseID.String(),
+		PageOffset: req.Offset(),
+		PageLimit:  req.Limit,
+	})
 	if err != nil {
-		return FindAllAssignmentsResponse{}, err
+		return FindAllAssignmentsResponse{}, logs.ErrWrapCtx(ctx, err, "AssignmentReader: FindAll: query")
 	}
 
 	count := int64(0)
@@ -132,7 +144,7 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		return FindAllAssignmentsResponse{}, err
 	}
 
-	userIDs := []uuid.UUID{}
+	userIDs := []string{}
 	for _, assignment := range assignments {
 		userIDs = append(userIDs, assignment.AssignedBy)
 	}
@@ -143,12 +155,12 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		return FindAllAssignmentsResponse{}, err
 	}
 
-	userMap := make(map[uuid.UUID]dbmodel.User, len(users))
+	userMap := make(map[string]dbmodel.User, len(users))
 	for _, user := range users {
-		userMap[user.ID] = user
+		userMap[user.ID.String()] = user
 	}
 
-	fileIDs := []uuid.UUID{}
+	fileIDs := []string{}
 	for _, assignment := range assignments {
 		fileIDs = append(fileIDs, assignment.CaseInputFileID, assignment.CaseOutputFileID)
 	}
@@ -159,9 +171,9 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		return FindAllAssignmentsResponse{}, err
 	}
 
-	fileMap := make(map[uuid.UUID]dbmodel.File, len(files))
+	fileMap := make(map[string]dbmodel.File, len(files))
 	for _, file := range files {
-		fileMap[file.ID] = file
+		fileMap[file.ID.String()] = file
 	}
 
 	result := FindAllAssignmentsResponse{
@@ -178,7 +190,22 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		fileInput := fileMap[assignment.CaseInputFileID]
 		fileOutput := fileMap[assignment.CaseOutputFileID]
 
-		asg := toAssignment(assignment, user, fileInput, fileOutput)
+		asg := toAssignment(dbmodel.Assignment{
+			Base: dbmodel.Base{
+				ID: uuid.MustParse(assignment.ID),
+				Metadata: dbmodel.Metadata{
+					CreatedAt: null.TimeFrom(assignment.CreatedAt),
+					UpdatedAt: null.TimeFrom(assignment.UpdatedAt),
+				},
+			},
+			AssignedBy:       uuid.MustParse(assignment.AssignedBy),
+			Name:             assignment.Name,
+			Description:      assignment.Description,
+			Template:         assignment.Template,
+			CaseInputFileID:  uuid.MustParse(assignment.CaseInputFileID),
+			CaseOutputFileID: uuid.MustParse(assignment.CaseOutputFileID),
+			DeadlineAt:       assignment.DeadlineAt,
+		}, user, fileInput, fileOutput)
 		result.Assignments[i] = asg
 	}
 

@@ -52,7 +52,7 @@ func mustInitService() *service.Service {
 
 	mailer, err := smtp.NewSmtpClient(&smtpConfig)
 	if err != nil {
-		log.Fatal("init mailer failed:", err)
+		logs.Err(err, "init mailer failed:")
 	}
 
 	sqlDB, err := gormDB.DB()

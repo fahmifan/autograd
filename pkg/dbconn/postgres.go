@@ -32,6 +32,10 @@ func MustPostgres() *gorm.DB {
 
 func DBTxFromGorm(tx *gorm.DB) (xsqlc.DBTX, bool) {
 	dbtx, ok := tx.Statement.ConnPool.(*sql.Tx)
+	if !ok {
+		db, ok := tx.Statement.ConnPool.(*sql.DB)
+		return db, ok
+	}
 	return dbtx, ok
 }
 

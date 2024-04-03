@@ -1,9 +1,9 @@
-import { Box, Button, Flex, Loader, LoadingOverlay, Modal, Pagination, Table, Text, TextInput, Title } from "@mantine/core";
+import { Box, Button, Card, Flex, Grid, Loader, LoadingOverlay, Modal, Pagination, Table, Text, TextInput, Title } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "react-query";
-import { useSearchParams } from "react-router-dom";
+import { redirect, useNavigate, useSearchParams } from "react-router-dom";
 import { CreateAdminCourseRequest, FindAllAdminCoursesResponse_Course, PaginationMetadata } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
 
@@ -33,10 +33,6 @@ function useListCourses(arg: {
             })
         },
     })
-
-    async function invalidateQueries(): Promise<void> {
-        return arg.queryClient.invalidateQueries(queryKeys)
-    }
 
     function isEmpty(): boolean {
         return !data || !data.courses || data?.courses.length === 0
@@ -104,6 +100,7 @@ export function PageCourses() {
 
     const queryClient = useQueryClient()
     const [modalOpen, modalMethod] = useDisclosure(false);
+    const navigate = useNavigate();
 
     const [searchParams] = useSearchParams()
     const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
@@ -190,27 +187,32 @@ export function PageCourses() {
             <LoadingOverlay visible={overlayVisible} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
         </Box>
 
-        <Table striped highlightOnHover mb="lg" maw={700}>
-            <Table.Thead>
-                <Table.Tr>
-                    <Table.Th>Name</Table.Th>
-                    <Table.Th>Description</Table.Th>
-                    <Table.Th>Active</Table.Th>
-                </Table.Tr>
-            </Table.Thead>
-
-            <Table.Tbody>
-                {hookListCourses.courses.map((course) => {
-                    return (
-                        <Table.Tr key={course.id}>
-                            <Table.Td>{course.name}</Table.Td>
-                            <Table.Td>{course.description}</Table.Td>
-                            <Table.Td>{course.active}</Table.Td>
-                        </Table.Tr>
-                    );
-                })}
-            </Table.Tbody>
-        </Table>
+        <Grid>
+            {
+                hookListCourses.courses.map((course) => {
+                    return <Grid.Col span={4} key={course.id}>
+                        <Card
+                            shadow="sm"
+                            p="xl"
+                            component="a"
+                            target="_blank"
+                            m="md"
+                            style={{
+                                '&:hover': {
+                                    cursor: 'pointer'
+                                }
+                            }}
+                            onClick={(e) => {
+                                navigate(`/backoffice/courses/detail?courseID=${course.id}`)
+                            }}
+                        >
+                            <Text fw={500} size="xl" mt="md">{course.name}</Text>
+                            <Text mt="xs" c="dimmed" size="sm">{course.description}</Text>
+                        </Card>
+                    </Grid.Col>
+                })
+            }
+        </Grid>
 
         <Pagination
             mb="lg"

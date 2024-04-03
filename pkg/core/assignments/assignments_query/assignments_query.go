@@ -13,6 +13,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
+	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
 )
 
@@ -33,8 +34,14 @@ func (query *AssignmentsQuery) FindAllAssignments(
 		return nil, core.ErrPermissionDenied
 	}
 
+	courseID, err := ulids.Parse(req.Msg.GetCourseId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
 	res, err := assignments.AssignmentReader{}.FindAll(ctx, query.GormDB, assignments.FindAllAssignmentsRequest{
 		Pagination: core.PaginationRequestFromProto(req.Msg.GetPaginationRequest()),
+		CourseID:   courseID,
 	})
 	if err != nil {
 		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: FindAll")

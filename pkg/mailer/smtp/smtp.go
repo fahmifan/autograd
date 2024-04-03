@@ -3,6 +3,7 @@ package smtp
 import (
 	"context"
 	_ "embed"
+	"errors"
 
 	"github.com/fahmifan/autograd/pkg/mailer"
 	"gopkg.in/gomail.v2"
@@ -41,6 +42,10 @@ func NewSmtpClient(cfg *Config) (smtp *SMTP, err error) {
 }
 
 func (m *SMTP) Send(ctx context.Context, email mailer.Email) (err error) {
+	if m == nil {
+		return errors.New("nil smpt instance")
+	}
+
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", email.From)
 	msg.SetHeader("To", email.To)

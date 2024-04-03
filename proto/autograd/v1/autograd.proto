@@ -139,6 +139,7 @@ message LoginResponse {
 
 message FindAllAssignmentsRequest {
     PaginationRequest pagination_request = 1;
+    string course_id = 2;
 }
 
 message FindAllAssignmentsResponse {

@@ -62,6 +62,11 @@ type OutboxItem struct {
 	Version       int32
 }
 
+type RelAssignmentToCourse struct {
+	CourseID     string
+	AssignmentID string
+}
+
 type RelCourseUser struct {
 	CourseID string
 	UserID   string
