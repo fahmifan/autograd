@@ -77,6 +77,12 @@ message Assigner {
 }
 
 message Assignment {
+    message Course {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+    }
+
     string id = 1;
     string name = 2;
     string description = 3;
@@ -86,6 +92,7 @@ message Assignment {
     string deadline_at = 7;
     TimestampMetadata timestamp_metadata = 8;
     string template = 9;
+    Course course = 10;
 }
 
 message Submission {
@@ -114,6 +121,7 @@ message CreateAssignmentRequest {
     string case_output_file_id = 4;
     string deadline_at = 5;
     string template = 6;
+    string course_id = 7;
 }
 
 message CreateSubmissionRequest {
@@ -149,6 +157,15 @@ message FindAllAssignmentsResponse {
         string description = 3;
     }
 
+    message Assignment {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+        Assigner assigner = 4;
+        string deadline_at = 7;
+        TimestampMetadata timestamp_metadata = 8;
+    }
+
     repeated Assignment assignments = 1;
     PaginationMetadata pagination_metadata = 2;
     Course course = 3;
@@ -182,6 +199,12 @@ message FindAllSubmissionsForAssignmentResponse {
     string assignment_name = 3;
     string assigner_id = 4;
     string assigner_name = 5;
+    Course course = 6;
+
+    message Course {
+        string id = 1;
+        string name = 2;
+    }
 
     message Submission {
         string id = 1;

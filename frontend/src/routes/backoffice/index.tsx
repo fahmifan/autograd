@@ -1,18 +1,12 @@
-import { AppShell, Box, Button, Container, Flex, NavLink, Text } from "@mantine/core";
+import { AppShell, Button, Container, Flex, NavLink, Text } from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
-import {
-	CreateAssignment,
-	ListAssignments,
-	actionCreateAssignemnt,
-	actionDeleteAssignment,
-	loaderListAssignments,
-} from "./assignments/Assignment";
-import { DetailAssignment, actionDetailAssignment, loadEditAssignment } from "./assignments/DetailAssignment";
-import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./assignments/Submissions";
-import { PageCourseDetail } from "./courses/PageCourseDetail";
+import { PageCourseDetail, actionDeleteAssignment } from "./courses/PageCourseDetail";
 import { PageCourses } from "./courses/PageCourses";
+import { NewAssignment, actionCreateAssignemnt } from "./courses/assignments/CreateAssignment";
+import { DetailAssignment, actionDetailAssignment, loadEditAssignment } from "./courses/assignments/DetailAssignment";
+import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./courses/assignments/Submissions";
 import {
 	CreateManagedUser,
 	ListManagedUsers,
@@ -43,16 +37,11 @@ export const router: RouteObject[] = [
 			{
 				path: "/backoffice/courses/detail",
 				element: <PrivateRoute element={<PageCourseDetail />} />,
-			},
-			{
-				path: "/backoffice/courses/assignments",
-				element: <PrivateRoute element={<ListAssignments />} />,
-				loader: loaderListAssignments,
 				action: actionDeleteAssignment,
 			},
 			{
 				path: "/backoffice/courses/assignments/new",
-				element: <PrivateRoute element={<CreateAssignment />} />,
+				element: <PrivateRoute element={<NewAssignment />} />,
 				action: actionCreateAssignemnt,
 			},
 			{
@@ -97,20 +86,20 @@ export default function DashboardLayout() {
 			label: "Courses",
 			to: "/backoffice/courses"
 		},
-		{
-			label: "Assignment Submission",
-			to: "/backoffice/courses/assignments",
-			children: [
-				{
-					label: "List Assignments",
-					to: "/backoffice/courses/assignments",
-				},
-				{
-					label: "Create Assignment",
-					to: "/backoffice/courses/assignments/create",
-				},
-			],
-		}
+		// {
+		// 	label: "Assignment Submission",
+		// 	to: "/backoffice/courses/assignments",
+		// 	children: [
+		// 		{
+		// 			label: "List Assignments",
+		// 			to: "/backoffice/courses/assignments",
+		// 		},
+		// 		{
+		// 			label: "Create Assignment",
+		// 			to: "/backoffice/courses/assignments/create",
+		// 		},
+		// 	],
+		// }
 	];
 
 	function navItemActive(path: string): boolean {

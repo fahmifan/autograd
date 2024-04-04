@@ -3,6 +3,7 @@ package assignments
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/dbconn"
@@ -18,79 +19,77 @@ import (
 
 type AssignmentWriter struct{}
 
-func (AssignmentWriter) Create(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
-	model := dbmodel.Assignment{
-		Base: dbmodel.Base{
-			ID: assignment.ID,
-		},
-		AssignedBy:       assignment.Assigner.ID,
-		Name:             assignment.Name,
-		Description:      assignment.Description,
-		CaseInputFileID:  assignment.CaseInputFile.ID,
-		CaseOutputFileID: assignment.CaseOutputFile.ID,
-		DeadlineAt:       assignment.DeadlineAt,
-		Template:         assignment.Template,
+func (AssignmentWriter) Save(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
+	query, err := dbconn.NewSqlcFromGorm(tx)
+	if err != nil {
+		return logs.ErrWrapCtx(ctx, err, "NewSqlcFromGorm")
 	}
 
-	return tx.Table("assignments").Create(&model).Error
+	err = query.SaveAssignment(ctx, xsqlc.SaveAssignmentParams{
+		ID:               assignment.ID.String(),
+		AssignedBy:       assignment.Assigner.ID.String(),
+		Name:             assignment.Name,
+		Description:      assignment.Description,
+		CaseInputFileID:  assignment.CaseInputFile.ID.String(),
+		CaseOutputFileID: assignment.CaseOutputFile.ID.String(),
+		Template:         assignment.Template,
+		DeadlineAt:       assignment.DeadlineAt,
+		CreatedAt:        assignment.CreatedAt,
+		UpdatedAt:        assignment.UpdatedAt,
+		DeletedAt:        assignment.DeletedAt.NullTime,
+	})
+	if err != nil {
+		return logs.ErrWrapCtx(ctx, err, "AssignmentWriter: SaveAssignment")
+	}
+
+	err = query.SaveAssignmentCourse(ctx, xsqlc.SaveAssignmentCourseParams{
+		CourseID:     assignment.Course.ID.String(),
+		AssignmentID: assignment.ID.String(),
+	})
+	if err != nil {
+		return logs.ErrWrapCtx(ctx, err, "AssignmentWriter: SaveAssignmentCourse")
+	}
+
+	return nil
 }
 
-func (AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
-	model := dbmodel.Assignment{
-		Base: dbmodel.Base{
-			ID: assignment.ID,
-			Metadata: dbmodel.Metadata{
-				DeletedAt: gorm.DeletedAt(assignment.DeletedAt.NullTime),
-				UpdatedAt: null.TimeFrom(assignment.UpdatedAt),
-			},
-		},
-		AssignedBy:       assignment.Assigner.ID,
-		Name:             assignment.Name,
-		Description:      assignment.Description,
-		CaseInputFileID:  assignment.CaseInputFile.ID,
-		CaseOutputFileID: assignment.CaseOutputFile.ID,
-		DeadlineAt:       assignment.DeadlineAt,
-		Template:         assignment.Template,
-	}
-
-	return tx.Table("assignments").Where("id = ?", assignment.ID).
-		UpdateColumns(map[string]any{
-			"assigned_by":         model.AssignedBy,
-			"name":                model.Name,
-			"description":         model.Description,
-			"case_input_file_id":  model.CaseInputFileID,
-			"case_output_file_id": model.CaseOutputFileID,
-			"deadline_at":         model.DeadlineAt,
-			"updated_at":          model.UpdatedAt,
-			"deleted_at":          model.DeletedAt,
-			"template":            model.Template,
-		}).Error
+func (wr AssignmentWriter) Update(ctx context.Context, tx *gorm.DB, assignment Assignment) error {
+	return wr.Save(ctx, tx, assignment)
 }
 
 type AssignmentReader struct{}
 
 func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID) (Assignment, error) {
-	assignment := dbmodel.Assignment{}
-	err := tx.Table("assignments").Where("id = ?", id).Take(&assignment).Error
+	query, err := dbconn.NewSqlcFromGorm(tx)
 	if err != nil {
-		return Assignment{}, err
+		return Assignment{}, logs.ErrWrapCtx(ctx, err, "NewSqlcFromGorm")
+	}
+
+	assignment, err := query.FindAssignmentByID(ctx, id.String())
+	if err != nil {
+		return Assignment{}, logs.ErrWrapCtx(ctx, err, "find assignment")
+	}
+
+	course, err := query.FindCourseByID(ctx, assignment.CourseID)
+	if err != nil {
+		return Assignment{}, logs.ErrWrapCtx(ctx, err, "find course")
 	}
 
 	user := dbmodel.User{}
 	err = tx.Table("users").Where("id = ?", assignment.AssignedBy).Take(&user).Error
 	if err != nil {
-		return Assignment{}, err
+		return Assignment{}, logs.ErrWrapCtx(ctx, err, "find user")
 	}
 
 	files := []dbmodel.File{}
-	fileIDs := []uuid.UUID{assignment.CaseInputFileID, assignment.CaseOutputFileID}
+	fileIDs := []string{assignment.CaseInputFileID, assignment.CaseOutputFileID}
 	err = tx.Table("files").Where("id IN (?)", fileIDs).Find(&files).Error
 	if err != nil {
-		return Assignment{}, err
+		return Assignment{}, logs.ErrWrapCtx(ctx, err, "find case files")
 	}
 
 	if len(files) != 2 {
-		return Assignment{}, err
+		return Assignment{}, errors.New("invalid case files count")
 	}
 
 	caseInputFile, _, found := lo.FindIndexOf(files, func(file dbmodel.File) bool {
@@ -107,7 +106,7 @@ func (AssignmentReader) FindByID(ctx context.Context, tx *gorm.DB, id uuid.UUID)
 		return Assignment{}, errors.New("case output file not found")
 	}
 
-	return toAssignment(assignment, user, caseInputFile, caseOutputFile), err
+	return toAssignment(assignment, course, user, caseInputFile, caseOutputFile), err
 }
 
 type FindAllAssignmentsRequest struct {
@@ -128,6 +127,11 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 
 	query := xsqlc.New(sqldb)
 
+	course, err := query.FindCourseByID(ctx, req.CourseID.String())
+	if err != nil {
+		return FindAllAssignmentsResponse{}, fmt.Errorf("find course: %w", err)
+	}
+
 	assignments, err := query.FindAllAssignmentsByCourseID(ctx, xsqlc.FindAllAssignmentsByCourseIDParams{
 		CourseID:   req.CourseID.String(),
 		PageOffset: req.Offset(),
@@ -137,8 +141,7 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		return FindAllAssignmentsResponse{}, logs.ErrWrapCtx(ctx, err, "AssignmentReader: FindAll: query")
 	}
 
-	count := int64(0)
-	err = tx.Table("assignments").Count(&count).Error
+	count, err := query.CountAllAssignmentsByCourse(ctx, req.CourseID.String())
 	if err != nil {
 		return FindAllAssignmentsResponse{}, err
 	}
@@ -189,22 +192,7 @@ func (AssignmentReader) FindAll(ctx context.Context, tx *gorm.DB, req FindAllAss
 		fileInput := fileMap[assignment.CaseInputFileID]
 		fileOutput := fileMap[assignment.CaseOutputFileID]
 
-		asg := toAssignment(dbmodel.Assignment{
-			Base: dbmodel.Base{
-				ID: uuid.MustParse(assignment.ID),
-				Metadata: dbmodel.Metadata{
-					CreatedAt: null.TimeFrom(assignment.CreatedAt),
-					UpdatedAt: null.TimeFrom(assignment.UpdatedAt),
-				},
-			},
-			AssignedBy:       uuid.MustParse(assignment.AssignedBy),
-			Name:             assignment.Name,
-			Description:      assignment.Description,
-			Template:         assignment.Template,
-			CaseInputFileID:  uuid.MustParse(assignment.CaseInputFileID),
-			CaseOutputFileID: uuid.MustParse(assignment.CaseOutputFileID),
-			DeadlineAt:       assignment.DeadlineAt,
-		}, user, fileInput, fileOutput)
+		asg := toAssignment(xsqlc.FindAssignmentByIDRow(assignment), course, user, fileInput, fileOutput)
 		result.Assignments[i] = asg
 	}
 
@@ -236,27 +224,37 @@ func toCaseFile(file dbmodel.File) CaseFile {
 }
 
 func toAssignment(
-	model dbmodel.Assignment,
+	model xsqlc.FindAssignmentByIDRow,
+	course xsqlc.Course,
 	user dbmodel.User,
 	inputFile dbmodel.File,
 	outputFile dbmodel.File,
 ) Assignment {
-	return Assignment{
-		ID:                model.ID,
-		Name:              model.Name,
-		Description:       model.Description,
-		Assigner:          toAssigner(user),
-		CaseInputFile:     toCaseFile(inputFile),
-		CaseOutputFile:    toCaseFile(outputFile),
-		TimestampMetadata: toEntityMeta(model.Base),
-		Template:          model.Template,
-		DeadlineAt:        model.DeadlineAt,
+	courseID, err := ulids.Parse(course.ID)
+	if err != nil {
+		panic(err)
 	}
-}
 
-func toEntityMeta(base dbmodel.Base) core.TimestampMetadata {
-	return core.TimestampMetadata{
-		CreatedAt: base.CreatedAt.Time,
-		UpdatedAt: base.UpdatedAt.Time,
+	return Assignment{
+		ID:             uuid.MustParse(model.ID),
+		CourseID:       courseID,
+		Name:           model.Name,
+		Description:    model.Description,
+		Assigner:       toAssigner(user),
+		CaseInputFile:  toCaseFile(inputFile),
+		CaseOutputFile: toCaseFile(outputFile),
+		TimestampMetadata: core.TimestampMetadata{
+			CreatedAt: model.CreatedAt,
+			UpdatedAt: model.UpdatedAt,
+			DeletedAt: null.Time{NullTime: model.DeletedAt},
+		},
+		Template:   model.Template,
+		DeadlineAt: model.DeadlineAt,
+		Course: Course{
+			ID:          courseID,
+			Name:        course.Name,
+			Description: course.Description,
+			IsActive:    course.IsActive,
+		},
 	}
 }

@@ -31,6 +31,15 @@ func MustPostgres() *gorm.DB {
 	return db
 }
 
+func NewSqlcFromGorm(tx *gorm.DB) (*xsqlc.Queries, error) {
+	dbtx, err := DBTxFromGorm(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	return xsqlc.New(dbtx), nil
+}
+
 func DBTxFromGorm(tx *gorm.DB) (xsqlc.DBTX, error) {
 	dbtx, ok := tx.Statement.ConnPool.(*sql.Tx)
 	if !ok {

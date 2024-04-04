@@ -17,6 +17,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/xsqlc"
 	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 )
 
 type AssignmentsQuery struct {
@@ -66,9 +67,23 @@ func (query *AssignmentsQuery) FindAllAssignments(
 		return nil, core.ErrInternalServer
 	}
 
+	asgs := lo.Map(res.Assignments, func(item assignments.Assignment, _ int) *autogradv1.FindAllAssignmentsResponse_Assignment {
+		return &autogradv1.FindAllAssignmentsResponse_Assignment{
+			Id:          item.ID.String(),
+			Name:        item.Name,
+			Description: item.Description,
+			Assigner: &autogradv1.Assigner{
+				Id:   item.Assigner.ID.String(),
+				Name: item.Assigner.Name,
+			},
+			DeadlineAt:        item.DeadlineAt.Format(time.RFC3339Nano),
+			TimestampMetadata: item.ProtoTimestampMetadata(),
+		}
+	})
+
 	return &connect.Response[autogradv1.FindAllAssignmentsResponse]{
 		Msg: &autogradv1.FindAllAssignmentsResponse{
-			Assignments:        toAssignmentProtos(res.Assignments),
+			Assignments:        asgs,
 			PaginationMetadata: res.ProtoPagination(),
 			Course: &autogradv1.FindAllAssignmentsResponse_Course{
 				Id:          course.ID,
@@ -107,8 +122,48 @@ func (query *AssignmentsQuery) FindAssignment(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	sqlcQuery, err := dbconn.NewSqlcFromGorm(query.GormDB)
+	if err != nil {
+		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllAssignments: NewSqlcFromGorm")
+		return nil, core.ErrInternalServer
+	}
+
+	course, err := sqlcQuery.FindCourseDetailForAssignmentByCourseID(ctx, assignment.CourseID.String())
+	if core.IsDBNotFoundErr(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+	if err != nil {
+		return nil, core.ErrInternalServer
+	}
+
 	return &connect.Response[autogradv1.Assignment]{
-		Msg: toAssignmentProto(assignment),
+		Msg: &autogradv1.Assignment{
+			Id:                assignment.ID.String(),
+			Name:              assignment.Name,
+			Description:       assignment.Description,
+			Template:          assignment.Template,
+			TimestampMetadata: assignment.ProtoTimestampMetadata(),
+			DeadlineAt:        assignment.DeadlineAt.Format(time.RFC3339),
+			Assigner: &autogradv1.Assigner{
+				Id:   assignment.Assigner.ID.String(),
+				Name: assignment.Assigner.Name,
+			},
+			CaseInputFile: &autogradv1.AssignmentFile{
+				Id:                assignment.CaseInputFile.ID.String(),
+				Url:               assignment.CaseInputFile.URL,
+				TimestampMetadata: assignment.CaseInputFile.ProtoTimestampMetadata(),
+			},
+			CaseOutputFile: &autogradv1.AssignmentFile{
+				Id:                assignment.CaseOutputFile.ID.String(),
+				Url:               assignment.CaseOutputFile.URL,
+				TimestampMetadata: assignment.CaseInputFile.ProtoTimestampMetadata(),
+			},
+			Course: &autogradv1.Assignment_Course{
+				Id:          course.ID,
+				Name:        course.Name,
+				Description: course.Description,
+			},
+		},
 	}, nil
 }
 
@@ -177,8 +232,21 @@ func (query *AssignmentsQuery) FindAllSubmissionForAssignment(
 		return nil, core.ErrPermissionDenied
 	}
 
-	assignment := dbmodel.Assignment{}
-	err := query.GormDB.Where("id = ?", req.Msg.GetAssignmentId()).Take(&assignment).Error
+	sqlcQuery, err := dbconn.NewSqlcFromGorm(query.GormDB)
+	if err != nil {
+		logs.ErrCtx(ctx, err, "AssignmentsQuery: FindAllSubmissionForAssignment: NewSqlcFromGorm")
+		return nil, core.ErrInternalServer
+	}
+
+	assignment, err := sqlcQuery.FindAssignmentByID(ctx, req.Msg.GetAssignmentId())
+	if err != nil && core.IsDBNotFoundErr(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	course, err := sqlcQuery.FindCourseByID(ctx, assignment.CourseID)
 	if err != nil && core.IsDBNotFoundErr(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
@@ -233,8 +301,12 @@ func (query *AssignmentsQuery) FindAllSubmissionForAssignment(
 			Submissions:    submissionRes,
 			AssignerId:     assigner.ID.String(),
 			AssignerName:   assigner.Name,
-			AssignmentId:   assignment.ID.String(),
+			AssignmentId:   assignment.ID,
 			AssignmentName: assignment.Name,
+			Course: &autogradv1.FindAllSubmissionsForAssignmentResponse_Course{
+				Id:   course.ID,
+				Name: course.Name,
+			},
 		},
 	}
 
@@ -260,14 +332,6 @@ func toSubmitterProto(submitter assignments.Submitter) *autogradv1.Submitter {
 		Id:   submitter.ID.String(),
 		Name: submitter.Name,
 	}
-}
-
-func toAssignmentProtos(assignments []assignments.Assignment) []*autogradv1.Assignment {
-	var result []*autogradv1.Assignment
-	for _, assignment := range assignments {
-		result = append(result, toAssignmentProto(assignment))
-	}
-	return result
 }
 
 func toAssignmentProto(assignment assignments.Assignment) *autogradv1.Assignment {

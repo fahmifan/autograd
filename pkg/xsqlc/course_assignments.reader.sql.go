@@ -7,12 +7,27 @@ package xsqlc
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
 
+const countAllAssignmentsByCourse = `-- name: CountAllAssignmentsByCourse :one
+SELECT COUNT(*) FROM assignments asg
+JOIN rel_assignment_to_course rel ON asg.id = rel.assignment_id
+WHERE rel.course_id = $1 AND asg.deleted_at is NULL
+`
+
+func (q *Queries) CountAllAssignmentsByCourse(ctx context.Context, courseID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllAssignmentsByCourse, courseID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const findAllAssignmentsByCourseID = `-- name: FindAllAssignmentsByCourseID :many
-SELECT id, assigned_by, name, description, case_output_file_id, case_input_file_id, created_at, deadline_at, updated_at, deleted_at, template FROM assignments WHERE id IN (
-    SELECT assignment_id FROM rel_assignment_to_course WHERE course_id = $1
-)
+SELECT asg.id, asg.assigned_by, asg.name, asg.description, asg.case_output_file_id, asg.case_input_file_id, asg.created_at, asg.deadline_at, asg.updated_at, asg.deleted_at, asg.template, rel.course_id FROM assignments asg
+JOIN rel_assignment_to_course rel ON asg.id = rel.assignment_id
+WHERE rel.course_id = $1 AND asg.deleted_at is NULL
 ORDER BY updated_at DESC
 LIMIT $3
 OFFSET $2
@@ -24,15 +39,30 @@ type FindAllAssignmentsByCourseIDParams struct {
 	PageLimit  int32
 }
 
-func (q *Queries) FindAllAssignmentsByCourseID(ctx context.Context, arg FindAllAssignmentsByCourseIDParams) ([]Assignment, error) {
+type FindAllAssignmentsByCourseIDRow struct {
+	ID               string
+	AssignedBy       string
+	Name             string
+	Description      string
+	CaseOutputFileID string
+	CaseInputFileID  string
+	CreatedAt        time.Time
+	DeadlineAt       time.Time
+	UpdatedAt        time.Time
+	DeletedAt        sql.NullTime
+	Template         string
+	CourseID         string
+}
+
+func (q *Queries) FindAllAssignmentsByCourseID(ctx context.Context, arg FindAllAssignmentsByCourseIDParams) ([]FindAllAssignmentsByCourseIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, findAllAssignmentsByCourseID, arg.CourseID, arg.PageOffset, arg.PageLimit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Assignment
+	var items []FindAllAssignmentsByCourseIDRow
 	for rows.Next() {
-		var i Assignment
+		var i FindAllAssignmentsByCourseIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.AssignedBy,
@@ -45,6 +75,7 @@ func (q *Queries) FindAllAssignmentsByCourseID(ctx context.Context, arg FindAllA
 			&i.UpdatedAt,
 			&i.DeletedAt,
 			&i.Template,
+			&i.CourseID,
 		); err != nil {
 			return nil, err
 		}
@@ -57,6 +88,47 @@ func (q *Queries) FindAllAssignmentsByCourseID(ctx context.Context, arg FindAllA
 		return nil, err
 	}
 	return items, nil
+}
+
+const findAssignmentByID = `-- name: FindAssignmentByID :one
+SELECT asg.id, asg.assigned_by, asg.name, asg.description, asg.case_output_file_id, asg.case_input_file_id, asg.created_at, asg.deadline_at, asg.updated_at, asg.deleted_at, asg.template, rel.course_id FROM assignments asg
+JOIN rel_assignment_to_course rel ON asg.id = rel.assignment_id
+WHERE asg.id = $1 AND asg.deleted_at is NULL
+`
+
+type FindAssignmentByIDRow struct {
+	ID               string
+	AssignedBy       string
+	Name             string
+	Description      string
+	CaseOutputFileID string
+	CaseInputFileID  string
+	CreatedAt        time.Time
+	DeadlineAt       time.Time
+	UpdatedAt        time.Time
+	DeletedAt        sql.NullTime
+	Template         string
+	CourseID         string
+}
+
+func (q *Queries) FindAssignmentByID(ctx context.Context, id string) (FindAssignmentByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, findAssignmentByID, id)
+	var i FindAssignmentByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.AssignedBy,
+		&i.Name,
+		&i.Description,
+		&i.CaseOutputFileID,
+		&i.CaseInputFileID,
+		&i.CreatedAt,
+		&i.DeadlineAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.Template,
+		&i.CourseID,
+	)
+	return i, err
 }
 
 const findCourseDetailForAssignmentByCourseID = `-- name: FindCourseDetailForAssignmentByCourseID :one

@@ -1,4 +1,4 @@
-import { Anchor, Breadcrumbs as MantineBreadcrumbs, BreadcrumbsFactory, BreadcrumbsProps, BreadcrumbsStylesNames, MantineStyleProps, StylesApiProps } from "@mantine/core";
+import { Anchor, Breadcrumbs as MantineBreadcrumbs, BreadcrumbsFactory, BreadcrumbsProps, BreadcrumbsStylesNames, MantineStyleProps, StylesApiProps, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
 
 type Item = {
@@ -12,6 +12,12 @@ export function Breadcrumbs(props: {
     return <MantineBreadcrumbs>
         {
             props.items.map((item) => {
+                if (!item.to) {
+                    return (
+                        <Text>{item.title}</Text>
+                    )
+                }
+
                 return (
                     <Anchor key={item.to} component={Link} to={item.to}>
                         {item.title}

@@ -39,105 +39,25 @@ import {
 	Link,
 	redirect,
 	useLoaderData,
+	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
 import {
 	FindAllAssignmentsResponse,
-} from "../../../pb/autograd/v1/autograd_pb";
-import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
+} from "../../../../pb/autograd/v1/autograd_pb";
+import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
+import { MarkdownEditor } from "./Assignment";
 
-export function ListAssignments() {
-	const res = useLoaderData() as FindAllAssignmentsResponse;
-	const submit = useSubmit();
 
-	if (!res || res.assignments.length === 0) {
-		return (
-			<>
-				<p>
-					<i>No Assignments</i>
-				</p>
-			</>
-		);
-	}
-
-	return (
-		<div>
-			<Title order={3} mb="lg">
-				Assignments
-			</Title>
-			<Table striped highlightOnHover maw={800} mb="lg">
-				<Table.Thead>
-					<Table.Tr>
-						<Table.Th>ID</Table.Th>
-						<Table.Th>Name</Table.Th>
-						<Table.Th>Assigner</Table.Th>
-						<Table.Th className="text-center">Action</Table.Th>
-					</Table.Tr>
-				</Table.Thead>
-
-				<Table.Tbody>
-					{res?.assignments?.map((assignment) => {
-						return (
-							<Table.Tr key={assignment.id}>
-								<Table.Td>{assignment.id}</Table.Td>
-								<Table.Td>{assignment.name}</Table.Td>
-								<Table.Td>{assignment.assigner?.name ?? ""}</Table.Td>
-								<Table.Td>
-									<Flex direction="row">
-										<Anchor
-												component={Link}
-												to={`/backoffice/courses/assignments/detail?id=${assignment.id}`}
-												size="sm"
-												mr="sm"
-											>
-												<Tooltip label={`Detail Assignment for ${assignment.name}`}>
-													<IconExternalLink color="#339AF0" />
-												</Tooltip>
-											</Anchor>
-										<Anchor
-											component={Link}
-											to={`/backoffice/courses/assignments/submissions?assignmentID=${assignment.id}`}
-											size="sm"
-											mr="sm"
-										>
-											<Tooltip label={`Submission for ${assignment.name}`}>
-												<IconNote color="#339AF0" />
-											</Tooltip>
-										</Anchor>
-										<Form method="POST" id="delete-assignment" onSubmit={e => {
-											e.preventDefault();
-											const ok = confirm(`Are you sure you want to delete assignment "${assignment.name}"?`);
-											if (!ok) {
-												return;
-											}
-											submit(e.currentTarget)
-										}}>
-											<VisuallyHidden>
-												<input name="id" value={assignment.id} />
-											</VisuallyHidden>
-											<Tooltip label={`Delete assignment ${assignment.name}`}>
-												<ActionIcon type="submit" name="intent" value="delete-assignment" variant="outline" aria-label="Delete assignment" color="red.5" size="sm">
-													<IconTrash />
-												</ActionIcon>
-											</Tooltip>
-										</Form>
-									</Flex>
-								</Table.Td>
-							</Table.Tr>
-						);
-					})}
-				</Table.Tbody>
-			</Table>
-		</div>
-	);
-}
-
-export function CreateAssignment() {
+export function NewAssignment() {
 	const [stdinFileID, setStdinFileID] = useState("");
 	const [stdoutFileID, setStdoutFileID] = useState("");
 	const markdownRef = useRef<MDXEditorMethods>(null);
 	const [template, setTemplate] = useState("");
 	const submit = useSubmit();
+
+	const [searchParams] = useSearchParams()
+	const courseID = searchParams.get('courseID') ?? ''
 
 	const mutateUploadStdin = useMutation({
 		mutationKey: "uploadStdin",
@@ -179,6 +99,13 @@ export function CreateAssignment() {
 					<TextInput label="Name" required name="name" title="Name" id="name" />
 
 					<VisuallyHidden>
+						<Input
+							type="hidden"
+							name="courseID"
+							id="courseID"
+							value={courseID}
+						/>
+
 						<Input
 							type="hidden"
 							name="description"
@@ -291,61 +218,12 @@ export function CreateAssignment() {
 	);
 }
 
-type MarkdownEditorProps = {
-	defaultValue?: string;
-	onChange?: (value: string) => void;
-	ref: React.RefObject<MDXEditorMethods>;
-};
-
-export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
-	(props: MarkdownEditorProps, ref) => {
-		return (
-			<Paper shadow="xs" p="xl">
-				<MDXEditor
-					ref={ref}
-					onChange={props.onChange}
-					markdown={props.defaultValue || "## Description"}
-					plugins={[
-						headingsPlugin(),
-						listsPlugin(),
-						quotePlugin(),
-						thematicBreakPlugin(),
-						markdownShortcutPlugin(),
-					]}
-				/>
-			</Paper>
-		);
-	},
-);
-
-export async function loaderListAssignments(): Promise<FindAllAssignmentsResponse> {
-	return await AutogradServiceClient.findAllAssignments({
-		paginationRequest: {
-			limit: 10,
-			page: 1,
-		},
-	});
-}
-
-export async function actionDeleteAssignment(arg: ActionFunctionArgs,): Promise<Response | null> {
-	const formData = await arg.request.formData();
-	const id = formData.get("id") as string;
-
-	const res = await AutogradServiceClient.deleteAssignment({
-		id,
-	})
-
-	if (res) {
-		return redirect("/backoffice/assignments");
-	}
-
-	return null;
-}
-
 export async function actionCreateAssignemnt(
 	arg: ActionFunctionArgs,
 ): Promise<Response | null> {
 	const formData = await arg.request.formData();
+	
+	const courseId = formData.get("courseID") as string;
 	const name = formData.get("name") as string;
 	const description = formData.get("description") as string;
 	const caseInputFileId = formData.get("case_input_file_id") as string;
@@ -354,6 +232,7 @@ export async function actionCreateAssignemnt(
 	const template = formData.get("template") as string;
 
 	const res = await AutogradServiceClient.createAssignment({
+		courseId,
 		name,
 		description,
 		caseInputFileId,
@@ -363,7 +242,7 @@ export async function actionCreateAssignemnt(
 	});
 
 	if (res) {
-		return redirect("/backoffice/assignments");
+		return redirect(`/backoffice/courses/detail?courseID=${courseId}`);
 	}
 
 	return null;

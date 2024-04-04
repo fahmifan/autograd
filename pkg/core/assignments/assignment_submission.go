@@ -7,6 +7,7 @@ import (
 
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
+	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
 	"gopkg.in/guregu/null.v4"
 )
@@ -24,12 +25,21 @@ type CaseFile struct {
 	core.TimestampMetadata
 }
 
+type Course struct {
+	ID          ulids.ULID
+	Name        string
+	Description string
+	IsActive    bool
+}
+
 type Assignment struct {
 	ID             uuid.UUID
+	CourseID       ulids.ULID
 	Name           string
 	Description    string
 	Template       string
 	Assigner       Assigner
+	Course         Course
 	CaseInputFile  CaseFile
 	CaseOutputFile CaseFile
 	DeadlineAt     time.Time
@@ -41,6 +51,7 @@ type CreateAssignmentRequest struct {
 	NewID          uuid.UUID
 	Now            time.Time
 	Assigner       Assigner
+	Course         Course
 	Name           string
 	Description    string
 	Template       string
@@ -62,6 +73,10 @@ func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
 		return Assignment{}, errors.New("description must be at least 3 characters")
 	}
 
+	if !req.Course.IsActive {
+		return Assignment{}, errors.New("course is not active")
+	}
+
 	return Assignment{
 		ID:                req.NewID,
 		TimestampMetadata: core.NewTimestampMeta(req.Now),
@@ -72,6 +87,8 @@ func CreateAssignment(req CreateAssignmentRequest) (Assignment, error) {
 		Assigner:          req.Assigner,
 		DeadlineAt:        req.DeadlineAt,
 		Template:          req.Template,
+		CourseID:          req.Course.ID,
+		Course:            req.Course,
 	}, nil
 }
 

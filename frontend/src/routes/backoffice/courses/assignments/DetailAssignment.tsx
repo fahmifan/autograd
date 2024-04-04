@@ -6,9 +6,9 @@ import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useMutation } from "react-query";
 import { ActionFunctionArgs, Form, Link, LoaderFunctionArgs, redirect, useLoaderData, useSearchParams, useSubmit } from "react-router-dom";
-import { Breadcrumbs } from "../../../components/Breadcrumbs";
-import { Assignment } from "../../../pb/autograd/v1/autograd_pb";
-import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
+import { Breadcrumbs } from "../../../../components/Breadcrumbs";
+import { Assignment } from "../../../../pb/autograd/v1/autograd_pb";
+import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
 import { MarkdownEditor } from "./Assignment";
 
 export function DetailAssignment() {
@@ -58,7 +58,8 @@ export function DetailAssignment() {
 	});
 
 	const items = [
-		{ title: "Course Assignments", to: `/backoffice/courses/detail?courseID=${courseID}` },
+		{ title: "Courses", to: "/backoffice/courses" },
+		{ title: res.course?.name ?? "", to: `/backoffice/courses/detail?courseID=${courseID}` },
 		{ title: res.name, to: `/backoffice/courses/assignments/detail?courseID=${courseID}&id=${res.id}` },
 	]
 

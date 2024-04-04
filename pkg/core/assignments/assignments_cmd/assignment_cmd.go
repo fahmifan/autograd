@@ -9,9 +9,11 @@ import (
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/assignments"
 	"github.com/fahmifan/autograd/pkg/core/auth"
+	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/fahmifan/autograd/pkg/logs"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
+	"github.com/fahmifan/ulids"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -41,6 +43,7 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
+	newID := uuid.New()
 	assignment := assignments.Assignment{}
 	caseStdinFileID, err := uuid.Parse(req.Msg.GetCaseInputFileId())
 	if err != nil {
@@ -53,6 +56,12 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 	}
 
 	err = core.Transaction(ctx, cmd.Ctx, func(tx *gorm.DB) error {
+		sqlcQuery, err := dbconn.NewSqlcFromGorm(tx)
+		if err != nil {
+			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: NewSqlcFromGorm")
+			return core.ErrInternalServer
+		}
+
 		assigner, err := assignerReader.FindByID(ctx, cmd.GormDB, authUser.UserID)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: FindByID")
@@ -80,8 +89,17 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 			return errors.New("case output file not found")
 		}
 
+		course, err := sqlcQuery.FindCourseByID(ctx, req.Msg.GetCourseId())
+		if err != nil {
+			if core.IsDBNotFoundErr(err) {
+				return connect.NewError(connect.CodeInvalidArgument, err)
+			}
+
+			return core.ErrInternalServer
+		}
+
 		assignment, err = assignments.CreateAssignment(assignments.CreateAssignmentRequest{
-			NewID:          uuid.New(),
+			NewID:          newID,
 			Name:           req.Msg.GetName(),
 			Description:    req.Msg.GetDescription(),
 			Assigner:       assigner,
@@ -89,12 +107,18 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 			CaseInputFile:  caseInputFile,
 			CaseOutputFile: caseOutputFile,
 			DeadlineAt:     deadlineAt,
+			Course: assignments.Course{
+				ID:          ulids.MustParse(course.ID),
+				Name:        course.Name,
+				Description: course.Description,
+				IsActive:    course.IsActive,
+			},
 		})
 		if err != nil {
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Create(ctx, tx, assignment)
+		err = assignmentWriter.Save(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: CreateAssignment: Save")
 			return core.ErrInternalServer
@@ -108,7 +132,7 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 
 	return &connect.Response[autogradv1.CreatedResponse]{
 		Msg: &autogradv1.CreatedResponse{
-			Id:      assignment.ID.String(),
+			Id:      newID.String(),
 			Message: "assignment created",
 		},
 	}, nil
@@ -199,7 +223,7 @@ func (cmd *AssignmentCmd) UpdateAssignment(ctx context.Context, req *connect.Req
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Update(ctx, tx, assignment)
+		err = assignmentWriter.Save(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: UpdateAssignment: Save")
 			return core.ErrInternalServer
@@ -246,7 +270,7 @@ func (cmd *AssignmentCmd) DeleteAssignment(ctx context.Context, req *connect.Req
 			return connect.NewError(connect.CodeInvalidArgument, err)
 		}
 
-		err = assignmentWriter.Update(ctx, tx, assignment)
+		err = assignmentWriter.Save(ctx, tx, assignment)
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AssignmentCmd: DeleteAssignment: Save")
 			return core.ErrInternalServer

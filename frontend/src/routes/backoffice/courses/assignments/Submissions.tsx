@@ -2,9 +2,9 @@ import { Anchor, Box, Table, Text, Title } from "@mantine/core";
 import { Editor } from "@monaco-editor/react";
 import { IconExternalLink } from "@tabler/icons-react";
 import { Link, LoaderFunctionArgs, useLoaderData, useSearchParams } from "react-router-dom";
-import { Breadcrumbs } from "../../../components/Breadcrumbs";
-import { FindAllSubmissionsForAssignmentResponse, Submission } from "../../../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../../../service";
+import { Breadcrumbs } from "../../../../components/Breadcrumbs";
+import { FindAllSubmissionsForAssignmentResponse, Submission } from "../../../../pb/autograd/v1/autograd_pb";
+import { AutogradServiceClient } from "../../../../service";
 
 export function ListSubmissions() {	
 	const res = useLoaderData() as FindAllSubmissionsForAssignmentResponse;
@@ -12,7 +12,8 @@ export function ListSubmissions() {
 	const courseID = searchParams.get('courseID') ?? ''
 
 	const items = [
-		{ title: "Assignments", to: `/backoffice/courses/detail?courseID=${courseID}` },
+		{ title: "Courses", to: `/backoffice/courses/detail?courseID=${courseID}` },
+		{ title: res.course?.name ?? "", to: `/backoffice/courses/detail?courseID=${courseID}` },
 		{ title: "Submission", to: `/backoffice/courses/assignments/submissions?assignmentID=${res.assignmentId}`},
 	]
 
@@ -34,7 +35,7 @@ export function ListSubmissions() {
 		<div>
 			<Breadcrumbs items={items} />
 
-			<Title order={3} mb="lg">
+			<Title order={3} my="lg">
 				Submissions
 			</Title>
 			<Table striped highlightOnHover maw={700} mb="lg">
@@ -76,7 +77,7 @@ export function SubmissionDetail() {
 	const courseID = searchParams.get('courseID') ?? ''
 
 	const items = [
-		{ title: "Assignments", to: "/backoffice/courses" },
+		{ title: "Courses", to: "/backoffice/courses" },
 		{ title: "Submission", to: `/backoffice/courses/assignments/submissions?courseID=${courseID}&assignmentID=${res.assignment?.id}`},
 		{ title: res.submitter?.name ?? '', to: `/backoffice/courses/assignments/submissions/detail?courseID=${courseID}&submissionID=${res.id}`},
 	]

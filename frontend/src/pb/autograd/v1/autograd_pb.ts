@@ -646,6 +646,11 @@ export class Assignment extends Message<Assignment> {
    */
   template = "";
 
+  /**
+   * @generated from field: autograd.v1.Assignment.Course course = 10;
+   */
+  course?: Assignment_Course;
+
   constructor(data?: PartialMessage<Assignment>) {
     super();
     proto3.util.initPartial(data, this);
@@ -663,6 +668,7 @@ export class Assignment extends Message<Assignment> {
     { no: 7, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "timestamp_metadata", kind: "message", T: TimestampMetadata },
     { no: 9, name: "template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "course", kind: "message", T: Assignment_Course },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Assignment {
@@ -679,6 +685,55 @@ export class Assignment extends Message<Assignment> {
 
   static equals(a: Assignment | PlainMessage<Assignment> | undefined, b: Assignment | PlainMessage<Assignment> | undefined): boolean {
     return proto3.util.equals(Assignment, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.Assignment.Course
+ */
+export class Assignment_Course extends Message<Assignment_Course> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description = "";
+
+  constructor(data?: PartialMessage<Assignment_Course>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.Assignment.Course";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Assignment_Course {
+    return new Assignment_Course().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Assignment_Course {
+    return new Assignment_Course().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Assignment_Course {
+    return new Assignment_Course().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Assignment_Course | PlainMessage<Assignment_Course> | undefined, b: Assignment_Course | PlainMessage<Assignment_Course> | undefined): boolean {
+    return proto3.util.equals(Assignment_Course, a, b);
   }
 }
 
@@ -856,6 +911,11 @@ export class CreateAssignmentRequest extends Message<CreateAssignmentRequest> {
    */
   template = "";
 
+  /**
+   * @generated from field: string course_id = 7;
+   */
+  courseId = "";
+
   constructor(data?: PartialMessage<CreateAssignmentRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -870,6 +930,7 @@ export class CreateAssignmentRequest extends Message<CreateAssignmentRequest> {
     { no: 4, name: "case_output_file_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "template", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "course_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateAssignmentRequest {
@@ -1115,9 +1176,9 @@ export class FindAllAssignmentsRequest extends Message<FindAllAssignmentsRequest
  */
 export class FindAllAssignmentsResponse extends Message<FindAllAssignmentsResponse> {
   /**
-   * @generated from field: repeated autograd.v1.Assignment assignments = 1;
+   * @generated from field: repeated autograd.v1.FindAllAssignmentsResponse.Assignment assignments = 1;
    */
-  assignments: Assignment[] = [];
+  assignments: FindAllAssignmentsResponse_Assignment[] = [];
 
   /**
    * @generated from field: autograd.v1.PaginationMetadata pagination_metadata = 2;
@@ -1137,7 +1198,7 @@ export class FindAllAssignmentsResponse extends Message<FindAllAssignmentsRespon
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "autograd.v1.FindAllAssignmentsResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "assignments", kind: "message", T: Assignment, repeated: true },
+    { no: 1, name: "assignments", kind: "message", T: FindAllAssignmentsResponse_Assignment, repeated: true },
     { no: 2, name: "pagination_metadata", kind: "message", T: PaginationMetadata },
     { no: 3, name: "course", kind: "message", T: FindAllAssignmentsResponse_Course },
   ]);
@@ -1205,6 +1266,73 @@ export class FindAllAssignmentsResponse_Course extends Message<FindAllAssignment
 
   static equals(a: FindAllAssignmentsResponse_Course | PlainMessage<FindAllAssignmentsResponse_Course> | undefined, b: FindAllAssignmentsResponse_Course | PlainMessage<FindAllAssignmentsResponse_Course> | undefined): boolean {
     return proto3.util.equals(FindAllAssignmentsResponse_Course, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.FindAllAssignmentsResponse.Assignment
+ */
+export class FindAllAssignmentsResponse_Assignment extends Message<FindAllAssignmentsResponse_Assignment> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description = "";
+
+  /**
+   * @generated from field: autograd.v1.Assigner assigner = 4;
+   */
+  assigner?: Assigner;
+
+  /**
+   * @generated from field: string deadline_at = 7;
+   */
+  deadlineAt = "";
+
+  /**
+   * @generated from field: autograd.v1.TimestampMetadata timestamp_metadata = 8;
+   */
+  timestampMetadata?: TimestampMetadata;
+
+  constructor(data?: PartialMessage<FindAllAssignmentsResponse_Assignment>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAllAssignmentsResponse.Assignment";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "assigner", kind: "message", T: Assigner },
+    { no: 7, name: "deadline_at", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "timestamp_metadata", kind: "message", T: TimestampMetadata },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAllAssignmentsResponse_Assignment {
+    return new FindAllAssignmentsResponse_Assignment().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAllAssignmentsResponse_Assignment {
+    return new FindAllAssignmentsResponse_Assignment().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAllAssignmentsResponse_Assignment {
+    return new FindAllAssignmentsResponse_Assignment().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAllAssignmentsResponse_Assignment | PlainMessage<FindAllAssignmentsResponse_Assignment> | undefined, b: FindAllAssignmentsResponse_Assignment | PlainMessage<FindAllAssignmentsResponse_Assignment> | undefined): boolean {
+    return proto3.util.equals(FindAllAssignmentsResponse_Assignment, a, b);
   }
 }
 
@@ -1421,6 +1549,11 @@ export class FindAllSubmissionsForAssignmentResponse extends Message<FindAllSubm
    */
   assignerName = "";
 
+  /**
+   * @generated from field: autograd.v1.FindAllSubmissionsForAssignmentResponse.Course course = 6;
+   */
+  course?: FindAllSubmissionsForAssignmentResponse_Course;
+
   constructor(data?: PartialMessage<FindAllSubmissionsForAssignmentResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1434,6 +1567,7 @@ export class FindAllSubmissionsForAssignmentResponse extends Message<FindAllSubm
     { no: 3, name: "assignment_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "assigner_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "assigner_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "course", kind: "message", T: FindAllSubmissionsForAssignmentResponse_Course },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAllSubmissionsForAssignmentResponse {
@@ -1450,6 +1584,49 @@ export class FindAllSubmissionsForAssignmentResponse extends Message<FindAllSubm
 
   static equals(a: FindAllSubmissionsForAssignmentResponse | PlainMessage<FindAllSubmissionsForAssignmentResponse> | undefined, b: FindAllSubmissionsForAssignmentResponse | PlainMessage<FindAllSubmissionsForAssignmentResponse> | undefined): boolean {
     return proto3.util.equals(FindAllSubmissionsForAssignmentResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.FindAllSubmissionsForAssignmentResponse.Course
+ */
+export class FindAllSubmissionsForAssignmentResponse_Course extends Message<FindAllSubmissionsForAssignmentResponse_Course> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  constructor(data?: PartialMessage<FindAllSubmissionsForAssignmentResponse_Course>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAllSubmissionsForAssignmentResponse.Course";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAllSubmissionsForAssignmentResponse_Course {
+    return new FindAllSubmissionsForAssignmentResponse_Course().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAllSubmissionsForAssignmentResponse_Course {
+    return new FindAllSubmissionsForAssignmentResponse_Course().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAllSubmissionsForAssignmentResponse_Course {
+    return new FindAllSubmissionsForAssignmentResponse_Course().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAllSubmissionsForAssignmentResponse_Course | PlainMessage<FindAllSubmissionsForAssignmentResponse_Course> | undefined, b: FindAllSubmissionsForAssignmentResponse_Course | PlainMessage<FindAllSubmissionsForAssignmentResponse_Course> | undefined): boolean {
+    return proto3.util.equals(FindAllSubmissionsForAssignmentResponse_Course, a, b);
   }
 }
 

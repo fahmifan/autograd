@@ -15,8 +15,10 @@ import { IconExternalLink, IconNote, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import {
+	ActionFunctionArgs,
 	Form,
 	Link,
+	redirect,
 	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
@@ -77,18 +79,6 @@ export function PageCourseDetail() {
 		{ title: "Courses", to: "/backoffice/courses" },
 		{ title: res?.course?.name ?? '', to: `/backoffice/courses/detail?courseID=${courseID}` },
 	]
-
-	if (!res || res.assignments.length === 0) {
-		return (
-			<>
-				<Breadcrumbs items={items} />
-
-				<Text mt="lg">
-					<i>No Assignments</i>
-				</Text>
-			</>
-		);
-	}
 
 	return (
 		<section>
@@ -164,7 +154,7 @@ export function PageCourseDetail() {
 
             <Pagination
                 mb="lg"
-                total={res.paginationMetadata?.totalPage as number}
+                total={res?.paginationMetadata?.totalPage as number}
                 value={page}
                 onChange={setPage}
                 siblings={1}
@@ -172,4 +162,19 @@ export function PageCourseDetail() {
             />
 		</section>
 	);
+}
+
+export async function actionDeleteAssignment(arg: ActionFunctionArgs): Promise<Response | null> {
+	const formData = await arg.request.formData();
+	const id = formData.get("id") as string;
+
+	const res = await AutogradServiceClient.deleteAssignment({
+		id,
+	})
+
+	if (res) {
+		return redirect("/backoffice/assignments");
+	}
+
+	return null;
 }
