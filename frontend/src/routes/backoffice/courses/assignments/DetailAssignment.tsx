@@ -5,11 +5,11 @@ import { Editor } from "@monaco-editor/react";
 import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useMutation } from "react-query";
-import { ActionFunctionArgs, Form, Link, LoaderFunctionArgs, redirect, useLoaderData, useSearchParams, useSubmit } from "react-router-dom";
+import { ActionFunctionArgs, Form, LoaderFunctionArgs, redirect, useLoaderData, useSearchParams, useSubmit } from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
 import { Assignment } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
-import { MarkdownEditor } from "./Assignment";
+import { MarkdownEditor } from "./shared";
 
 export function DetailAssignment() {
 	const res = useLoaderData() as Assignment;
@@ -60,6 +60,7 @@ export function DetailAssignment() {
 	const items = [
 		{ title: "Courses", to: "/backoffice/courses" },
 		{ title: res.course?.name ?? "", to: `/backoffice/courses/detail?courseID=${courseID}` },
+		{ title: "Assignments", to: `/backoffice/courses/assignments?courseID=${courseID}` },
 		{ title: res.name, to: `/backoffice/courses/assignments/detail?courseID=${courseID}&id=${res.id}` },
 	]
 

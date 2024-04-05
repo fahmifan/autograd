@@ -83,6 +83,12 @@ const (
 	// AutogradServiceUpdateAdminCourseProcedure is the fully-qualified name of the AutogradService's
 	// UpdateAdminCourse RPC.
 	AutogradServiceUpdateAdminCourseProcedure = "/autograd.v1.AutogradService/UpdateAdminCourse"
+	// AutogradServiceFindAdminCourseDetailProcedure is the fully-qualified name of the
+	// AutogradService's FindAdminCourseDetail RPC.
+	AutogradServiceFindAdminCourseDetailProcedure = "/autograd.v1.AutogradService/FindAdminCourseDetail"
+	// AutogradServiceFindAllCourseStudentsProcedure is the fully-qualified name of the
+	// AutogradService's FindAllCourseStudents RPC.
+	AutogradServiceFindAllCourseStudentsProcedure = "/autograd.v1.AutogradService/FindAllCourseStudents"
 	// AutogradServiceFindAllStudentAssignmentsProcedure is the fully-qualified name of the
 	// AutogradService's FindAllStudentAssignments RPC.
 	AutogradServiceFindAllStudentAssignmentsProcedure = "/autograd.v1.AutogradService/FindAllStudentAssignments"
@@ -123,6 +129,9 @@ type AutogradServiceClient interface {
 	FindAllAdminCourses(context.Context, *connect.Request[v1.FindAllPaginationRequest]) (*connect.Response[v1.FindAllAdminCoursesResponse], error)
 	CreateAdminCourse(context.Context, *connect.Request[v1.CreateAdminCourseRequest]) (*connect.Response[v1.CreatedResponse], error)
 	UpdateAdminCourse(context.Context, *connect.Request[v1.UpdateAdminCourseRequest]) (*connect.Response[v1.Empty], error)
+	FindAdminCourseDetail(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindAdminCourseDetailResponse], error)
+	// Admin Course Students
+	FindAllCourseStudents(context.Context, *connect.Request[v1.FindAllCourseStudentsRequest]) (*connect.Response[v1.FindAllCourseStudentsResponse], error)
 	// Student Assignment
 	// Student Assignment Queries
 	FindAllStudentAssignments(context.Context, *connect.Request[v1.FindAllStudentAssignmentsRequest]) (*connect.Response[v1.FindAllStudentAssignmentsResponse], error)
@@ -230,6 +239,16 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			baseURL+AutogradServiceUpdateAdminCourseProcedure,
 			opts...,
 		),
+		findAdminCourseDetail: connect.NewClient[v1.FindByIDRequest, v1.FindAdminCourseDetailResponse](
+			httpClient,
+			baseURL+AutogradServiceFindAdminCourseDetailProcedure,
+			opts...,
+		),
+		findAllCourseStudents: connect.NewClient[v1.FindAllCourseStudentsRequest, v1.FindAllCourseStudentsResponse](
+			httpClient,
+			baseURL+AutogradServiceFindAllCourseStudentsProcedure,
+			opts...,
+		),
 		findAllStudentAssignments: connect.NewClient[v1.FindAllStudentAssignmentsRequest, v1.FindAllStudentAssignmentsResponse](
 			httpClient,
 			baseURL+AutogradServiceFindAllStudentAssignmentsProcedure,
@@ -277,6 +296,8 @@ type autogradServiceClient struct {
 	findAllAdminCourses            *connect.Client[v1.FindAllPaginationRequest, v1.FindAllAdminCoursesResponse]
 	createAdminCourse              *connect.Client[v1.CreateAdminCourseRequest, v1.CreatedResponse]
 	updateAdminCourse              *connect.Client[v1.UpdateAdminCourseRequest, v1.Empty]
+	findAdminCourseDetail          *connect.Client[v1.FindByIDRequest, v1.FindAdminCourseDetailResponse]
+	findAllCourseStudents          *connect.Client[v1.FindAllCourseStudentsRequest, v1.FindAllCourseStudentsResponse]
 	findAllStudentAssignments      *connect.Client[v1.FindAllStudentAssignmentsRequest, v1.FindAllStudentAssignmentsResponse]
 	findStudentAssignment          *connect.Client[v1.FindByIDRequest, v1.StudentAssignment]
 	submitStudentSubmission        *connect.Client[v1.SubmitStudentSubmissionRequest, v1.CreatedResponse]
@@ -369,6 +390,16 @@ func (c *autogradServiceClient) UpdateAdminCourse(ctx context.Context, req *conn
 	return c.updateAdminCourse.CallUnary(ctx, req)
 }
 
+// FindAdminCourseDetail calls autograd.v1.AutogradService.FindAdminCourseDetail.
+func (c *autogradServiceClient) FindAdminCourseDetail(ctx context.Context, req *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindAdminCourseDetailResponse], error) {
+	return c.findAdminCourseDetail.CallUnary(ctx, req)
+}
+
+// FindAllCourseStudents calls autograd.v1.AutogradService.FindAllCourseStudents.
+func (c *autogradServiceClient) FindAllCourseStudents(ctx context.Context, req *connect.Request[v1.FindAllCourseStudentsRequest]) (*connect.Response[v1.FindAllCourseStudentsResponse], error) {
+	return c.findAllCourseStudents.CallUnary(ctx, req)
+}
+
 // FindAllStudentAssignments calls autograd.v1.AutogradService.FindAllStudentAssignments.
 func (c *autogradServiceClient) FindAllStudentAssignments(ctx context.Context, req *connect.Request[v1.FindAllStudentAssignmentsRequest]) (*connect.Response[v1.FindAllStudentAssignmentsResponse], error) {
 	return c.findAllStudentAssignments.CallUnary(ctx, req)
@@ -418,6 +449,9 @@ type AutogradServiceHandler interface {
 	FindAllAdminCourses(context.Context, *connect.Request[v1.FindAllPaginationRequest]) (*connect.Response[v1.FindAllAdminCoursesResponse], error)
 	CreateAdminCourse(context.Context, *connect.Request[v1.CreateAdminCourseRequest]) (*connect.Response[v1.CreatedResponse], error)
 	UpdateAdminCourse(context.Context, *connect.Request[v1.UpdateAdminCourseRequest]) (*connect.Response[v1.Empty], error)
+	FindAdminCourseDetail(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindAdminCourseDetailResponse], error)
+	// Admin Course Students
+	FindAllCourseStudents(context.Context, *connect.Request[v1.FindAllCourseStudentsRequest]) (*connect.Response[v1.FindAllCourseStudentsResponse], error)
 	// Student Assignment
 	// Student Assignment Queries
 	FindAllStudentAssignments(context.Context, *connect.Request[v1.FindAllStudentAssignmentsRequest]) (*connect.Response[v1.FindAllStudentAssignmentsResponse], error)
@@ -521,6 +555,16 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 		svc.UpdateAdminCourse,
 		opts...,
 	)
+	autogradServiceFindAdminCourseDetailHandler := connect.NewUnaryHandler(
+		AutogradServiceFindAdminCourseDetailProcedure,
+		svc.FindAdminCourseDetail,
+		opts...,
+	)
+	autogradServiceFindAllCourseStudentsHandler := connect.NewUnaryHandler(
+		AutogradServiceFindAllCourseStudentsProcedure,
+		svc.FindAllCourseStudents,
+		opts...,
+	)
 	autogradServiceFindAllStudentAssignmentsHandler := connect.NewUnaryHandler(
 		AutogradServiceFindAllStudentAssignmentsProcedure,
 		svc.FindAllStudentAssignments,
@@ -582,6 +626,10 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 			autogradServiceCreateAdminCourseHandler.ServeHTTP(w, r)
 		case AutogradServiceUpdateAdminCourseProcedure:
 			autogradServiceUpdateAdminCourseHandler.ServeHTTP(w, r)
+		case AutogradServiceFindAdminCourseDetailProcedure:
+			autogradServiceFindAdminCourseDetailHandler.ServeHTTP(w, r)
+		case AutogradServiceFindAllCourseStudentsProcedure:
+			autogradServiceFindAllCourseStudentsHandler.ServeHTTP(w, r)
 		case AutogradServiceFindAllStudentAssignmentsProcedure:
 			autogradServiceFindAllStudentAssignmentsHandler.ServeHTTP(w, r)
 		case AutogradServiceFindStudentAssignmentProcedure:
@@ -667,6 +715,14 @@ func (UnimplementedAutogradServiceHandler) CreateAdminCourse(context.Context, *c
 
 func (UnimplementedAutogradServiceHandler) UpdateAdminCourse(context.Context, *connect.Request[v1.UpdateAdminCourseRequest]) (*connect.Response[v1.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.UpdateAdminCourse is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) FindAdminCourseDetail(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindAdminCourseDetailResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindAdminCourseDetail is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) FindAllCourseStudents(context.Context, *connect.Request[v1.FindAllCourseStudentsRequest]) (*connect.Response[v1.FindAllCourseStudentsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindAllCourseStudents is not implemented"))
 }
 
 func (UnimplementedAutogradServiceHandler) FindAllStudentAssignments(context.Context, *connect.Request[v1.FindAllStudentAssignmentsRequest]) (*connect.Response[v1.FindAllStudentAssignmentsResponse], error) {

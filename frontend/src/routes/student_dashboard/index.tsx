@@ -9,12 +9,17 @@ import {
 	loaderDetailStudentAssignment,
 	loaderListStudentAssignments,
 } from "./StudentAssignments";
+import { PageCourses } from "./courses/PageCourses";
 
 export const router: RouteObject[] = [
 	{
 		path: "/student-dashboard",
 		element: <PrivateRoute element={<DashboardLayout />} />,
 		children: [
+			{
+				path: "/student-dashboard/courses",
+				element: <PrivateRoute element={<PageCourses />} />,
+			},
 			{
 				path: "/student-dashboard/assignments",
 				element: <PrivateRoute element={<ListStudentAssignments />} />,
@@ -40,6 +45,11 @@ export default function DashboardLayout() {
 	const location = useLocation();
 
 	const navitems: NavItem[] = [
+		{
+			label: "Courses",
+			to: "/student-dashboard/courses",
+			children: [],
+		},
 		{
 			label: "Assignments",
 			to: "/student-dashboard/assignments",

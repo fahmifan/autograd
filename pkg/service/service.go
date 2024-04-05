@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"connectrpc.com/connect"
+	"github.com/coocood/freecache"
 	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/admin_courses/admin_courses_cmd"
@@ -23,6 +24,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/mailer"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
+	"golang.org/x/sync/singleflight"
 	"gorm.io/gorm"
 )
 
@@ -54,6 +56,7 @@ func NewService(
 	mediaCfg core.MediaConfig,
 	senderEmail string,
 	mailer mailer.Mailer,
+	cache *freecache.Cache,
 ) *Service {
 	outboxService := outbox.NewOutboxService(gormDB, sqlDB, config.Debug())
 
@@ -68,6 +71,8 @@ func NewService(
 		OutboxEnqueuer: outboxService,
 		SqlDB:          sqlDB,
 		Debug:          debug,
+		Cache:          cache,
+		Flight:         &singleflight.Group{},
 	}
 
 	return &Service{

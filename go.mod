@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	connectrpc.com/connect v1.12.0
+	github.com/coocood/freecache v1.2.4
 	github.com/fahmifan/ulids v1.2.0
 	github.com/glebarez/sqlite v1.10.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -16,13 +17,15 @@ require (
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/mailgun/mailgun-go/v4 v4.12.0
 	github.com/matcornic/hermes/v2 v2.1.0
-	github.com/rs/xid v1.2.1
-	github.com/rs/zerolog v1.15.0
+	github.com/rs/xid v1.4.0
+	github.com/rs/zerolog v1.28.0
 	github.com/samber/lo v1.38.1
 	github.com/sethvargo/go-password v0.2.0
 	github.com/simukti/sqldb-logger v0.0.0-20230108155151-646c1a075551
+	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20230108155151-646c1a075551
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/crypto v0.14.0
+	golang.org/x/sync v0.1.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/guregu/null.v4 v4.0.0
@@ -36,6 +39,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/aokoli/goutils v1.0.1 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/go-chi/chi/v5 v5.0.8 // indirect

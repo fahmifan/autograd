@@ -2345,3 +2345,224 @@ export class UpdateAdminCourseRequest extends Message<UpdateAdminCourseRequest> 
   }
 }
 
+/**
+ * @generated from message autograd.v1.FindAdminCourseDetailResponse
+ */
+export class FindAdminCourseDetailResponse extends Message<FindAdminCourseDetailResponse> {
+  /**
+   * @generated from field: autograd.v1.FindAdminCourseDetailResponse.Course course = 1;
+   */
+  course?: FindAdminCourseDetailResponse_Course;
+
+  constructor(data?: PartialMessage<FindAdminCourseDetailResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAdminCourseDetailResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "course", kind: "message", T: FindAdminCourseDetailResponse_Course },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAdminCourseDetailResponse {
+    return new FindAdminCourseDetailResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAdminCourseDetailResponse {
+    return new FindAdminCourseDetailResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAdminCourseDetailResponse {
+    return new FindAdminCourseDetailResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAdminCourseDetailResponse | PlainMessage<FindAdminCourseDetailResponse> | undefined, b: FindAdminCourseDetailResponse | PlainMessage<FindAdminCourseDetailResponse> | undefined): boolean {
+    return proto3.util.equals(FindAdminCourseDetailResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.FindAdminCourseDetailResponse.Course
+ */
+export class FindAdminCourseDetailResponse_Course extends Message<FindAdminCourseDetailResponse_Course> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description = "";
+
+  /**
+   * @generated from field: bool active = 4;
+   */
+  active = false;
+
+  constructor(data?: PartialMessage<FindAdminCourseDetailResponse_Course>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAdminCourseDetailResponse.Course";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "active", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAdminCourseDetailResponse_Course {
+    return new FindAdminCourseDetailResponse_Course().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAdminCourseDetailResponse_Course {
+    return new FindAdminCourseDetailResponse_Course().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAdminCourseDetailResponse_Course {
+    return new FindAdminCourseDetailResponse_Course().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAdminCourseDetailResponse_Course | PlainMessage<FindAdminCourseDetailResponse_Course> | undefined, b: FindAdminCourseDetailResponse_Course | PlainMessage<FindAdminCourseDetailResponse_Course> | undefined): boolean {
+    return proto3.util.equals(FindAdminCourseDetailResponse_Course, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.FindAllCourseStudentsRequest
+ */
+export class FindAllCourseStudentsRequest extends Message<FindAllCourseStudentsRequest> {
+  /**
+   * @generated from field: string course_id = 1;
+   */
+  courseId = "";
+
+  /**
+   * @generated from field: autograd.v1.PaginationRequest pagination_request = 2;
+   */
+  paginationRequest?: PaginationRequest;
+
+  constructor(data?: PartialMessage<FindAllCourseStudentsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAllCourseStudentsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "course_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "pagination_request", kind: "message", T: PaginationRequest },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAllCourseStudentsRequest {
+    return new FindAllCourseStudentsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAllCourseStudentsRequest {
+    return new FindAllCourseStudentsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAllCourseStudentsRequest {
+    return new FindAllCourseStudentsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAllCourseStudentsRequest | PlainMessage<FindAllCourseStudentsRequest> | undefined, b: FindAllCourseStudentsRequest | PlainMessage<FindAllCourseStudentsRequest> | undefined): boolean {
+    return proto3.util.equals(FindAllCourseStudentsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.FindAllCourseStudentsResponse
+ */
+export class FindAllCourseStudentsResponse extends Message<FindAllCourseStudentsResponse> {
+  /**
+   * @generated from field: autograd.v1.PaginationMetadata pagination_metadata = 1;
+   */
+  paginationMetadata?: PaginationMetadata;
+
+  /**
+   * @generated from field: repeated autograd.v1.FindAllCourseStudentsResponse.Student students = 2;
+   */
+  students: FindAllCourseStudentsResponse_Student[] = [];
+
+  constructor(data?: PartialMessage<FindAllCourseStudentsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAllCourseStudentsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "pagination_metadata", kind: "message", T: PaginationMetadata },
+    { no: 2, name: "students", kind: "message", T: FindAllCourseStudentsResponse_Student, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAllCourseStudentsResponse {
+    return new FindAllCourseStudentsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAllCourseStudentsResponse {
+    return new FindAllCourseStudentsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAllCourseStudentsResponse {
+    return new FindAllCourseStudentsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAllCourseStudentsResponse | PlainMessage<FindAllCourseStudentsResponse> | undefined, b: FindAllCourseStudentsResponse | PlainMessage<FindAllCourseStudentsResponse> | undefined): boolean {
+    return proto3.util.equals(FindAllCourseStudentsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message autograd.v1.FindAllCourseStudentsResponse.Student
+ */
+export class FindAllCourseStudentsResponse_Student extends Message<FindAllCourseStudentsResponse_Student> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  constructor(data?: PartialMessage<FindAllCourseStudentsResponse_Student>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "autograd.v1.FindAllCourseStudentsResponse.Student";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FindAllCourseStudentsResponse_Student {
+    return new FindAllCourseStudentsResponse_Student().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FindAllCourseStudentsResponse_Student {
+    return new FindAllCourseStudentsResponse_Student().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FindAllCourseStudentsResponse_Student {
+    return new FindAllCourseStudentsResponse_Student().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FindAllCourseStudentsResponse_Student | PlainMessage<FindAllCourseStudentsResponse_Student> | undefined, b: FindAllCourseStudentsResponse_Student | PlainMessage<FindAllCourseStudentsResponse_Student> | undefined): boolean {
+    return proto3.util.equals(FindAllCourseStudentsResponse_Student, a, b);
+  }
+}
+

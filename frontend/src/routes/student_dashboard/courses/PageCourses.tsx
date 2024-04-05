@@ -48,53 +48,6 @@ function useListCourses(arg: {
     }
 }
 
-function useCreateCourse(arg: {
-    queryClient: QueryClient;
-    onSuccess: (arg: { id: string }) => void;
-    onError: (error: Error) => void;
-}): {
-    create(req: {
-        name: string;
-        description: string;
-    }): Promise<void>;
-    isLoading: boolean;
-} {
-    const [isLoading, setIsLoading] = useState(false)
-
-    const mutation = useMutation({
-        mutationFn: async (req: CreateAdminCourseRequest) => {
-            return AutogradServiceClient.createAdminCourse({
-                description: req.description,
-                name: req.name,
-            })
-        },
-        onError: (error: Error) => {
-            arg.onError(error)
-        },
-    })
-
-    async function create(req: {
-        name: string;
-        description: string;
-    }): Promise<void> {
-        setIsLoading(true)
-        const res = await mutation.mutateAsync(new CreateAdminCourseRequest({
-            description: req.description,
-            name: req.name,
-        }))
-        await arg.queryClient.invalidateQueries(["courses"])
-        arg.onSuccess({
-            id: res.id
-        })
-        setIsLoading(false)
-    }
-
-    return {
-        isLoading,
-        create,
-    }
-}
-
 export function PageCourses() {
     const [overlayVisible, overlayMethod] = useDisclosure(false);
 
@@ -109,19 +62,6 @@ export function PageCourses() {
         queryClient,
         page,
         limit,
-    })
-
-    const hookCreateCourse = useCreateCourse({
-        queryClient,
-        onSuccess: () => {
-            overlayMethod.toggle()
-            modalMethod.close()
-        },
-        onError: (error) => {
-            notifications.show({
-                message: error.message,
-            })
-        }
     })
 
     if (hookListCourses.isLoading) {
@@ -147,30 +87,7 @@ export function PageCourses() {
             <Title order={3} mb="lg" mr="lg">
                 Courses
             </Title>
-            <Button size="compact-md" onClick={() => {
-                modalMethod.open()
-            }}>Create</Button>
-
-                <Modal opened={modalOpen} onClose={modalMethod.close} title="Authentication">
-                    <form onSubmit={(e) => {
-                        e.preventDefault()
-                        const form = new FormData(e.target as HTMLFormElement)
-                        hookCreateCourse.create({
-                            name: form.get('name') as string,
-                            description: form.get('description') as string,
-                        })
-                    }}>
-                        <TextInput name="name" label="Course Name" placeholder="Name" />
-                        <TextInput name="description" label="Course Description" placeholder="Description" />
-                        
-                        {
-                            hookCreateCourse.isLoading 
-                                ? <Loader color="blue" />
-                                : <Button type="submit" mt="lg" disabled={hookCreateCourse.isLoading}>Save</Button>
-                        }
-                    </form>
-                </Modal>
-            </Flex>
+        </Flex>
     }
 
     if (hookListCourses.isEmpty()) {

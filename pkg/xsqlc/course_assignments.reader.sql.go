@@ -13,7 +13,7 @@ import (
 
 const countAllAssignmentsByCourse = `-- name: CountAllAssignmentsByCourse :one
 SELECT COUNT(*) FROM assignments asg
-JOIN rel_assignment_to_course rel ON asg.id = rel.assignment_id
+JOIN rel_assignment_to_courses rel ON asg.id = rel.assignment_id
 WHERE rel.course_id = $1 AND asg.deleted_at is NULL
 `
 
@@ -26,7 +26,7 @@ func (q *Queries) CountAllAssignmentsByCourse(ctx context.Context, courseID stri
 
 const findAllAssignmentsByCourseID = `-- name: FindAllAssignmentsByCourseID :many
 SELECT asg.id, asg.assigned_by, asg.name, asg.description, asg.case_output_file_id, asg.case_input_file_id, asg.created_at, asg.deadline_at, asg.updated_at, asg.deleted_at, asg.template, rel.course_id FROM assignments asg
-JOIN rel_assignment_to_course rel ON asg.id = rel.assignment_id
+JOIN rel_assignment_to_courses rel ON asg.id = rel.assignment_id
 WHERE rel.course_id = $1 AND asg.deleted_at is NULL
 ORDER BY updated_at DESC
 LIMIT $3
@@ -92,7 +92,7 @@ func (q *Queries) FindAllAssignmentsByCourseID(ctx context.Context, arg FindAllA
 
 const findAssignmentByID = `-- name: FindAssignmentByID :one
 SELECT asg.id, asg.assigned_by, asg.name, asg.description, asg.case_output_file_id, asg.case_input_file_id, asg.created_at, asg.deadline_at, asg.updated_at, asg.deleted_at, asg.template, rel.course_id FROM assignments asg
-JOIN rel_assignment_to_course rel ON asg.id = rel.assignment_id
+JOIN rel_assignment_to_courses rel ON asg.id = rel.assignment_id
 WHERE asg.id = $1 AND asg.deleted_at is NULL
 `
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/coocood/freecache"
 	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
@@ -43,7 +44,7 @@ func Execute() error {
 }
 
 func mustInitService() *service.Service {
-	gormDB := dbconn.MustPostgres()
+	gormDB := dbconn.MustPostgres(config.Debug())
 	mediaCfg := core.MediaConfig{
 		RootDir:      config.FileUploadPath(),
 		ObjectStorer: fs.NewLocalStorage(),
@@ -62,6 +63,9 @@ func mustInitService() *service.Service {
 
 	debug := config.Debug()
 
+	cacheSize := 10 * 1024 * 1024
+	cache := freecache.NewCache(cacheSize)
+
 	svc := service.NewService(
 		gormDB,
 		sqlDB,
@@ -70,6 +74,7 @@ func mustInitService() *service.Service {
 		mediaCfg,
 		config.SenderEmail(),
 		mailer,
+		cache,
 	)
 
 	return svc

@@ -298,6 +298,32 @@ message UpdateAdminCourseRequest {
     bool active = 4;
 }
 
+message FindAdminCourseDetailResponse {
+    message Course {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+        bool active = 4;
+    }
+
+    Course course = 1;
+}
+
+message FindAllCourseStudentsRequest {
+    string course_id = 1;
+    PaginationRequest pagination_request = 2;
+}
+
+message FindAllCourseStudentsResponse {
+    message Student {
+        string id = 1;
+        string name = 2;
+    }
+
+    PaginationMetadata pagination_metadata = 1;
+    repeated Student students = 2;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
 
@@ -324,6 +350,10 @@ service AutogradService {
     rpc FindAllAdminCourses(FindAllPaginationRequest) returns (FindAllAdminCoursesResponse) {}
     rpc CreateAdminCourse(CreateAdminCourseRequest) returns (CreatedResponse) {}
     rpc UpdateAdminCourse(UpdateAdminCourseRequest) returns (Empty) {}
+    rpc FindAdminCourseDetail(FindByIDRequest) returns (FindAdminCourseDetailResponse) {}
+
+    // Admin Course Students
+    rpc FindAllCourseStudents(FindAllCourseStudentsRequest) returns (FindAllCourseStudentsResponse) {}
 
     // Student Assignment
     // Student Assignment Queries

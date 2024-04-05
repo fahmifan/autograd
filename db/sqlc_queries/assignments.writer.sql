@@ -28,7 +28,7 @@ SET
 ;
 
 -- name: SaveAssignmentCourse :exec
-INSERT INTO rel_assignment_to_course
+INSERT INTO rel_assignment_to_courses
 (
     course_id, assignment_id
 )

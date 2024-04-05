@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ActivateManagedUserRequest, Assignment, CreateAdminCourseRequest, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAllAdminCoursesResponse, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllManagedUsersResponse, FindAllPaginationRequest, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, ResubmitStudentSubmissionRequest, StudentAssignment, Submission, SubmitStudentSubmissionRequest, UpdateAdminCourseRequest, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { ActivateManagedUserRequest, Assignment, CreateAdminCourseRequest, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAdminCourseDetailResponse, FindAllAdminCoursesResponse, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllCourseStudentsRequest, FindAllCourseStudentsResponse, FindAllManagedUsersResponse, FindAllPaginationRequest, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, ResubmitStudentSubmissionRequest, StudentAssignment, Submission, SubmitStudentSubmissionRequest, UpdateAdminCourseRequest, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -172,6 +172,26 @@ export const AutogradService = {
       name: "UpdateAdminCourse",
       I: UpdateAdminCourseRequest,
       O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradService.FindAdminCourseDetail
+     */
+    findAdminCourseDetail: {
+      name: "FindAdminCourseDetail",
+      I: FindByIDRequest,
+      O: FindAdminCourseDetailResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Admin Course Students
+     *
+     * @generated from rpc autograd.v1.AutogradService.FindAllCourseStudents
+     */
+    findAllCourseStudents: {
+      name: "FindAllCourseStudents",
+      I: FindAllCourseStudentsRequest,
+      O: FindAllCourseStudentsResponse,
       kind: MethodKind.Unary,
     },
     /**

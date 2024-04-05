@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS "rel_course_users" (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE INDEX idx_course_id ON "rel_course_users" ("course_id");
+CREATE INDEX idx_user_id ON "rel_course_users" ("user_id");
+CREATE INDEX idx_user_type ON "rel_course_users" ("user_type");
+
 -- +migrate Down
 DROP TABLE IF EXISTS "courses";
 DROP TABLE IF EXISTS "rel_course_users";

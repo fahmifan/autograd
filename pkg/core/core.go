@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/coocood/freecache"
 	"github.com/fahmifan/autograd/pkg/dbmodel"
 	"github.com/fahmifan/autograd/pkg/jobqueue"
 	"github.com/fahmifan/autograd/pkg/jobqueue/outbox"
 	"github.com/fahmifan/autograd/pkg/mailer"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
+	"golang.org/x/sync/singleflight"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 )
@@ -30,6 +32,8 @@ type Ctx struct {
 	SqlDB          *sql.DB
 	Mailer         mailer.Mailer
 	OutboxEnqueuer OutboxEnqueuer
+	Cache          *freecache.Cache
+	Flight         *singleflight.Group
 }
 
 type OutboxEnqueuer interface {
@@ -170,10 +174,12 @@ func (p Pagination) TotalPage() int32 {
 }
 
 var (
-	ProtoEmptyResponse  = &connect.Response[autogradv1.Empty]{Msg: &autogradv1.Empty{}}
+	ProtoEmptyResponse = &connect.Response[autogradv1.Empty]{Msg: &autogradv1.Empty{}}
+
 	ErrInternalServer   = connect.NewError(connect.CodeInternal, errors.New("internal server error"))
 	ErrUnauthenticated  = connect.NewError(connect.CodeUnauthenticated, errors.New("unauthenticated"))
 	ErrPermissionDenied = connect.NewError(connect.CodePermissionDenied, errors.New("unauthorized"))
+	ErrNotFound         = connect.NewError(connect.CodeNotFound, errors.New("data not found"))
 )
 
 type CoreError struct {

@@ -46,7 +46,7 @@ import {
 	FindAllAssignmentsResponse,
 } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
-import { MarkdownEditor } from "./Assignment";
+import { MarkdownEditor } from "./shared";
 
 
 export function NewAssignment() {

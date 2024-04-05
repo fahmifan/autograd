@@ -5,28 +5,40 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/fahmifan/autograd/pkg/xsqlc"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/rs/zerolog"
+	sqldblogger "github.com/simukti/sqldb-logger"
+	"github.com/simukti/sqldb-logger/logadapter/zerologadapter"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func MustPostgres() *gorm.DB {
+func MustPostgres(debug bool) *gorm.DB {
 	// create gorm postgres connection
 	dsn := "host=localhost user=postgres dbname=autograd port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	conn, err := sql.Open("pgx", dsn)
 	if err != nil {
 		panic(err)
 	}
 
-	conn, err := db.DB()
+	conn.SetMaxIdleConns(2)
+	conn.SetMaxOpenConns(10)
+
+	if debug {
+		loggerAdapter := zerologadapter.New(zerolog.New(os.Stdout))
+		conn = sqldblogger.OpenDriver(dsn, conn.Driver(), loggerAdapter)
+	}
+
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: conn,
+	}))
 	if err != nil {
 		panic(err)
 	}
-
-	conn.SetMaxIdleConns(8)
-	conn.SetMaxOpenConns(100)
 
 	return db
 }
