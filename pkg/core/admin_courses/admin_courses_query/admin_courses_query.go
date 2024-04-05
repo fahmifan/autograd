@@ -2,12 +2,8 @@ package admin_courses_query
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/coocood/freecache"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth"
 	"github.com/fahmifan/autograd/pkg/dbconn"
@@ -124,9 +120,9 @@ func (query *AdminCoursesQuery) FindAllCourseStudents(
 
 	pagin := core.PaginationRequestFromProto(req.Msg.GetPaginationRequest())
 
-	totalCacheKey := NewCacheKey("total", "course", "course_id", req.Msg.GetCourseId())
-	total, err := GetOrCache(query.Ctx, totalCacheKey, 60, func() (int64, error) {
-		total, err := sqlcQuery.CountAllStudentsByCourse(ctx, req.Msg.GetCourseId())
+	totalCacheKey := core.NewCacheKey("total", "course", "course_id", req.Msg.GetCourseId())
+	total, err := core.GetOrCache(ctx, query.Ctx, totalCacheKey, 60, func() (int64, error) {
+		total, err := sqlcQuery.CountAllCourseStudents(ctx, req.Msg.GetCourseId())
 		if err != nil {
 			logs.ErrCtx(ctx, err, "AdminCoursesQuery: FindAllCourseStudents: FindAllStudentsByCourse")
 			return 0, core.ErrInternalServer
@@ -139,7 +135,7 @@ func (query *AdminCoursesQuery) FindAllCourseStudents(
 		return nil, core.ErrInternalServer
 	}
 
-	students, err := sqlcQuery.FindAllStudentsByCourse(ctx, xsqlc.FindAllStudentsByCourseParams{
+	students, err := sqlcQuery.FindAllCourseStudents(ctx, xsqlc.FindAllCourseStudentsParams{
 		CourseID:   req.Msg.GetCourseId(),
 		PageOffset: pagin.Offset(),
 		PageLimit:  pagin.Limit,
@@ -149,9 +145,9 @@ func (query *AdminCoursesQuery) FindAllCourseStudents(
 		return nil, core.ErrInternalServer
 	}
 
-	resStudents := make([]*autogradv1.FindAllCourseStudentsResponse_Student, len(students))
+	protoStudents := make([]*autogradv1.FindAllCourseStudentsResponse_Student, len(students))
 	for i := range students {
-		resStudents[i] = &autogradv1.FindAllCourseStudentsResponse_Student{
+		protoStudents[i] = &autogradv1.FindAllCourseStudentsResponse_Student{
 			Id:   students[i].ID,
 			Name: students[i].Name,
 		}
@@ -159,55 +155,8 @@ func (query *AdminCoursesQuery) FindAllCourseStudents(
 
 	return &connect.Response[autogradv1.FindAllCourseStudentsResponse]{
 		Msg: &autogradv1.FindAllCourseStudentsResponse{
-			Students:           resStudents,
+			Students:           protoStudents,
 			PaginationMetadata: pagin.WithTotal(int32(total)).ProtoPagination(),
 		},
 	}, nil
-}
-
-type CacheKey string
-
-func NewCacheKey(arg ...string) CacheKey {
-	return CacheKey(strings.Join(arg, ":"))
-}
-
-func GetOrCache[T any](coreCtx *core.Ctx, key CacheKey, expireInSecond int, fetch func() (T, error)) (T, error) {
-	val, err, _ := coreCtx.Flight.Do(string(key), func() (interface{}, error) {
-		var tval T
-
-		val, err := coreCtx.Cache.Get([]byte(key))
-		if err == nil {
-			// found
-			err = json.Unmarshal(val, &tval)
-			return tval, err
-		}
-		if !errors.Is(err, freecache.ErrNotFound) {
-			return tval, err
-		}
-
-		tval, err = fetch()
-		if err != nil {
-			return tval, err
-		}
-
-		val, err = json.Marshal(tval)
-		if err != nil {
-			return tval, err
-		}
-
-		err = coreCtx.Cache.Set([]byte(key), val, expireInSecond)
-		if err != nil {
-			return tval, err
-		}
-
-		return tval, nil
-	})
-	defer coreCtx.Flight.Forget(string(key))
-
-	var tval T
-	if err != nil {
-		return tval, nil
-	}
-
-	return val.(T), nil
 }

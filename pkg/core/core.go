@@ -3,9 +3,11 @@ package core
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -193,4 +195,51 @@ func NewError(code connect.Code, msg string) CoreError {
 
 func (e CoreError) Error() string {
 	return fmt.Sprintf("code: %s, error: %s", e.Code.String(), e.Msg)
+}
+
+type CacheKey string
+
+func NewCacheKey(arg ...string) CacheKey {
+	return CacheKey(strings.Join(arg, ":"))
+}
+
+func GetOrCache[T any](ctx context.Context, coreCtx *Ctx, key CacheKey, expireInSecond int, fetch func() (T, error)) (T, error) {
+	val, err, _ := coreCtx.Flight.Do(string(key), func() (interface{}, error) {
+		var tval T
+
+		val, err := coreCtx.Cache.Get([]byte(key))
+		if err == nil {
+			// found
+			err = json.Unmarshal(val, &tval)
+			return tval, err
+		}
+		if !errors.Is(err, freecache.ErrNotFound) {
+			return tval, err
+		}
+
+		tval, err = fetch()
+		if err != nil {
+			return tval, err
+		}
+
+		val, err = json.Marshal(tval)
+		if err != nil {
+			return tval, err
+		}
+
+		err = coreCtx.Cache.Set([]byte(key), val, expireInSecond)
+		if err != nil {
+			return tval, err
+		}
+
+		return tval, nil
+	})
+	defer coreCtx.Flight.Forget(string(key))
+
+	var tval T
+	if err != nil {
+		return tval, nil
+	}
+
+	return val.(T), nil
 }

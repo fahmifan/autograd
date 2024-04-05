@@ -9,6 +9,18 @@ import (
 	"context"
 )
 
+const countAllCourseStudents = `-- name: CountAllCourseStudents :one
+SELECT COUNT(rel.user_id) FROM rel_course_users rel
+WHERE rel.course_id = $1
+`
+
+func (q *Queries) CountAllCourseStudents(ctx context.Context, courseID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllCourseStudents, courseID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countAllCoursesByUser = `-- name: CountAllCoursesByUser :one
 SELECT COUNT(*) FROM courses
 WHERE id IN (SELECT course_id FROM rel_course_users WHERE user_id = $1)
@@ -20,6 +32,52 @@ func (q *Queries) CountAllCoursesByUser(ctx context.Context, userID string) (int
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const findAllCourseStudents = `-- name: FindAllCourseStudents :many
+SELECT u.id, u.name FROM users u
+WHERE u.id IN (
+    SELECT rel.user_id FROM rel_course_users rel
+    WHERE rel.course_id = $1
+    LIMIT $3
+    OFFSET $2
+)
+AND u.deleted_at IS NULL
+ORDER BY u.id DESC
+`
+
+type FindAllCourseStudentsParams struct {
+	CourseID   string
+	PageOffset int32
+	PageLimit  int32
+}
+
+type FindAllCourseStudentsRow struct {
+	ID   string
+	Name string
+}
+
+func (q *Queries) FindAllCourseStudents(ctx context.Context, arg FindAllCourseStudentsParams) ([]FindAllCourseStudentsRow, error) {
+	rows, err := q.db.QueryContext(ctx, findAllCourseStudents, arg.CourseID, arg.PageOffset, arg.PageLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FindAllCourseStudentsRow
+	for rows.Next() {
+		var i FindAllCourseStudentsRow
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const findAllCoursesByUser = `-- name: FindAllCoursesByUser :many

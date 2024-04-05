@@ -18,3 +18,18 @@ WHERE id = @id;
 SELECT * FROM courses
 WHERE id = @id
 AND deleted_at IS NULL;
+
+-- name: FindAllCourseStudents :many
+SELECT u.id, u.name FROM users u
+WHERE u.id IN (
+    SELECT rel.user_id FROM rel_course_users rel
+    WHERE rel.course_id = @course_id
+    LIMIT @page_limit
+    OFFSET @page_offset
+)
+AND u.deleted_at IS NULL
+ORDER BY u.id DESC;
+
+-- name: CountAllCourseStudents :one
+SELECT COUNT(rel.user_id) FROM rel_course_users rel
+WHERE rel.course_id = @course_id;

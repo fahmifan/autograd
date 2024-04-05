@@ -104,7 +104,7 @@ export function PageCourses() {
 
     const [searchParams] = useSearchParams()
     const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const limit = parseInt(searchParams.get('limit') || '9')
     const hookListCourses = useListCourses({
         queryClient,
         page,
