@@ -1,25 +1,39 @@
 import { Anchor, Box, Table, Text, Title } from "@mantine/core";
 import { Editor } from "@monaco-editor/react";
 import { IconExternalLink } from "@tabler/icons-react";
-import { Link, LoaderFunctionArgs, useLoaderData, useSearchParams } from "react-router-dom";
+import {
+	Link,
+	LoaderFunctionArgs,
+	useLoaderData,
+	useSearchParams,
+} from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
-import { FindAllSubmissionsForAssignmentResponse, Submission } from "../../../../pb/autograd/v1/autograd_pb";
+import {
+	FindAllSubmissionsForAssignmentResponse,
+	Submission,
+} from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../../service";
 
-export function ListSubmissions() {	
+export function ListSubmissions() {
 	const res = useLoaderData() as FindAllSubmissionsForAssignmentResponse;
-	const [searchParams] = useSearchParams()
-	const courseID = searchParams.get('courseID') ?? ''
+	const [searchParams] = useSearchParams();
+	const courseID = searchParams.get("courseID") ?? "";
 
 	const items = [
 		{ title: "Courses", to: `/backoffice/courses/detail?courseID=${courseID}` },
-		{ title: res.course?.name ?? "", to: `/backoffice/courses/detail?courseID=${courseID}` },
-		{ title: "Submission", to: `/backoffice/courses/assignments/submissions?assignmentID=${res.assignmentId}`},
-	]
+		{
+			title: res.course?.name ?? "",
+			to: `/backoffice/courses/detail?courseID=${courseID}`,
+		},
+		{
+			title: "Submission",
+			to: `/backoffice/courses/assignments/submissions?assignmentID=${res.assignmentId}`,
+		},
+	];
 
 	if (!res || !res.submissions || res.submissions.length === 0) {
 		return (
-			<>	
+			<>
 				<Box mb="lg">
 					<Breadcrumbs items={items} />
 				</Box>
@@ -29,7 +43,6 @@ export function ListSubmissions() {
 			</>
 		);
 	}
-
 
 	return (
 		<div>
@@ -73,14 +86,20 @@ export function ListSubmissions() {
 export function SubmissionDetail() {
 	const res = useLoaderData() as Submission;
 
-	const [searchParams] = useSearchParams()
-	const courseID = searchParams.get('courseID') ?? ''
+	const [searchParams] = useSearchParams();
+	const courseID = searchParams.get("courseID") ?? "";
 
 	const items = [
 		{ title: "Courses", to: "/backoffice/courses" },
-		{ title: "Submission", to: `/backoffice/courses/assignments/submissions?courseID=${courseID}&assignmentID=${res.assignment?.id}`},
-		{ title: res.submitter?.name ?? '', to: `/backoffice/courses/assignments/submissions/detail?courseID=${courseID}&submissionID=${res.id}`},
-	]
+		{
+			title: "Submission",
+			to: `/backoffice/courses/assignments/submissions?courseID=${courseID}&assignmentID=${res.assignment?.id}`,
+		},
+		{
+			title: res.submitter?.name ?? "",
+			to: `/backoffice/courses/assignments/submissions/detail?courseID=${courseID}&submissionID=${res.id}`,
+		},
+	];
 
 	return (
 		<div>
@@ -90,9 +109,7 @@ export function SubmissionDetail() {
 				Submission
 			</Title>
 
-			<Text mb="sm">
-				Student: {res.submitter?.name}
-			</Text>
+			<Text mb="sm">Student: {res.submitter?.name}</Text>
 
 			<Box
 				py="lg"
@@ -119,7 +136,7 @@ export async function loaderListSubmissions({
 	const assignmentID = url.searchParams.get("assignmentID") as string;
 
 	return await AutogradServiceClient.findAllSubmissionForAssignment({
-		assignmentId: assignmentID
+		assignmentId: assignmentID,
 	});
 }
 

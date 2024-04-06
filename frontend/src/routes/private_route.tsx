@@ -6,9 +6,8 @@ export function PrivateRoute({ element }: { element: JSX.Element }) {
 	const location = useLocation();
 
 	if (!jwtToken || !jwtToken.id) {
-		return <Navigate to="/login" state={{ from: location }} />
+		return <Navigate to="/login" state={{ from: location }} />;
 	}
 
-
-	return element
+	return element;
 }

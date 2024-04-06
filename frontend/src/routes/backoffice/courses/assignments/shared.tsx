@@ -1,5 +1,13 @@
 import { Paper } from "@mantine/core";
-import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePlugin, thematicBreakPlugin } from "@mdxeditor/editor";
+import {
+	MDXEditor,
+	MDXEditorMethods,
+	headingsPlugin,
+	listsPlugin,
+	markdownShortcutPlugin,
+	quotePlugin,
+	thematicBreakPlugin,
+} from "@mdxeditor/editor";
 import { forwardRef } from "react";
 
 type MarkdownEditorProps = {
@@ -28,4 +36,3 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
 		);
 	},
 );
-

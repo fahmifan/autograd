@@ -43,8 +43,8 @@ export function ListStudentAssignments() {
 	const res = useLoaderData() as FindAllStudentAssignmentsResponse;
 	const navigate = useNavigate();
 
-	const [searchParams] = useSearchParams()
-	const courseID = searchParams.get('courseID') ?? ''
+	const [searchParams] = useSearchParams();
+	const courseID = searchParams.get("courseID") ?? "";
 
 	if (!res || res.assignments.length === 0) {
 		return (
@@ -132,7 +132,7 @@ export function DetailStudentAssignment() {
 			title: res.name,
 			to: `/student-dashboard/courses/assignments/detail?id=${res.id}`,
 		},
-	]
+	];
 
 	return (
 		<>
@@ -167,7 +167,9 @@ export function DetailStudentAssignment() {
 						<Table.Tr>
 							<Table.Th>Grade</Table.Th>
 							<Table.Td>
-								{(res.hasSubmission && res.submission?.isGraded) ? res.submission?.grade : "-"}
+								{res.hasSubmission && res.submission?.isGraded
+									? res.submission?.grade
+									: "-"}
 							</Table.Td>
 						</Table.Tr>
 					</Table.Tbody>
@@ -283,7 +285,11 @@ export function DetailStudentAssignment() {
 						height="300px"
 						defaultLanguage="cpp"
 						language="cpp"
-						defaultValue={res?.hasSubmission ? res.submission?.submissionCode : res.codeTemplate}
+						defaultValue={
+							res?.hasSubmission
+								? res.submission?.submissionCode
+								: res.codeTemplate
+						}
 					/>
 				</Box>
 			</Box>

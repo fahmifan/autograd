@@ -15,13 +15,13 @@ export function useAutogradClient(): PromiseClient<typeof AutogradService> {
 	return useClient(AutogradService);
 }
 
-let _jwtToken = ''
+let _jwtToken = "";
 export function getJWTToken(): string {
 	if (_jwtToken) {
-		return _jwtToken
+		return _jwtToken;
 	}
 	_jwtToken = localStorage.getItem("token") ?? "";
-	return _jwtToken
+	return _jwtToken;
 }
 
 type JWTDecoded = JwtPayload & {
@@ -33,12 +33,12 @@ type JWTDecoded = JwtPayload & {
 
 export function saveJWTToken(token: string): void {
 	localStorage.setItem("token", token);
-	_jwtToken = token
+	_jwtToken = token;
 }
 
 export function removeJWTToken(): void {
 	localStorage.removeItem("token");
-	_jwtToken = ''
+	_jwtToken = "";
 }
 
 export function decodeJWTToken(token: string): JWTDecoded {
@@ -47,10 +47,10 @@ export function decodeJWTToken(token: string): JWTDecoded {
 
 export function getDecodedJWTToken(): JWTDecoded {
 	try {
-		const token = getJWTToken()
-		return decodeJWTToken(token)
-	} catch(err) {
-		return {}
+		const token = getJWTToken();
+		return decodeJWTToken(token);
+	} catch (err) {
+		return {};
 	}
 }
 

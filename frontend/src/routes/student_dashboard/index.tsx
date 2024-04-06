@@ -1,4 +1,11 @@
-import { AppShell, Button, Container, Flex, NavLink, Text } from "@mantine/core";
+import {
+	AppShell,
+	Button,
+	Container,
+	Flex,
+	NavLink,
+	Text,
+} from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
@@ -93,11 +100,12 @@ export default function DashboardLayout() {
 						Autograd Dashboard
 					</Text>
 					<Link to="/logout">
-						<Button mr="sm" size="compact-sm" color="gray" variant="outline">Logout</Button>
+						<Button mr="sm" size="compact-sm" color="gray" variant="outline">
+							Logout
+						</Button>
 					</Link>
 				</Flex>
 			</AppShell.Header>
-			
 
 			<AppShell.Navbar p="md">
 				{navitems.map((item) => {

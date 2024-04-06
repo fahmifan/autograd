@@ -30,7 +30,12 @@ import {
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { Editor } from "@monaco-editor/react";
-import { IconExternalLink, IconNote, IconTrash, IconUpload } from "@tabler/icons-react";
+import {
+	IconExternalLink,
+	IconNote,
+	IconTrash,
+	IconUpload,
+} from "@tabler/icons-react";
 import { forwardRef, useRef, useState } from "react";
 import { useMutation } from "react-query";
 import {
@@ -42,12 +47,9 @@ import {
 	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
-import {
-	FindAllAssignmentsResponse,
-} from "../../../../pb/autograd/v1/autograd_pb";
+import { FindAllAssignmentsResponse } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
 import { MarkdownEditor } from "./shared";
-
 
 export function NewAssignment() {
 	const [stdinFileID, setStdinFileID] = useState("");
@@ -56,8 +58,8 @@ export function NewAssignment() {
 	const [template, setTemplate] = useState("");
 	const submit = useSubmit();
 
-	const [searchParams] = useSearchParams()
-	const courseID = searchParams.get('courseID') ?? ''
+	const [searchParams] = useSearchParams();
+	const courseID = searchParams.get("courseID") ?? "";
 
 	const mutateUploadStdin = useMutation({
 		mutationKey: "uploadStdin",
@@ -127,7 +129,7 @@ export function NewAssignment() {
 							value={stdoutFileID}
 						/>
 
-						<Input 
+						<Input
 							type="hidden"
 							name="template"
 							id="template"
@@ -222,7 +224,7 @@ export async function actionCreateAssignemnt(
 	arg: ActionFunctionArgs,
 ): Promise<Response | null> {
 	const formData = await arg.request.formData();
-	
+
 	const courseId = formData.get("courseID") as string;
 	const name = formData.get("name") as string;
 	const description = formData.get("description") as string;

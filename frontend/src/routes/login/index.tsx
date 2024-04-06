@@ -9,7 +9,11 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { ActionFunctionArgs, Form, Navigate, redirect } from "react-router-dom";
-import { AutogradServiceClient, getDecodedJWTToken, saveJWTToken } from "../../service";
+import {
+	AutogradServiceClient,
+	getDecodedJWTToken,
+	saveJWTToken,
+} from "../../service";
 
 export function LoginPage() {
 	const decoded = getDecodedJWTToken();

@@ -1,13 +1,35 @@
-import { AppShell, Button, Container, Flex, NavLink, Text } from "@mantine/core";
+import {
+	AppShell,
+	Button,
+	Container,
+	Flex,
+	NavLink,
+	Text,
+} from "@mantine/core";
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
-import { PageCourseDetail, actionDeleteAssignment } from "./courses/PageCourseDetail";
+import {
+	PageCourseDetail,
+	actionDeleteAssignment,
+} from "./courses/PageCourseDetail";
 import { PageCourses } from "./courses/PageCourses";
-import { NewAssignment, actionCreateAssignemnt } from "./courses/assignments/CreateAssignment";
-import { DetailAssignment, actionDetailAssignment, loadEditAssignment } from "./courses/assignments/DetailAssignment";
+import {
+	NewAssignment,
+	actionCreateAssignemnt,
+} from "./courses/assignments/CreateAssignment";
+import {
+	DetailAssignment,
+	actionDetailAssignment,
+	loadEditAssignment,
+} from "./courses/assignments/DetailAssignment";
 import { PageAssignments } from "./courses/assignments/PageAssignments";
-import { ListSubmissions, SubmissionDetail, loaderListSubmissions, loaderSubmissionDetail } from "./courses/assignments/Submissions";
+import {
+	ListSubmissions,
+	SubmissionDetail,
+	loaderListSubmissions,
+	loaderSubmissionDetail,
+} from "./courses/assignments/Submissions";
 import { PageStudents } from "./courses/students/PageStudents";
 import {
 	CreateManagedUser,
@@ -74,9 +96,9 @@ export const router: RouteObject[] = [
 			// Courses Students
 			{
 				path: "/backoffice/courses/students",
-				element: <PrivateRoute element={<PageStudents />} />
-			}
-		]
+				element: <PrivateRoute element={<PageStudents />} />,
+			},
+		],
 	},
 ];
 
@@ -100,7 +122,7 @@ export default function DashboardLayout() {
 		},
 		{
 			label: "Courses",
-			to: "/backoffice/courses"
+			to: "/backoffice/courses",
 		},
 	];
 
@@ -135,7 +157,9 @@ export default function DashboardLayout() {
 						Autograd Dashboard
 					</Text>
 					<Link to="/logout">
-						<Button mr="sm" size="compact-sm" color="gray" variant="outline">Logout</Button>
+						<Button mr="sm" size="compact-sm" color="gray" variant="outline">
+							Logout
+						</Button>
 					</Link>
 				</Flex>
 			</AppShell.Header>

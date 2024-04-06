@@ -28,61 +28,72 @@ import {
 import { Breadcrumbs } from "../../../components/Breadcrumbs";
 import {
 	FindAllAssignmentsResponse,
-    PaginationMetadata,
+	PaginationMetadata,
 } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
 import { useAdminCourseDetail } from "./hooks";
 
 function useListAssignments(arg: {
-    courseId: string;
-    page: number;
-    limit: number;
+	courseId: string;
+	page: number;
+	limit: number;
 }): {
-    error: unknown;
-    res?: FindAllAssignmentsResponse;
-    paginationMetadata?: PaginationMetadata;
+	error: unknown;
+	res?: FindAllAssignmentsResponse;
+	paginationMetadata?: PaginationMetadata;
 } {
-    const queryKeys = ["courses", arg.courseId, "assignments", arg.page, arg.limit]
+	const queryKeys = [
+		"courses",
+		arg.courseId,
+		"assignments",
+		arg.page,
+		arg.limit,
+	];
 
-    const { isLoading, data, isError, error } = useQuery({
-        queryKey: queryKeys,
-        queryFn: async () => {
-            return AutogradServiceClient.findAllAssignments({
-                courseId: arg.courseId,
-                paginationRequest: {
-                    page: arg.page,
-                    limit: arg.limit,
-                }
-            })
-        },
-    })
+	const { isLoading, data, isError, error } = useQuery({
+		queryKey: queryKeys,
+		queryFn: async () => {
+			return AutogradServiceClient.findAllAssignments({
+				courseId: arg.courseId,
+				paginationRequest: {
+					page: arg.page,
+					limit: arg.limit,
+				},
+			});
+		},
+	});
 
-    return {
-        error,
-        paginationMetadata: data?.paginationMetadata,
-        res: data
-    }
+	return {
+		error,
+		paginationMetadata: data?.paginationMetadata,
+		res: data,
+	};
 }
 
 export function PageCourseDetail() {
-    const [searchParams] = useSearchParams()
-    const [page] = useState(parseInt(searchParams.get('page') || '1'))
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const courseID = searchParams.get('courseID') ?? ''
+	const [searchParams] = useSearchParams();
+	const [page] = useState(parseInt(searchParams.get("page") || "1"));
+	const limit = parseInt(searchParams.get("limit") || "10");
+	const courseID = searchParams.get("courseID") ?? "";
 
-    const hookCourse = useAdminCourseDetail({ courseID })
+	const hookCourse = useAdminCourseDetail({ courseID });
 	const { res } = hookCourse;
 
 	const items = [
 		{ title: "Courses", to: "/backoffice/courses" },
-		{ title: res?.course?.name ?? '', to: `/backoffice/courses/detail?courseID=${courseID}` },
-	]
+		{
+			title: res?.course?.name ?? "",
+			to: `/backoffice/courses/detail?courseID=${courseID}`,
+		},
+	];
 
 	return (
 		<section>
 			<Breadcrumbs items={items} />
-			<Title order={3} mt="lg">{res?.course?.name}</Title>
-			
+			<Title order={3} mt="lg">
+				{res?.course?.name}
+			</Title>
+
 			<Grid>
 				<Grid.Col span={4}>
 					<Card
@@ -92,12 +103,14 @@ export function PageCourseDetail() {
 						to={`/backoffice/courses/assignments?courseID=${courseID}`}
 						m="md"
 						style={{
-							'&:hover': {
-								cursor: 'pointer'
-							}
+							"&:hover": {
+								cursor: "pointer",
+							},
 						}}
 					>
-						<Text fw={500} size="xl" mt="md">Assignments</Text>
+						<Text fw={500} size="xl" mt="md">
+							Assignments
+						</Text>
 					</Card>
 				</Grid.Col>
 
@@ -109,12 +122,14 @@ export function PageCourseDetail() {
 						to={`/backoffice/courses/students?courseID=${courseID}`}
 						m="md"
 						style={{
-							'&:hover': {
-								cursor: 'pointer'
-							}
+							"&:hover": {
+								cursor: "pointer",
+							},
 						}}
 					>
-						<Text fw={500} size="xl" mt="md">Students</Text>
+						<Text fw={500} size="xl" mt="md">
+							Students
+						</Text>
 					</Card>
 				</Grid.Col>
 			</Grid>
@@ -122,13 +137,15 @@ export function PageCourseDetail() {
 	);
 }
 
-export async function actionDeleteAssignment(arg: ActionFunctionArgs): Promise<Response | null> {
+export async function actionDeleteAssignment(
+	arg: ActionFunctionArgs,
+): Promise<Response | null> {
 	const formData = await arg.request.formData();
 	const id = formData.get("id") as string;
 
 	const res = await AutogradServiceClient.deleteAssignment({
 		id,
-	})
+	});
 
 	if (res) {
 		return redirect("/backoffice/assignments");

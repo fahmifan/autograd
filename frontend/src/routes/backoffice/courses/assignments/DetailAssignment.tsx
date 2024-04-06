@@ -1,11 +1,34 @@
-import { ActionIcon, Anchor, Button, Card, FileInput, Flex, Input, Stack, Text, TextInput, Title, Tooltip, VisuallyHidden, rem } from "@mantine/core";
+import {
+	ActionIcon,
+	Anchor,
+	Button,
+	Card,
+	FileInput,
+	Flex,
+	Input,
+	Stack,
+	Text,
+	TextInput,
+	Title,
+	Tooltip,
+	VisuallyHidden,
+	rem,
+} from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { Editor } from "@monaco-editor/react";
 import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useMutation } from "react-query";
-import { ActionFunctionArgs, Form, LoaderFunctionArgs, redirect, useLoaderData, useSearchParams, useSubmit } from "react-router-dom";
+import {
+	ActionFunctionArgs,
+	Form,
+	LoaderFunctionArgs,
+	redirect,
+	useLoaderData,
+	useSearchParams,
+	useSubmit,
+} from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
 import { Assignment } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
@@ -14,8 +37,8 @@ import { MarkdownEditor } from "./shared";
 export function DetailAssignment() {
 	const res = useLoaderData() as Assignment;
 
-	const [searchParams] = useSearchParams()
-	const courseID = searchParams.get('courseID') ?? ''
+	const [searchParams] = useSearchParams();
+	const courseID = searchParams.get("courseID") ?? "";
 
 	const [stdinFileID, setStdinFileID] = useState(res.caseInputFile?.id ?? "");
 	const [stdoutFileID, setStdoutFileID] = useState(
@@ -59,10 +82,19 @@ export function DetailAssignment() {
 
 	const items = [
 		{ title: "Courses", to: "/backoffice/courses" },
-		{ title: res.course?.name ?? "", to: `/backoffice/courses/detail?courseID=${courseID}` },
-		{ title: "Assignments", to: `/backoffice/courses/assignments?courseID=${courseID}` },
-		{ title: res.name, to: `/backoffice/courses/assignments/detail?courseID=${courseID}&id=${res.id}` },
-	]
+		{
+			title: res.course?.name ?? "",
+			to: `/backoffice/courses/detail?courseID=${courseID}`,
+		},
+		{
+			title: "Assignments",
+			to: `/backoffice/courses/assignments?courseID=${courseID}`,
+		},
+		{
+			title: res.name,
+			to: `/backoffice/courses/assignments/detail?courseID=${courseID}&id=${res.id}`,
+		},
+	];
 
 	return (
 		<>
@@ -72,17 +104,22 @@ export function DetailAssignment() {
 				<Title order={3} mb="lg">
 					{res.name}
 				</Title>
-				<Form method="POST" id="delete-assignment"
-					onSubmit={e => {
+				<Form
+					method="POST"
+					id="delete-assignment"
+					onSubmit={(e) => {
 						e.preventDefault();
 
-						const ok = confirm(`Are you sure you want to delete assignment "${res.name}"?`);
+						const ok = confirm(
+							`Are you sure you want to delete assignment "${res.name}"?`,
+						);
 						if (!ok) {
 							return;
 						}
 
 						submit(e.currentTarget);
-					}}>
+					}}
+				>
 					<VisuallyHidden>
 						<input name="id" value={res.id} />
 					</VisuallyHidden>
@@ -105,19 +142,14 @@ export function DetailAssignment() {
 					/>
 
 					<VisuallyHidden>
-                        <Input 
-                            type="hidden"
-                            name="courseID"
-                            id="courseID"
-                            value={courseID}
-                        />
-
 						<Input
 							type="hidden"
-							name="id"
-							id="id"
-							value={res.id}
+							name="courseID"
+							id="courseID"
+							value={courseID}
 						/>
+
+						<Input type="hidden" name="id" id="id" value={res.id} />
 
 						<Input
 							type="hidden"
@@ -140,7 +172,7 @@ export function DetailAssignment() {
 							value={stdoutFileID}
 						/>
 
-						<Input 
+						<Input
 							type="hidden"
 							name="template"
 							value={template}
@@ -152,7 +184,9 @@ export function DetailAssignment() {
 						required
 						label="Case Input/Stdin"
 						title="Case Input/Stdin"
-						placeholder={res?.caseInputFile? res?.caseInputFile?.id : "Select file"}
+						placeholder={
+							res?.caseInputFile ? res?.caseInputFile?.id : "Select file"
+						}
 						rightSection={
 							<IconUpload
 								style={{ width: rem(18), height: rem(18) }}
@@ -171,7 +205,9 @@ export function DetailAssignment() {
 						required
 						label="Case Output/Stdout"
 						title="Case Output/Stdout"
-						placeholder={res?.caseOutputFile? res?.caseOutputFile?.id : "Select file"}
+						placeholder={
+							res?.caseOutputFile ? res?.caseOutputFile?.id : "Select file"
+						}
 						rightSection={
 							<IconUpload
 								style={{ width: rem(18), height: rem(18) }}
@@ -217,7 +253,7 @@ export function DetailAssignment() {
 				<Button
 					mt="md"
 					type="submit"
-					name="intent" 
+					name="intent"
 					value="update-assignment"
 					onClick={(event) => {
 						event.preventDefault();
@@ -242,12 +278,16 @@ export function DetailAssignment() {
 	);
 }
 
-export async function actionDetailAssignment(arg: ActionFunctionArgs): Promise<Response | null> {
+export async function actionDetailAssignment(
+	arg: ActionFunctionArgs,
+): Promise<Response | null> {
 	const form = await arg.request.formData();
 	const intent = form.get("intent");
 	switch (intent) {
-		case "delete-assignment": return await doDeleteAssignment(form);
-		case "update-assignment": return await doUpdateAssignment(form);
+		case "delete-assignment":
+			return await doDeleteAssignment(form);
+		case "update-assignment":
+			return await doUpdateAssignment(form);
 	}
 
 	return null;
@@ -266,10 +306,9 @@ export async function loadEditAssignment({
 	return res;
 }
 
-
 async function doUpdateAssignment(form: FormData): Promise<Response | null> {
 	const id = form.get("id") as string;
-    const courseID = form.get("courseID") as string;
+	const courseID = form.get("courseID") as string;
 	const name = form.get("name") as string;
 	const description = form.get("description") as string;
 	const caseInputFileId = form.get("case_input_file_id") as string;
@@ -284,15 +323,16 @@ async function doUpdateAssignment(form: FormData): Promise<Response | null> {
 		caseInputFileId,
 		caseOutputFileId,
 		deadlineAt,
-		template
+		template,
 	});
 
 	if (res) {
-		return redirect(`/backoffice/assignments/detail?courseID=${courseID}&id=${id}`);
+		return redirect(
+			`/backoffice/assignments/detail?courseID=${courseID}&id=${id}`,
+		);
 	}
 
 	return null;
-
 }
 async function doDeleteAssignment(form: FormData): Promise<Response | null> {
 	const id = form.get("id") as string;
@@ -301,4 +341,3 @@ async function doDeleteAssignment(form: FormData): Promise<Response | null> {
 	});
 	return redirect("/backoffice/assignments");
 }
-

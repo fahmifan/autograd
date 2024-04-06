@@ -94,19 +94,27 @@ export function CreateManagedUser() {
 
 	return (
 		<>
-			<Title order={3} mb="lg">Create User</Title>
+			<Title order={3} mb="lg">
+				Create User
+			</Title>
 			<Group>
 				<Form method="post" id="create-managed-user">
-						<TextInput mb="md" type="text" name="name" id="name" label="Name" />
-						<TextInput mb="md" type="email" name="email" id="email" label="Email" />
-						<Select
-							mb="md"
-							label="Role"
-							name="role"
-							id="role"
-							placeholder="Choose a role"
-							data={roleSelection}
-						/>
+					<TextInput mb="md" type="text" name="name" id="name" label="Name" />
+					<TextInput
+						mb="md"
+						type="email"
+						name="email"
+						id="email"
+						label="Email"
+					/>
+					<Select
+						mb="md"
+						label="Role"
+						name="role"
+						id="role"
+						placeholder="Choose a role"
+						data={roleSelection}
+					/>
 
 					<Button
 						type="submit"

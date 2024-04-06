@@ -5,22 +5,22 @@ import { AutogradServiceClient } from "../../../service";
 export function useAdminCourseDetail(arg: {
 	courseID: string;
 }): {
-    error: unknown;
-    res?: FindAdminCourseDetailResponse,
+	error: unknown;
+	res?: FindAdminCourseDetailResponse;
 } {
-	const queryKeys = ["courses", arg.courseID]
+	const queryKeys = ["courses", arg.courseID];
 
-    const { isLoading, data, isError, error } = useQuery({
-        queryKey: queryKeys,
-        queryFn: async () => {
-            return AutogradServiceClient.findAdminCourseDetail({
-                id: arg.courseID,
-            })
-        },
-    })
+	const { isLoading, data, isError, error } = useQuery({
+		queryKey: queryKeys,
+		queryFn: async () => {
+			return AutogradServiceClient.findAdminCourseDetail({
+				id: arg.courseID,
+			});
+		},
+	});
 
-    return {
-        error,
-        res: data
-    }
+	return {
+		error,
+		res: data,
+	};
 }
