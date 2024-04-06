@@ -3,12 +3,12 @@ import { Editor } from "@monaco-editor/react";
 import { IconExternalLink } from "@tabler/icons-react";
 import {
 	Link,
-	LoaderFunctionArgs,
+	type LoaderFunctionArgs,
 	useLoaderData,
 	useSearchParams,
 } from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
-import {
+import type {
 	FindAllSubmissionsForAssignmentResponse,
 	Submission,
 } from "../../../../pb/autograd/v1/autograd_pb";

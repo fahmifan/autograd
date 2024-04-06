@@ -1,15 +1,15 @@
 import {
-	Interceptor,
-	PromiseClient,
+	type Interceptor,
+	type PromiseClient,
 	createPromiseClient,
 } from "@bufbuild/connect";
 import { createConnectTransport } from "@bufbuild/connect-web";
-import { ServiceType } from "@bufbuild/protobuf";
+import type { ServiceType } from "@bufbuild/protobuf";
 import { useMemo } from "react";
 
-import { JwtPayload, jwtDecode } from "jwt-decode";
+import { type JwtPayload, jwtDecode } from "jwt-decode";
 import { AutogradService } from "../pb/autograd/v1/autograd_connect";
-import { AutogradRPC } from "./rcp_client";
+import { AutogradRPC } from "./rpc_client";
 
 export function useAutogradClient(): PromiseClient<typeof AutogradService> {
 	return useClient(AutogradService);

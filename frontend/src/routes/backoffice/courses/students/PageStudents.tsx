@@ -1,19 +1,10 @@
-import {
-	Anchor,
-	Flex,
-	Loader,
-	Pagination,
-	Table,
-	Text,
-	Tooltip,
-} from "@mantine/core";
-import { IconExternalLink } from "@tabler/icons-react";
+import { Loader, Pagination, Table, Text } from "@mantine/core";
 import { useState } from "react";
 import { useQuery } from "react-query";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
 import {
-	FindAllCourseStudentsResponse,
+	type FindAllCourseStudentsResponse,
 	PaginationRequest,
 } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../../service";
@@ -61,8 +52,10 @@ function useCourseStudents(arg: {
 export function PageStudents() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const courseID = searchParams.get("courseID") ?? "";
-	const [page, setPage] = useState(parseInt(searchParams.get("page") || "1"));
-	const limit = parseInt(searchParams.get("limit") || "10");
+	const [page, setPage] = useState(
+		Number.parseInt(searchParams.get("page") || "1"),
+	);
+	const limit = Number.parseInt(searchParams.get("limit") || "10");
 
 	const hookCourse = useAdminCourseDetail({ courseID });
 	const hookCourseStudents = useCourseStudents({

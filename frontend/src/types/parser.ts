@@ -3,7 +3,7 @@ export function parseIntWithDefault(
 	defaultValue: number,
 ): number {
 	if (value) {
-		return parseInt(value);
+		return Number.parseInt(value);
 	}
 
 	return defaultValue;

@@ -1,6 +1,5 @@
 import {
 	ActionIcon,
-	Anchor,
 	Button,
 	Card,
 	FileInput,
@@ -15,22 +14,22 @@ import {
 	rem,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import { MDXEditorMethods } from "@mdxeditor/editor";
+import type { MDXEditorMethods } from "@mdxeditor/editor";
 import { Editor } from "@monaco-editor/react";
 import { IconTrash, IconUpload } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { useMutation } from "react-query";
 import {
-	ActionFunctionArgs,
+	type ActionFunctionArgs,
 	Form,
-	LoaderFunctionArgs,
+	type LoaderFunctionArgs,
 	redirect,
 	useLoaderData,
 	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
-import { Assignment } from "../../../../pb/autograd/v1/autograd_pb";
+import type { Assignment } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
 import { MarkdownEditor } from "./shared";
 

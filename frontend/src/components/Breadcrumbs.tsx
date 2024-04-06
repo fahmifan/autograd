@@ -1,13 +1,4 @@
-import {
-	Anchor,
-	Breadcrumbs as MantineBreadcrumbs,
-	BreadcrumbsFactory,
-	BreadcrumbsProps,
-	BreadcrumbsStylesNames,
-	MantineStyleProps,
-	StylesApiProps,
-	Text,
-} from "@mantine/core";
+import { Anchor, Breadcrumbs as MantineBreadcrumbs, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
 
 type Item = {

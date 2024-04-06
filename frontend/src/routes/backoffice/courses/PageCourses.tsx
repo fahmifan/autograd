@@ -8,7 +8,6 @@ import {
 	LoadingOverlay,
 	Modal,
 	Pagination,
-	Table,
 	Text,
 	TextInput,
 	Title,
@@ -17,7 +16,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import {
-	QueryClient,
+	type QueryClient,
 	useMutation,
 	useQuery,
 	useQueryClient,
@@ -25,7 +24,7 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	CreateAdminCourseRequest,
-	FindAllAdminCoursesResponse_Course,
+	type FindAllAdminCoursesResponse_Course,
 	PaginationMetadata,
 } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
@@ -127,8 +126,10 @@ export function PageCourses() {
 	const navigate = useNavigate();
 
 	const [searchParams] = useSearchParams();
-	const [page, setPage] = useState(parseInt(searchParams.get("page") || "1"));
-	const limit = parseInt(searchParams.get("limit") || "9");
+	const [page, setPage] = useState(
+		Number.parseInt(searchParams.get("page") || "1"),
+	);
+	const limit = Number.parseInt(searchParams.get("limit") || "9");
 	const hookListCourses = useListCourses({
 		queryClient,
 		page,

@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { FindAdminCourseDetailResponse } from "../../../pb/autograd/v1/autograd_pb";
+import type { FindAdminCourseDetailResponse } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
 
 export function useAdminCourseDetail(arg: {

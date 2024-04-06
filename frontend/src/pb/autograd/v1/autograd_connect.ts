@@ -3,14 +3,15 @@
 /* eslint-disable */
 // @ts-nocheck
 
+import { MethodKind } from "@bufbuild/protobuf";
 import {
 	ActivateManagedUserRequest,
 	Assignment,
 	CreateAdminCourseRequest,
 	CreateAssignmentRequest,
-	CreatedResponse,
 	CreateManagedUserRequest,
 	CreateSubmissionRequest,
+	CreatedResponse,
 	DeleteByIDRequest,
 	Empty,
 	FindAdminCourseDetailResponse,
@@ -40,7 +41,6 @@ import {
 	UpdateAssignmentRequest,
 	UpdateSubmissionRequest,
 } from "./autograd_pb.js";
-import { MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service autograd.v1.AutogradService

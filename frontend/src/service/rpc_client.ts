@@ -1,7 +1,10 @@
-import { Err, OK, ResultFromPromise, ResultPromise } from "../types";
+import { Err, OK, ResultFromPromise, type ResultPromise } from "../types";
 
 export class AutogradRPC {
-	constructor(private baseUrl: string, private token: string) {
+	constructor(
+		private baseUrl: string,
+		private token: string,
+	) {
 		this.baseUrl = baseUrl;
 		this.token = token;
 	}

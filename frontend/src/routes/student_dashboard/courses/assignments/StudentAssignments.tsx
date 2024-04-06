@@ -24,7 +24,7 @@ import { useState } from "react";
 import {
 	Form,
 	Link,
-	LoaderFunctionArgs,
+	type LoaderFunctionArgs,
 	redirect,
 	useLoaderData,
 	useNavigate,
@@ -32,7 +32,7 @@ import {
 	useSubmit,
 } from "react-router-dom";
 import { Breadcrumbs } from "../../../../components/Breadcrumbs";
-import {
+import type {
 	FindAllStudentAssignmentsResponse,
 	StudentAssignment,
 } from "../../../../pb/autograd/v1/autograd_pb";

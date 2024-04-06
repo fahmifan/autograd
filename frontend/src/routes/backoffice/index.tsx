@@ -6,7 +6,7 @@ import {
 	NavLink,
 	Text,
 } from "@mantine/core";
-import { RouteObject } from "react-router-dom";
+import type { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
 import {

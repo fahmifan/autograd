@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { useQuery } from "react-query";
-import {
-	FindAdminCourseDetailResponse,
+import type {
 	FindAllStudentEnrolledCoursesResponse,
 	FindStudentCourseDetailResponse,
 } from "../../../pb/autograd/v1/autograd_pb";

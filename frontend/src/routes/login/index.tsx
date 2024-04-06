@@ -8,7 +8,12 @@ import {
 	Text,
 	TextInput,
 } from "@mantine/core";
-import { ActionFunctionArgs, Form, Navigate, redirect } from "react-router-dom";
+import {
+	type ActionFunctionArgs,
+	Form,
+	Navigate,
+	redirect,
+} from "react-router-dom";
 import {
 	AutogradServiceClient,
 	getDecodedJWTToken,
@@ -20,9 +25,10 @@ export function LoginPage() {
 	if (decoded?.id) {
 		if (decoded?.role === "admin") {
 			return <Navigate to="/backoffice" />;
-		} else if (decoded?.role === "student") {
-			return <Navigate to="/student-dashboard" />;
 		}
+
+		// role === "student"
+		return <Navigate to="/student-dashboard" />;
 	}
 
 	return (

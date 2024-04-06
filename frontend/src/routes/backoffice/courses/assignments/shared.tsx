@@ -1,7 +1,7 @@
 import { Paper } from "@mantine/core";
 import {
 	MDXEditor,
-	MDXEditorMethods,
+	type MDXEditorMethods,
 	headingsPlugin,
 	listsPlugin,
 	markdownShortcutPlugin,

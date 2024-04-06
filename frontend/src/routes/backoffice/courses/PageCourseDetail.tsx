@@ -1,32 +1,15 @@
-import {
-	ActionIcon,
-	Anchor,
-	Button,
-	Card,
-	Flex,
-	Grid,
-	Pagination,
-	Table,
-	Text,
-	Title,
-	Tooltip,
-	VisuallyHidden,
-} from "@mantine/core";
+import { Card, Grid, Text, Title } from "@mantine/core";
 import "@mdxeditor/editor/style.css";
-import { IconExternalLink, IconNote, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import {
-	ActionFunctionArgs,
-	Form,
+	type ActionFunctionArgs,
 	Link,
 	redirect,
-	useNavigate,
 	useSearchParams,
-	useSubmit,
 } from "react-router-dom";
 import { Breadcrumbs } from "../../../components/Breadcrumbs";
-import {
+import type {
 	FindAllAssignmentsResponse,
 	PaginationMetadata,
 } from "../../../pb/autograd/v1/autograd_pb";
@@ -72,8 +55,8 @@ function useListAssignments(arg: {
 
 export function PageCourseDetail() {
 	const [searchParams] = useSearchParams();
-	const [page] = useState(parseInt(searchParams.get("page") || "1"));
-	const limit = parseInt(searchParams.get("limit") || "10");
+	const [page] = useState(Number.parseInt(searchParams.get("page") || "1"));
+	const limit = Number.parseInt(searchParams.get("limit") || "10");
 	const courseID = searchParams.get("courseID") ?? "";
 
 	const hookCourse = useAdminCourseDetail({ courseID });

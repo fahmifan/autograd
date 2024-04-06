@@ -1,7 +1,6 @@
 import {
 	Button,
 	Group,
-	Input,
 	Pagination,
 	Select,
 	Table,
@@ -9,15 +8,15 @@ import {
 	Title,
 } from "@mantine/core";
 import {
-	ActionFunctionArgs,
+	type ActionFunctionArgs,
 	Form,
-	LoaderFunctionArgs,
+	type LoaderFunctionArgs,
 	redirect,
 	useLoaderData,
 	useNavigate,
 	useSubmit,
 } from "react-router-dom";
-import { FindAllManagedUsersResponse } from "../../../pb/autograd/v1/autograd_pb";
+import type { FindAllManagedUsersResponse } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
 
 export function ListManagedUsers() {
@@ -157,7 +156,7 @@ function parseIntWithDefault(
 	defaultValue: number,
 ): number {
 	if (value) {
-		return parseInt(value);
+		return Number.parseInt(value);
 	}
 
 	return defaultValue;

@@ -1,53 +1,29 @@
 import {
-	ActionIcon,
-	Anchor,
-	Box,
-	Breadcrumbs,
 	Button,
 	Card,
 	FileInput,
-	Flex,
 	Input,
-	Paper,
 	Stack,
-	Table,
 	Text,
 	TextInput,
 	Title,
-	Tooltip,
 	VisuallyHidden,
 	rem,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import {
-	MDXEditor,
-	MDXEditorMethods,
-	headingsPlugin,
-	listsPlugin,
-	markdownShortcutPlugin,
-	quotePlugin,
-	thematicBreakPlugin,
-} from "@mdxeditor/editor";
+import type { MDXEditorMethods } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { Editor } from "@monaco-editor/react";
-import {
-	IconExternalLink,
-	IconNote,
-	IconTrash,
-	IconUpload,
-} from "@tabler/icons-react";
-import { forwardRef, useRef, useState } from "react";
+import { IconUpload } from "@tabler/icons-react";
+import { useRef, useState } from "react";
 import { useMutation } from "react-query";
 import {
-	ActionFunctionArgs,
+	type ActionFunctionArgs,
 	Form,
-	Link,
 	redirect,
-	useLoaderData,
 	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
-import { FindAllAssignmentsResponse } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradRPCClient, AutogradServiceClient } from "../../../../service";
 import { MarkdownEditor } from "./shared";
 

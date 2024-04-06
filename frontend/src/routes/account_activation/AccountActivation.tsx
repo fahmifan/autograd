@@ -1,4 +1,4 @@
-import { ConnectError } from "@bufbuild/connect";
+import type { ConnectError } from "@bufbuild/connect";
 import {
 	Anchor,
 	Button,
@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import { Form, redirect, useNavigate } from "react-router-dom";
+import { Form, useNavigate } from "react-router-dom";
 import { AutogradServiceClient } from "../../service";
 
 export function AccountActivation() {
