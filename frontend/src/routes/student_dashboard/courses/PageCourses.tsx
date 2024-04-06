@@ -32,7 +32,7 @@ export function PageCourses() {
 	if (hookListCourses.isLoading) {
 		return (
 			<>
-				<Title order={3} mb="lg">
+				<Title order={3} mt="lg" mb="lg">
 					Courses
 				</Title>
 				<Text>Loading...</Text>
@@ -43,7 +43,7 @@ export function PageCourses() {
 	if (hookListCourses.error) {
 		return (
 			<>
-				<Title order={3} mb="lg">
+				<Title order={3} mt="lg" mb="lg">
 					Courses
 				</Title>
 				<Text>Error: {hookListCourses.error as string}</Text>
@@ -54,7 +54,7 @@ export function PageCourses() {
 	function CourseHeading() {
 		return (
 			<Flex direction="row">
-				<Title order={3} mb="lg" mr="lg">
+				<Title order={3} mt="lg" mb="lg" mr="lg">
 					Courses
 				</Title>
 			</Flex>

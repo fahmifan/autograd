@@ -61,12 +61,7 @@ export default function DashboardLayout() {
 			label: "Courses",
 			to: "/student-dashboard/courses",
 			children: [],
-		},
-		{
-			label: "Assignments",
-			to: "/student-dashboard/assignments",
-			children: [],
-		},
+		}
 	];
 
 	function navItemActive(path: string): boolean {

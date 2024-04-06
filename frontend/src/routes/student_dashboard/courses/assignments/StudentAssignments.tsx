@@ -38,6 +38,7 @@ import type {
 } from "../../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../../service";
 import { parseIntWithDefault } from "../../../../types/parser";
+import { useCourseDetail } from "../hooks";
 
 export function ListStudentAssignments() {
 	const res = useLoaderData() as FindAllStudentAssignmentsResponse;
@@ -45,6 +46,8 @@ export function ListStudentAssignments() {
 
 	const [searchParams] = useSearchParams();
 	const courseID = searchParams.get("courseID") ?? "";
+
+	const hookCourse = useCourseDetail({ courseID })
 
 	if (!res || res.assignments.length === 0) {
 		return (
@@ -57,9 +60,23 @@ export function ListStudentAssignments() {
 		);
 	}
 
+	const items = [
+		{ title: "Courses", to: "/student-dashboard/courses" },
+		{
+			title: hookCourse?.res?.course?.name ?? "",
+			to: `/student-dashboard/courses/detail?courseID=${courseID}`,
+		},
+		{
+			title: "Assignments",
+			to: `/student-dashboard/courses/assignments?courseID=${courseID}`,
+		},
+	];
+
 	return (
 		<>
-			<Title order={2} mb="lg">
+			<Breadcrumbs items={items} />
+
+			<Title order={2} mb="lg" mt="lg">
 				Assignments
 			</Title>
 			<Table striped highlightOnHover mb="lg" maw={700}>
@@ -86,7 +103,7 @@ export function ListStudentAssignments() {
 								<Table.Td align="center">
 									<Anchor
 										component={Link}
-										to={`/student-dashboard/courses/assignments/detail?id=${assg.id}`}
+										to={`/student-dashboard/courses/assignments/detail?courseID=${courseID}&id=${assg.id}`}
 									>
 										<IconExternalLink color="#339AF0" />
 									</Anchor>
@@ -116,6 +133,10 @@ export function DetailStudentAssignment() {
 	const submit = useSubmit();
 	const [submisisonCode, setSubmissionCode] = useState<string>("");
 
+	const [searchParams] = useSearchParams();
+	const courseID = searchParams.get("courseID") ?? "";
+	const hookCourse = useCourseDetail({ courseID })
+
 	if (!res) {
 		return (
 			<>
@@ -127,20 +148,25 @@ export function DetailStudentAssignment() {
 	}
 
 	const items = [
-		{ title: "Assignments", to: "/student-dashboard/courses/assignments" },
+		{ title: "Courses", to: "/student-dashboard/courses" },
+		{
+			title: hookCourse?.res?.course?.name ?? "",
+			to: `/student-dashboard/courses/detail?courseID=${courseID}`,
+		},
+		{ title: "Assignments", to: `/student-dashboard/courses/assignments?courseID=${courseID}` },
 		{
 			title: res.name,
-			to: `/student-dashboard/courses/assignments/detail?id=${res.id}`,
+			to: `/student-dashboard/courses/assignments/detail?courseID=${courseID}&id=${res.id}`,
 		},
 	];
 
 	return (
 		<>
-			<Title order={2} mb="lg">
+			<Breadcrumbs items={items} />
+
+			<Title order={2} mb="lg" mt="lg">
 				Assignments
 			</Title>
-
-			<Breadcrumbs items={items} />
 
 			<Title order={3} mb="sm" mt="lg">
 				{res.name}
