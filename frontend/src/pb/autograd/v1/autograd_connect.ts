@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ActivateManagedUserRequest, Assignment, CreateAdminCourseRequest, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAdminCourseDetailResponse, FindAllAdminCoursesResponse, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllCourseStudentsRequest, FindAllCourseStudentsResponse, FindAllManagedUsersResponse, FindAllPaginationRequest, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, LoginRequest, LoginResponse, PingResponse, ResubmitStudentSubmissionRequest, StudentAssignment, Submission, SubmitStudentSubmissionRequest, UpdateAdminCourseRequest, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
+import { ActivateManagedUserRequest, Assignment, CreateAdminCourseRequest, CreateAssignmentRequest, CreatedResponse, CreateManagedUserRequest, CreateSubmissionRequest, DeleteByIDRequest, Empty, FindAdminCourseDetailResponse, FindAllAdminCoursesResponse, FindAllAssignmentsRequest, FindAllAssignmentsResponse, FindAllCourseStudentsRequest, FindAllCourseStudentsResponse, FindAllManagedUsersResponse, FindAllPaginationRequest, FindAllStudentAssignmentsRequest, FindAllStudentAssignmentsResponse, FindAllStudentEnrolledCoursesRequest, FindAllStudentEnrolledCoursesResponse, FindAllSubmissionsForAssignmentRequest, FindAllSubmissionsForAssignmentResponse, FindByIDRequest, FindStudentCourseDetailResponse, LoginRequest, LoginResponse, PingResponse, ResubmitStudentSubmissionRequest, StudentAssignment, Submission, SubmitStudentSubmissionRequest, UpdateAdminCourseRequest, UpdateAssignmentRequest, UpdateSubmissionRequest } from "./autograd_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -233,6 +233,26 @@ export const AutogradService = {
       name: "ResubmitStudentSubmission",
       I: ResubmitStudentSubmissionRequest,
       O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Student Courses
+     *
+     * @generated from rpc autograd.v1.AutogradService.FindAllStudentEnrolledCourses
+     */
+    findAllStudentEnrolledCourses: {
+      name: "FindAllStudentEnrolledCourses",
+      I: FindAllStudentEnrolledCoursesRequest,
+      O: FindAllStudentEnrolledCoursesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradService.FindStudentCourseDetail
+     */
+    findStudentCourseDetail: {
+      name: "FindStudentCourseDetail",
+      I: FindByIDRequest,
+      O: FindStudentCourseDetailResponse,
       kind: MethodKind.Unary,
     },
     /**

@@ -101,6 +101,12 @@ const (
 	// AutogradServiceResubmitStudentSubmissionProcedure is the fully-qualified name of the
 	// AutogradService's ResubmitStudentSubmission RPC.
 	AutogradServiceResubmitStudentSubmissionProcedure = "/autograd.v1.AutogradService/ResubmitStudentSubmission"
+	// AutogradServiceFindAllStudentEnrolledCoursesProcedure is the fully-qualified name of the
+	// AutogradService's FindAllStudentEnrolledCourses RPC.
+	AutogradServiceFindAllStudentEnrolledCoursesProcedure = "/autograd.v1.AutogradService/FindAllStudentEnrolledCourses"
+	// AutogradServiceFindStudentCourseDetailProcedure is the fully-qualified name of the
+	// AutogradService's FindStudentCourseDetail RPC.
+	AutogradServiceFindStudentCourseDetailProcedure = "/autograd.v1.AutogradService/FindStudentCourseDetail"
 	// AutogradServiceLoginProcedure is the fully-qualified name of the AutogradService's Login RPC.
 	AutogradServiceLoginProcedure = "/autograd.v1.AutogradService/Login"
 )
@@ -139,6 +145,9 @@ type AutogradServiceClient interface {
 	// Student Assignment Command
 	SubmitStudentSubmission(context.Context, *connect.Request[v1.SubmitStudentSubmissionRequest]) (*connect.Response[v1.CreatedResponse], error)
 	ResubmitStudentSubmission(context.Context, *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
+	// Student Courses
+	FindAllStudentEnrolledCourses(context.Context, *connect.Request[v1.FindAllStudentEnrolledCoursesRequest]) (*connect.Response[v1.FindAllStudentEnrolledCoursesResponse], error)
+	FindStudentCourseDetail(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindStudentCourseDetailResponse], error)
 	// Auth
 	// Auth Mutation
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
@@ -269,6 +278,16 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			baseURL+AutogradServiceResubmitStudentSubmissionProcedure,
 			opts...,
 		),
+		findAllStudentEnrolledCourses: connect.NewClient[v1.FindAllStudentEnrolledCoursesRequest, v1.FindAllStudentEnrolledCoursesResponse](
+			httpClient,
+			baseURL+AutogradServiceFindAllStudentEnrolledCoursesProcedure,
+			opts...,
+		),
+		findStudentCourseDetail: connect.NewClient[v1.FindByIDRequest, v1.FindStudentCourseDetailResponse](
+			httpClient,
+			baseURL+AutogradServiceFindStudentCourseDetailProcedure,
+			opts...,
+		),
 		login: connect.NewClient[v1.LoginRequest, v1.LoginResponse](
 			httpClient,
 			baseURL+AutogradServiceLoginProcedure,
@@ -302,6 +321,8 @@ type autogradServiceClient struct {
 	findStudentAssignment          *connect.Client[v1.FindByIDRequest, v1.StudentAssignment]
 	submitStudentSubmission        *connect.Client[v1.SubmitStudentSubmissionRequest, v1.CreatedResponse]
 	resubmitStudentSubmission      *connect.Client[v1.ResubmitStudentSubmissionRequest, v1.Empty]
+	findAllStudentEnrolledCourses  *connect.Client[v1.FindAllStudentEnrolledCoursesRequest, v1.FindAllStudentEnrolledCoursesResponse]
+	findStudentCourseDetail        *connect.Client[v1.FindByIDRequest, v1.FindStudentCourseDetailResponse]
 	login                          *connect.Client[v1.LoginRequest, v1.LoginResponse]
 }
 
@@ -420,6 +441,16 @@ func (c *autogradServiceClient) ResubmitStudentSubmission(ctx context.Context, r
 	return c.resubmitStudentSubmission.CallUnary(ctx, req)
 }
 
+// FindAllStudentEnrolledCourses calls autograd.v1.AutogradService.FindAllStudentEnrolledCourses.
+func (c *autogradServiceClient) FindAllStudentEnrolledCourses(ctx context.Context, req *connect.Request[v1.FindAllStudentEnrolledCoursesRequest]) (*connect.Response[v1.FindAllStudentEnrolledCoursesResponse], error) {
+	return c.findAllStudentEnrolledCourses.CallUnary(ctx, req)
+}
+
+// FindStudentCourseDetail calls autograd.v1.AutogradService.FindStudentCourseDetail.
+func (c *autogradServiceClient) FindStudentCourseDetail(ctx context.Context, req *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindStudentCourseDetailResponse], error) {
+	return c.findStudentCourseDetail.CallUnary(ctx, req)
+}
+
 // Login calls autograd.v1.AutogradService.Login.
 func (c *autogradServiceClient) Login(ctx context.Context, req *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return c.login.CallUnary(ctx, req)
@@ -459,6 +490,9 @@ type AutogradServiceHandler interface {
 	// Student Assignment Command
 	SubmitStudentSubmission(context.Context, *connect.Request[v1.SubmitStudentSubmissionRequest]) (*connect.Response[v1.CreatedResponse], error)
 	ResubmitStudentSubmission(context.Context, *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error)
+	// Student Courses
+	FindAllStudentEnrolledCourses(context.Context, *connect.Request[v1.FindAllStudentEnrolledCoursesRequest]) (*connect.Response[v1.FindAllStudentEnrolledCoursesResponse], error)
+	FindStudentCourseDetail(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindStudentCourseDetailResponse], error)
 	// Auth
 	// Auth Mutation
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
@@ -585,6 +619,16 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 		svc.ResubmitStudentSubmission,
 		opts...,
 	)
+	autogradServiceFindAllStudentEnrolledCoursesHandler := connect.NewUnaryHandler(
+		AutogradServiceFindAllStudentEnrolledCoursesProcedure,
+		svc.FindAllStudentEnrolledCourses,
+		opts...,
+	)
+	autogradServiceFindStudentCourseDetailHandler := connect.NewUnaryHandler(
+		AutogradServiceFindStudentCourseDetailProcedure,
+		svc.FindStudentCourseDetail,
+		opts...,
+	)
 	autogradServiceLoginHandler := connect.NewUnaryHandler(
 		AutogradServiceLoginProcedure,
 		svc.Login,
@@ -638,6 +682,10 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 			autogradServiceSubmitStudentSubmissionHandler.ServeHTTP(w, r)
 		case AutogradServiceResubmitStudentSubmissionProcedure:
 			autogradServiceResubmitStudentSubmissionHandler.ServeHTTP(w, r)
+		case AutogradServiceFindAllStudentEnrolledCoursesProcedure:
+			autogradServiceFindAllStudentEnrolledCoursesHandler.ServeHTTP(w, r)
+		case AutogradServiceFindStudentCourseDetailProcedure:
+			autogradServiceFindStudentCourseDetailHandler.ServeHTTP(w, r)
 		case AutogradServiceLoginProcedure:
 			autogradServiceLoginHandler.ServeHTTP(w, r)
 		default:
@@ -739,6 +787,14 @@ func (UnimplementedAutogradServiceHandler) SubmitStudentSubmission(context.Conte
 
 func (UnimplementedAutogradServiceHandler) ResubmitStudentSubmission(context.Context, *connect.Request[v1.ResubmitStudentSubmissionRequest]) (*connect.Response[v1.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.ResubmitStudentSubmission is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) FindAllStudentEnrolledCourses(context.Context, *connect.Request[v1.FindAllStudentEnrolledCoursesRequest]) (*connect.Response[v1.FindAllStudentEnrolledCoursesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindAllStudentEnrolledCourses is not implemented"))
+}
+
+func (UnimplementedAutogradServiceHandler) FindStudentCourseDetail(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.FindStudentCourseDetailResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.FindStudentCourseDetail is not implemented"))
 }
 
 func (UnimplementedAutogradServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {

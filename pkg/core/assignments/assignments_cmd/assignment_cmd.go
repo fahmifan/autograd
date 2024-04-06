@@ -91,7 +91,7 @@ func (cmd *AssignmentCmd) CreateAssignment(ctx context.Context, req *connect.Req
 
 		course, err := sqlcQuery.FindCourseByID(ctx, req.Msg.GetCourseId())
 		if err != nil {
-			if core.IsDBNotFoundErr(err) {
+			if core.IsErrDBNotFound(err) {
 				return connect.NewError(connect.CodeInvalidArgument, err)
 			}
 

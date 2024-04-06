@@ -1,7 +1,6 @@
 import {
 	Anchor,
 	Box,
-	Breadcrumbs,
 	Button,
 	Group,
 	Pagination,
@@ -29,18 +28,23 @@ import {
 	redirect,
 	useLoaderData,
 	useNavigate,
+	useSearchParams,
 	useSubmit,
 } from "react-router-dom";
+import { Breadcrumbs } from "../../../../components/Breadcrumbs";
 import {
 	FindAllStudentAssignmentsResponse,
 	StudentAssignment,
-} from "../../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../../service";
-import { parseIntWithDefault } from "../../types/parser";
+} from "../../../../pb/autograd/v1/autograd_pb";
+import { AutogradServiceClient } from "../../../../service";
+import { parseIntWithDefault } from "../../../../types/parser";
 
 export function ListStudentAssignments() {
 	const res = useLoaderData() as FindAllStudentAssignmentsResponse;
 	const navigate = useNavigate();
+
+	const [searchParams] = useSearchParams()
+	const courseID = searchParams.get('courseID') ?? ''
 
 	if (!res || res.assignments.length === 0) {
 		return (
@@ -82,7 +86,7 @@ export function ListStudentAssignments() {
 								<Table.Td align="center">
 									<Anchor
 										component={Link}
-										to={`/student-dashboard/assignments/detail?id=${assg.id}`}
+										to={`/student-dashboard/courses/assignments/detail?id=${assg.id}`}
 									>
 										<IconExternalLink color="#339AF0" />
 									</Anchor>
@@ -97,7 +101,7 @@ export function ListStudentAssignments() {
 				total={res.paginationMetadata?.totalPage as number}
 				onChange={(page) => {
 					navigate(
-						`/student-dashboard/assignments?page=${page}&limit=${res.paginationMetadata?.limit}`,
+						`/student-dashboard/courses/assignments?courseID=${courseID}&page=${page}&limit=${res.paginationMetadata?.limit}`,
 					);
 				}}
 				siblings={1}
@@ -123,18 +127,12 @@ export function DetailStudentAssignment() {
 	}
 
 	const items = [
-		{ title: "Assignments", to: "/student-dashboard/assignments" },
+		{ title: "Assignments", to: "/student-dashboard/courses/assignments" },
 		{
 			title: res.name,
-			to: `/student-dashboard/assignments/detail?id=${res.id}`,
+			to: `/student-dashboard/courses/assignments/detail?id=${res.id}`,
 		},
-	].map((item) => {
-		return (
-			<Anchor key={item.to} component={Link} to={item.to}>
-				{item.title}
-			</Anchor>
-		);
-	});
+	]
 
 	return (
 		<>
@@ -142,9 +140,9 @@ export function DetailStudentAssignment() {
 				Assignments
 			</Title>
 
-			<Breadcrumbs mb="lg">{items}</Breadcrumbs>
+			<Breadcrumbs items={items} />
 
-			<Title order={3} mb="sm">
+			<Title order={3} mb="sm" mt="lg">
 				{res.name}
 			</Title>
 
@@ -354,7 +352,7 @@ export async function actionDetailAssignment({
 			});
 
 			return redirect(
-				`/student-dashboard/assignments/detail?id=${assignmentId}`,
+				`/student-dashboard/courses/assignments/detail?id=${assignmentId}`,
 			);
 		}
 		case "resubmit_submission": {
@@ -374,7 +372,7 @@ export async function actionDetailAssignment({
 				color: "green",
 			});
 			return redirect(
-				`/student-dashboard/assignments/detail?id=${assignmentId}`,
+				`/student-dashboard/courses/assignments/detail?id=${assignmentId}`,
 			);
 		}
 		default:

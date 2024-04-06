@@ -53,7 +53,7 @@ type ObjectStorer interface {
 	Seek(ctx context.Context, srcpath string) (io.ReadCloser, error)
 }
 
-func IsDBNotFoundErr(err error) bool {
+func IsErrDBNotFound(err error) bool {
 	if ok := errors.Is(err, gorm.ErrRecordNotFound); ok {
 		return ok
 	}

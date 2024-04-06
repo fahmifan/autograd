@@ -57,35 +57,42 @@ const (
 	ViewCourse
 	CreateCourse
 	UpdateCourse
+	ViewAdminCoursesStudents
+	ViewAdminCourseDetail
+	ViewStudentEnrolledCourses
 )
 
 var policy = map[Role]map[Permission]bool{
 	RoleAdmin: {
-		ViewAnyUsers:             _ok,
-		CreateAssignment:         _ok,
-		UpdateAssignment:         _ok,
-		ViewAssignment:           _ok,
-		ViewAnyAssignments:       _ok,
-		DeleteAssignment:         _ok,
-		GradeAssignment:          _ok,
-		CreateSubmission:         _ok,
-		ViewSubmission:           _ok,
-		ViewAnySubmissions:       _ok,
-		CreateAnyUser:            _ok,
-		CreateSubmissionForOther: _ok,
-		CreateMedia:              _ok,
-		ViewCourse:               _ok,
-		CreateCourse:             _ok,
-		UpdateCourse:             _ok,
+		ViewAnyUsers:               _ok,
+		CreateAssignment:           _ok,
+		UpdateAssignment:           _ok,
+		ViewAssignment:             _ok,
+		ViewAnyAssignments:         _ok,
+		DeleteAssignment:           _ok,
+		GradeAssignment:            _ok,
+		CreateSubmission:           _ok,
+		ViewSubmission:             _ok,
+		ViewAnySubmissions:         _ok,
+		CreateAnyUser:              _ok,
+		CreateSubmissionForOther:   _ok,
+		CreateMedia:                _ok,
+		ViewCourse:                 _ok,
+		CreateCourse:               _ok,
+		UpdateCourse:               _ok,
+		ViewAdminCoursesStudents:   _ok,
+		ViewAdminCourseDetail:      _ok,
+		ViewStudentEnrolledCourses: _ok,
 	},
 	RoleStudent: {
-		ViewAssignment:   _ok,
-		UpdateSubmission: _ok,
-		DeleteSubmission: _ok,
-		UpdateUser:       _ok,
-		CreateMedia:      _ok,
-		CreateSubmission: _ok,
-		ViewCourse:       _ok,
+		ViewAssignment:             _ok,
+		UpdateSubmission:           _ok,
+		DeleteSubmission:           _ok,
+		UpdateUser:                 _ok,
+		CreateMedia:                _ok,
+		CreateSubmission:           _ok,
+		ViewCourse:                 _ok,
+		ViewStudentEnrolledCourses: _ok,
 	},
 }
 

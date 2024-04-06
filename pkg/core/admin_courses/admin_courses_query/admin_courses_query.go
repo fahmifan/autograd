@@ -46,7 +46,7 @@ func (query *AdminCoursesQuery) FindAllAdminCourses(
 	}
 
 	totalCount, err := sqlcQuery.CountAllCoursesByUser(ctx, authUser.UserID.String())
-	if err != nil && !core.IsDBNotFoundErr(err) {
+	if err != nil && !core.IsErrDBNotFound(err) {
 		logs.ErrCtx(ctx, err, "AdminCoursesQuery: FindAllCoursesByUser: CountAllAdminCourses")
 		return nil, core.ErrInternalServer
 	}
@@ -77,6 +77,11 @@ func (query *AdminCoursesQuery) FindAdminCourseDetail(
 	*connect.Response[autogradv1.FindAdminCourseDetailResponse],
 	error,
 ) {
+	authUser, _ := auth.GetUserFromCtx(ctx)
+	if !authUser.Role.Can(auth.ViewAdminCoursesStudents) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	sqlcQuery, err := dbconn.NewSqlcFromGorm(query.GormDB)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "AdminCoursesQuery: FindAdminCourseDetail: NewSqlcFromGorm")
@@ -85,7 +90,7 @@ func (query *AdminCoursesQuery) FindAdminCourseDetail(
 
 	course, err := sqlcQuery.FindCourseByID(ctx, req.Msg.GetId())
 	if err != nil {
-		if core.IsDBNotFoundErr(err) {
+		if core.IsErrDBNotFound(err) {
 			return nil, core.ErrNotFound
 		}
 
@@ -112,6 +117,11 @@ func (query *AdminCoursesQuery) FindAllCourseStudents(
 	*connect.Response[autogradv1.FindAllCourseStudentsResponse],
 	error,
 ) {
+	authUser, _ := auth.GetUserFromCtx(ctx)
+	if !authUser.Role.Can(auth.ViewAdminCoursesStudents) {
+		return nil, core.ErrPermissionDenied
+	}
+
 	sqlcQuery, err := dbconn.NewSqlcFromGorm(query.GormDB)
 	if err != nil {
 		logs.ErrCtx(ctx, err, "AdminCoursesQuery: FindAllCourseStudents: NewSqlcFromGorm")

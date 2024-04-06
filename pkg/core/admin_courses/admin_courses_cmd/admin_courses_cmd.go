@@ -38,7 +38,7 @@ func (cmd *AdminCoursesCmd) CreateAdminCourse(
 
 	admin, err := adminReader.FindAdminByID(ctx, cmd.SqlDB, authUser.UserID)
 	if err != nil {
-		if core.IsDBNotFoundErr(err) {
+		if core.IsErrDBNotFound(err) {
 			return nil, connect.NewError(connect.CodeNotFound, errors.New("admin not found"))
 		}
 
@@ -93,7 +93,7 @@ func (cmd *AdminCoursesCmd) UpdateAdminCourse(
 	err = dbconn.SqlcTransaction(ctx, cmd.SqlDB, func(d xsqlc.DBTX) error {
 		course, err := courseReader.FindCourseByID(ctx, cmd.SqlDB, id)
 		if err != nil {
-			if core.IsDBNotFoundErr(err) {
+			if core.IsErrDBNotFound(err) {
 				return connect.NewError(connect.CodeNotFound, errors.New("course not found"))
 			}
 

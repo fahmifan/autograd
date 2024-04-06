@@ -324,6 +324,30 @@ message FindAllCourseStudentsResponse {
     repeated Student students = 2;
 }
 
+message FindAllStudentEnrolledCoursesRequest {
+    PaginationRequest pagination_request = 2;
+}
+
+message FindAllStudentEnrolledCoursesResponse {
+    message Course {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+    }
+    PaginationMetadata pagination_metadata = 1;
+    repeated Course courses = 2;
+}
+
+message FindStudentCourseDetailResponse {
+    message Course {
+        string id = 1;
+        string name = 2;
+        string description = 3;
+    }
+
+    Course course = 1;
+}
+
 service AutogradService {
     rpc Ping(Empty) returns (PingResponse) {}
 
@@ -362,6 +386,9 @@ service AutogradService {
     // Student Assignment Command
     rpc SubmitStudentSubmission(SubmitStudentSubmissionRequest) returns (CreatedResponse) {}
     rpc ResubmitStudentSubmission(ResubmitStudentSubmissionRequest) returns (Empty) {}
+    // Student Courses
+    rpc FindAllStudentEnrolledCourses(FindAllStudentEnrolledCoursesRequest) returns (FindAllStudentEnrolledCoursesResponse) {}
+    rpc FindStudentCourseDetail(FindByIDRequest) returns (FindStudentCourseDetailResponse) {}
 
     // Auth
     // Auth Mutation

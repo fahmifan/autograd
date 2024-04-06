@@ -60,7 +60,7 @@ func (query *AssignmentsQuery) FindAllAssignments(
 	sqlcQuery := xsqlc.New(sqldb)
 
 	course, err := sqlcQuery.FindCourseDetailForAssignmentByCourseID(ctx, courseID.String())
-	if core.IsDBNotFoundErr(err) {
+	if core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 	if err != nil {
@@ -114,7 +114,7 @@ func (query *AssignmentsQuery) FindAssignment(
 
 	assignmentReader := assignments.AssignmentReader{}
 	assignment, err := assignmentReader.FindByID(ctx, query.GormDB, assignmentID)
-	if core.IsDBNotFoundErr(err) {
+	if core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 	if err != nil {
@@ -129,7 +129,7 @@ func (query *AssignmentsQuery) FindAssignment(
 	}
 
 	course, err := sqlcQuery.FindCourseDetailForAssignmentByCourseID(ctx, assignment.CourseID.String())
-	if core.IsDBNotFoundErr(err) {
+	if core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 	if err != nil {
@@ -187,7 +187,7 @@ func (query *AssignmentsQuery) FindSubmission(
 
 	submReader := assignments.SubmissionReader{}
 	submission, err := submReader.FindByID(ctx, query.GormDB, submissionID)
-	if core.IsDBNotFoundErr(err) {
+	if core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 	if err != nil {
@@ -239,7 +239,7 @@ func (query *AssignmentsQuery) FindAllSubmissionForAssignment(
 	}
 
 	assignment, err := sqlcQuery.FindAssignmentByID(ctx, req.Msg.GetAssignmentId())
-	if err != nil && core.IsDBNotFoundErr(err) {
+	if err != nil && core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 	if err != nil {
@@ -247,7 +247,7 @@ func (query *AssignmentsQuery) FindAllSubmissionForAssignment(
 	}
 
 	course, err := sqlcQuery.FindCourseByID(ctx, assignment.CourseID)
-	if err != nil && core.IsDBNotFoundErr(err) {
+	if err != nil && core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 	if err != nil {
@@ -256,7 +256,7 @@ func (query *AssignmentsQuery) FindAllSubmissionForAssignment(
 
 	assigner := dbmodel.User{}
 	err = query.GormDB.Where("id = ?", assignment.AssignedBy).Take(&assigner).Error
-	if err != nil && core.IsDBNotFoundErr(err) {
+	if err != nil && core.IsErrDBNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 

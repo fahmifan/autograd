@@ -17,6 +17,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/core/mediastore/mediastore_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment/student_assignment_cmd"
 	"github.com/fahmifan/autograd/pkg/core/student_assignment/student_assignment_query"
+	"github.com/fahmifan/autograd/pkg/core/student_courses/student_courses_cmdquery"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_query"
 	"github.com/fahmifan/autograd/pkg/jobqueue"
@@ -42,6 +43,7 @@ type Service struct {
 	*grading_cmd.GradingCmd
 	*admin_courses_query.AdminCoursesQuery
 	*admin_courses_cmd.AdminCoursesCmd
+	*student_courses_cmdquery.StudentCoursesQuery
 
 	outboxService *outbox.OutboxService
 }
@@ -89,6 +91,7 @@ func NewService(
 		GradingCmd:             &grading_cmd.GradingCmd{Ctx: coreCtx},
 		AdminCoursesQuery:      &admin_courses_query.AdminCoursesQuery{Ctx: coreCtx},
 		AdminCoursesCmd:        &admin_courses_cmd.AdminCoursesCmd{Ctx: coreCtx},
+		StudentCoursesQuery:    &student_courses_cmdquery.StudentCoursesQuery{Ctx: coreCtx},
 	}
 }
 

@@ -6,52 +6,11 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from "react-query"
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CreateAdminCourseRequest, FindAllAdminCoursesResponse_Course, PaginationMetadata } from "../../../pb/autograd/v1/autograd_pb";
 import { AutogradServiceClient } from "../../../service";
-
-
-function useListCourses(arg: {
-    queryClient: QueryClient;
-    page: number;
-    limit: number;
-}): {
-    isLoading: boolean;
-    isError: boolean;
-    error: unknown;
-    courses: FindAllAdminCoursesResponse_Course[];
-    paginationMetadata: PaginationMetadata;
-    isEmpty: () => boolean;
-} {
-    const queryKeys = ["courses", arg.page, arg.limit]
-
-    const { isLoading, data, isError, error } = useQuery({
-        queryKey: queryKeys,
-        queryFn: async () => {
-            return AutogradServiceClient.findAllAdminCourses({
-                paginationRequest: {
-                    page: arg.page,
-                    limit: arg.limit,
-                }
-            })
-        },
-    })
-
-    function isEmpty(): boolean {
-        return !data || !data.courses || data?.courses.length === 0
-    }
-
-    return {
-        isLoading,
-        isError,
-        error,
-        courses: data?.courses || [],
-        paginationMetadata: data?.paginationMetadata || new PaginationMetadata(),
-        isEmpty,
-    }
-}
+import { useListCourses } from "./hooks";
 
 export function PageCourses() {
     const [overlayVisible, overlayMethod] = useDisclosure(false);
 
-    const queryClient = useQueryClient()
     const [modalOpen, modalMethod] = useDisclosure(false);
     const navigate = useNavigate();
 
@@ -59,7 +18,6 @@ export function PageCourses() {
     const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
     const limit = parseInt(searchParams.get('limit') || '10')
     const hookListCourses = useListCourses({
-        queryClient,
         page,
         limit,
     })
@@ -73,7 +31,7 @@ export function PageCourses() {
         </>
     }
 
-    if (hookListCourses.isError) {
+    if (hookListCourses.error) {
         return <>
             <Title order={3} mb="lg">
                 Courses
@@ -106,7 +64,7 @@ export function PageCourses() {
 
         <Grid>
             {
-                hookListCourses.courses.map((course) => {
+                hookListCourses?.res?.courses?.map((course) => {
                     return <Grid.Col span={4} key={course.id}>
                         <Card
                             shadow="sm"
@@ -120,7 +78,7 @@ export function PageCourses() {
                                 }
                             }}
                             onClick={(e) => {
-                                navigate(`/backoffice/courses/detail?courseID=${course.id}`)
+                                navigate(`/student-dashboard/courses/detail?courseID=${course.id}`)
                             }}
                         >
                             <Text fw={500} size="xl" mt="md">{course.name}</Text>
@@ -133,7 +91,7 @@ export function PageCourses() {
 
         <Pagination
             mb="lg"
-            total={hookListCourses.paginationMetadata?.totalPage as number}
+            total={hookListCourses?.res?.paginationMetadata?.totalPage as number}
             value={page}
             onChange={setPage}
             siblings={1}

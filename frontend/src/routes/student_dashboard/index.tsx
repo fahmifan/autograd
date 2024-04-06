@@ -2,14 +2,15 @@ import { AppShell, Button, Container, Flex, NavLink, Text } from "@mantine/core"
 import { RouteObject } from "react-router-dom";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { PrivateRoute } from "../private_route";
+import { PageCourses } from "./courses/PageCourses";
+import { PageCourseDetail } from "./courses/PageCoursesDetail";
 import {
 	DetailStudentAssignment,
 	ListStudentAssignments,
 	actionDetailAssignment,
 	loaderDetailStudentAssignment,
 	loaderListStudentAssignments,
-} from "./StudentAssignments";
-import { PageCourses } from "./courses/PageCourses";
+} from "./courses/assignments/StudentAssignments";
 
 export const router: RouteObject[] = [
 	{
@@ -21,12 +22,16 @@ export const router: RouteObject[] = [
 				element: <PrivateRoute element={<PageCourses />} />,
 			},
 			{
-				path: "/student-dashboard/assignments",
+				path: "/student-dashboard/courses/detail",
+				element: <PrivateRoute element={<PageCourseDetail />} />,
+			},
+			{
+				path: "/student-dashboard/courses/assignments",
 				element: <PrivateRoute element={<ListStudentAssignments />} />,
 				loader: loaderListStudentAssignments,
 			},
 			{
-				path: "/student-dashboard/assignments/detail",
+				path: "/student-dashboard/courses/assignments/detail",
 				element: <PrivateRoute element={<DetailStudentAssignment />} />,
 				loader: loaderDetailStudentAssignment,
 				action: actionDetailAssignment,
