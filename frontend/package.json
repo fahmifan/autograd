@@ -8,7 +8,7 @@
 		"build": "tsc && vite build",
 		"preview": "vite preview",
 		"lint": "biome lint .",
-		"lint:fix": "biome format . --write"
+		"lint:fix": " biome check --apply ./src && biome format . --write"
 	},
 	"dependencies": {
 		"@mantine/core": "^7.1.7",
