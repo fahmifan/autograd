@@ -5,32 +5,22 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+
+	"github.com/fahmifan/autograd/pkg/core/grading"
 )
 
-type Result struct {
-	stdout []byte
-}
+type CPP struct{}
 
-func (res *Result) Output() []byte {
-	return res.stdout
-}
-
-type CPP struct {
-	MountDir        string
-	ProgramFileName string
-	Input           io.Reader
-}
-
-func (cr *CPP) Run() (Result, error) {
+func (cr *CPP) Run(arg grading.RunnerArg) (grading.RunResult, error) {
 	args := []string{
 		"run", "--rm",
 		"-i",
-		"--memory=100m",
+		fmt.Sprintf("--memory=%s", arg.MemLimit),
 		"--network=none",
-		"-v", fmt.Sprintf(`./%s:/src`, cr.MountDir),
+		"-v", fmt.Sprintf(`./%s:/src`, arg.MountDir),
 		"-w", "/src",
 		"docker.io/library/gcc:latest",
-		"sh", "-c", fmt.Sprintf(`g++ -o /src/app /src/%s && timeout 10s /src/app`, cr.ProgramFileName),
+		"sh", "-c", fmt.Sprintf(`g++ -o /src/app /src/%s && timeout %s /src/app`, arg.ProgramFileName, arg.RunTimeout),
 	}
 
 	buffErr := bytes.NewBuffer(nil)
@@ -38,19 +28,19 @@ func (cr *CPP) Run() (Result, error) {
 	stdout := bytes.NewBuffer(nil)
 	cmd := exec.Command("podman", args...)
 
-	buff, err := io.ReadAll(cr.Input)
+	buff, err := io.ReadAll(arg.Input)
 	if err != nil {
-		return Result{}, fmt.Errorf("read input: %w", err)
+		return grading.RunResult{}, fmt.Errorf("read input: %w", err)
 	}
 	cmd.Stdin = bytes.NewBuffer(buff)
 	cmd.Stdout = stdout
 	cmd.Stderr = buffErr
 
 	if err := cmd.Run(); err != nil {
-		return Result{}, fmt.Errorf("run cpp: %w", err)
+		return grading.RunResult{}, fmt.Errorf("run cpp: %w", err)
 	}
 
-	return Result{
-		stdout: stdout.Bytes(),
+	return grading.RunResult{
+		Output: stdout.Bytes(),
 	}, nil
 }

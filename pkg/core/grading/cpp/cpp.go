@@ -13,8 +13,6 @@ import (
 	"github.com/fahmifan/autograd/pkg/logs"
 )
 
-var _ grading.Compiler = (*CPPCompiler)(nil)
-
 type CPPCompiler struct {
 }
 
