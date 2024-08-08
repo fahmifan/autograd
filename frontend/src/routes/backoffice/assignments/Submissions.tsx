@@ -3,7 +3,7 @@ import { Editor } from "@monaco-editor/react";
 import { IconExternalLink } from "@tabler/icons-react";
 import { Link, LoaderFunctionArgs, useLoaderData } from "react-router-dom";
 import { FindAllSubmissionsForAssignmentResponse, Submission } from "../../../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../../../service";
+import { AutogradCmdClient } from "../../../service";
 
 export function ListSubmissions() {	
 	const res = useLoaderData() as FindAllSubmissionsForAssignmentResponse;
@@ -121,7 +121,7 @@ export async function loaderListSubmissions({
 	const url = new URL(request.url);
 	const assignmentID = url.searchParams.get("assignmentID") as string;
 
-	return await AutogradServiceClient.findAllSubmissionForAssignment({
+	return await AutogradCmdClient.findAllSubmissionForAssignment({
 		assignmentId: assignmentID
 	});
 }
@@ -132,7 +132,7 @@ export async function loaderSubmissionDetail({
 	const url = new URL(request.url);
 	const id = url.searchParams.get("submissionID");
 
-	return await AutogradServiceClient.findSubmission({
+	return await AutogradCmdClient.findSubmission({
 		id: id as string,
 	});
 }

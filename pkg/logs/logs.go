@@ -46,13 +46,26 @@ func EchoRequestID() echo.MiddlewareFunc {
 	}
 }
 
+var logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+
 func EchoRequestLogger(debug bool) func(c echo.Context, v middleware.RequestLoggerValues) error {
 	return func(c echo.Context, val middleware.RequestLoggerValues) error {
 		reqID := c.Request().Header.Get(RequestIDHeaderKey)
 
-		logger := zerolog.
-			New(os.Stdout).
-			With().
+		statusCode := c.Response().Status
+		msg := "Request"
+
+		var logEvent *zerolog.Event
+		switch {
+		case statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError:
+			logEvent = logger.Error()
+		case statusCode >= http.StatusInternalServerError:
+			logEvent = logger.Fatal()
+		default:
+			logEvent = logger.Info()
+		}
+
+		logEvent.
 			Str(string(RequestIDHeaderKey), reqID).
 			Str("method", c.Request().Method).
 			Str("path", c.Request().URL.Path).
@@ -61,23 +74,7 @@ func EchoRequestLogger(debug bool) func(c echo.Context, v middleware.RequestLogg
 			Str("ip", c.RealIP()).
 			Str("user-agent", c.Request().UserAgent()).
 			AnErr("error", val.Error).
-			Logger()
-
-		if debug {
-			logger = logger.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-		}
-
-		statusCode := c.Response().Status
-		msg := "Request"
-
-		switch {
-		case statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError:
-			logger.WithLevel(zerolog.ErrorLevel).Msg(msg)
-		case statusCode >= http.StatusInternalServerError:
-			logger.WithLevel(zerolog.FatalLevel).Msg(msg)
-		default:
-			logger.WithLevel(zerolog.InfoLevel).Msg(msg)
-		}
+			Msg(msg)
 
 		return nil
 	}
@@ -92,7 +89,11 @@ func ErrCtx(ctx context.Context, err error, label string, msg ...string) {
 	if reqID := GetRequestID(ctx); reqID != "" {
 		logger = logger.Str(string(RequestIDHeaderKey), reqID)
 	}
-	logger.Msg(strings.Join(msg, ". "))
+	logger.Msg(wrapWithBracket(strings.Join(msg, ". ")))
+}
+
+func wrapWithBracket(msg string) string {
+	return "[" + msg + "]"
 }
 
 func ErrWrapCtx(ctx context.Context, err error, label string, msg ...string) error {
@@ -118,13 +119,13 @@ func InfoCtx(ctx context.Context, label string, msg ...string) {
 	if reqID := GetRequestID(ctx); reqID != "" {
 		logger = logger.Str(string(RequestIDHeaderKey), reqID)
 	}
-	logger.Msg(strings.Join(msg, ". "))
+	logger.Msg(wrapWithBracket(strings.Join(msg, ". ")))
 }
 
 func Info(label string, msg ...string) {
-	log.Info().Str("label", label).Msg(strings.Join(msg, ". "))
+	log.Info().Str("label", label).Msg(wrapWithBracket(strings.Join(msg, ". ")))
 }
 
 func Warn(label string, msg ...string) {
-	log.Warn().Str("label", label).Msg(strings.Join(msg, ". "))
+	log.Warn().Str("label", label).Msg(wrapWithBracket(strings.Join(msg, ". ")))
 }

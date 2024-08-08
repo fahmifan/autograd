@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fahmifan/autograd/pkg/core/grading/podman"
 	"github.com/google/uuid"
 )
 
@@ -21,6 +22,8 @@ type Compiler interface {
 }
 
 type SourceCodePath string
+type SourceCodeDir string
+type RelativeFilename string
 
 type GradeRequest struct {
 	Compiler       Compiler
@@ -46,6 +49,48 @@ func Grade(arg GradeRequest) (GradeResult, error) {
 	}
 
 	outputs := strings.Split(stdout.String(), "\n")
+	expectedbuf, err := io.ReadAll(arg.Expecteds)
+	if err != nil {
+		return GradeResult{}, fmt.Errorf("Grade: read expecteds: %w", err)
+	}
+
+	expecteds := strings.Split(string(expectedbuf), "\n")
+	if len(outputs) != len(expecteds) {
+		return GradeResult{}, fmt.Errorf("Grade: expecteds and outputs length mismatch")
+	}
+
+	for i, output := range outputs {
+		result.Outputs = append(result.Outputs, output)
+		result.Corrects = append(result.Corrects, output == expecteds[i])
+	}
+
+	return result, nil
+}
+
+type GradeRequestV2 struct {
+	Compiler         Compiler
+	RelativeFilename RelativeFilename
+	SourceCodeDir    SourceCodeDir
+	Expecteds        io.Reader
+	Inputs           io.Reader
+	Submission       Submission
+}
+
+func GradeV2(arg GradeRequestV2) (GradeResult, error) {
+	compiler := podman.CPP{
+		MountDir:        string(arg.SourceCodeDir),
+		ProgramFileName: string(arg.RelativeFilename),
+		Input:           arg.Inputs,
+	}
+
+	result := GradeResult{}
+
+	res, err := compiler.Run()
+	if err != nil {
+		return GradeResult{}, fmt.Errorf("Grade: run: %w", err)
+	}
+
+	outputs := strings.Split(string(res.Output()), "\n")
 	expectedbuf, err := io.ReadAll(arg.Expecteds)
 	if err != nil {
 		return GradeResult{}, fmt.Errorf("Grade: read expecteds: %w", err)
@@ -113,6 +158,7 @@ type Assignment struct {
 
 type SubmissionFile struct {
 	FileName string
+	FilePath string
 	File     io.ReadCloser
 }
 

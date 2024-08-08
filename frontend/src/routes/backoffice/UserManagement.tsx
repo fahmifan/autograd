@@ -18,7 +18,7 @@ import {
 	useSubmit,
 } from "react-router-dom";
 import { FindAllManagedUsersResponse } from "../../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../../service";
+import { AutogradCmdClient } from "../../service";
 
 export function ListManagedUsers() {
 	const { managedUsers, paginationMetadata } =
@@ -134,7 +134,7 @@ export async function loaderUserManagement({
 	const page = parseIntWithDefault(url.searchParams.get("page"), 1);
 	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10);
 
-	const res = await AutogradServiceClient.findAllManagedUsers({
+	const res = await AutogradCmdClient.findAllManagedUsers({
 		paginationRequest: {
 			limit,
 			page,
@@ -164,7 +164,7 @@ export async function actionCreateManagedUser({
 	const email = formData.get("email") as string;
 	const role = formData.get("role") as string;
 
-	const res = await AutogradServiceClient.createManagedUser({
+	const res = await AutogradCmdClient.createManagedUser({
 		email,
 		name,
 		role,

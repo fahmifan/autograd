@@ -35,7 +35,7 @@ import {
 	FindAllStudentAssignmentsResponse,
 	StudentAssignment,
 } from "../../pb/autograd/v1/autograd_pb";
-import { AutogradServiceClient } from "../../service";
+import { AutogradCmdClient } from "../../service";
 import { parseIntWithDefault } from "../../types/parser";
 
 export function ListStudentAssignments() {
@@ -306,7 +306,7 @@ export async function loaderDetailStudentAssignment({
 	const url = new URL(request.url);
 	const id = url.searchParams.get("id");
 
-	const res = await AutogradServiceClient.findStudentAssignment({
+	const res = await AutogradCmdClient.findStudentAssignment({
 		id: id as string,
 	});
 
@@ -320,7 +320,7 @@ export async function loaderListStudentAssignments({
 	const page = parseIntWithDefault(url.searchParams.get("page"), 1);
 	const limit = parseIntWithDefault(url.searchParams.get("limit"), 10);
 
-	const res = await AutogradServiceClient.findAllStudentAssignments({
+	const res = await AutogradCmdClient.findAllStudentAssignments({
 		paginationRequest: {
 			limit,
 			page,
@@ -341,7 +341,7 @@ export async function actionDetailAssignment({
 			const assignmentId = form.get("assignment_id") as string;
 			const submissionCode = form.get("submission_code") as string;
 
-			await AutogradServiceClient.submitStudentSubmission({
+			await AutogradCmdClient.submitStudentSubmission({
 				assignmentId,
 				submissionCode,
 			});
@@ -362,7 +362,7 @@ export async function actionDetailAssignment({
 			const submissionId = form.get("submission_id") as string;
 			const submissionCode = form.get("submission_code") as string;
 
-			await AutogradServiceClient.resubmitStudentSubmission({
+			await AutogradCmdClient.resubmitStudentSubmission({
 				submissionId,
 				submissionCode,
 			});

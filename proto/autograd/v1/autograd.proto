@@ -253,10 +253,10 @@ service AutogradService {
 
     // Assignment Submission
     // Assignment Queries
-    rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
-    rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
-    rpc FindSubmission(FindByIDRequest) returns (Submission) {}
-    rpc FindAllSubmissionForAssignment(FindAllSubmissionsForAssignmentRequest) returns (FindAllSubmissionsForAssignmentResponse) {}
+    // rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
+    // rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
+    // rpc FindSubmission(FindByIDRequest) returns (Submission) {}
+    // rpc FindAllSubmissionForAssignment(FindAllSubmissionsForAssignmentRequest) returns (FindAllSubmissionsForAssignmentResponse) {}
     // Assignment Command
     rpc CreateAssignment(CreateAssignmentRequest) returns (CreatedResponse) {}
     rpc UpdateAssignment(UpdateAssignmentRequest) returns (Empty) {}
@@ -276,4 +276,11 @@ service AutogradService {
     // Auth
     // Auth Mutation
     rpc Login(LoginRequest) returns (LoginResponse) {}
+}
+
+service AutogradQuery {
+    rpc FindAssignment(FindByIDRequest) returns (Assignment) {}
+    rpc FindAllAssignments(FindAllAssignmentsRequest) returns (FindAllAssignmentsResponse) {}
+    rpc FindSubmission(FindByIDRequest) returns (Submission) {}
+    rpc FindAllSubmissionForAssignment(FindAllSubmissionsForAssignmentRequest) returns (FindAllSubmissionsForAssignmentResponse) {}
 }

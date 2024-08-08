@@ -71,6 +71,7 @@ func (SubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, objStorer cor
 		UpdatedAt: submModel.UpdatedAt.Time,
 		SubmissionFile: SubmissionFile{
 			FileName: submFile.Name,
+			FilePath: submFile.Path,
 		},
 		Student: Student{
 			ID:     studentModel.ID,
@@ -91,19 +92,19 @@ func (SubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, objStorer cor
 	{
 		var err error
 
-		submissionFile, err := objStorer.Seek(ctx, path.Join(rootDir, submFile.Name))
+		submissionFile, err := objStorer.Seek(ctx, path.Join(rootDir, submFile.Path))
 		defer closeWhenErr(err, submissionFile)
 		if err != nil {
 			return Submission{}, fmt.Errorf("seek submission file: %w", err)
 		}
 
-		caseInputFile, err := objStorer.Seek(ctx, path.Join(rootDir, caseInputModel.Name))
+		caseInputFile, err := objStorer.Seek(ctx, path.Join(rootDir, caseInputModel.Path))
 		defer closeWhenErr(err, caseInputFile)
 		if err != nil {
 			return Submission{}, fmt.Errorf("seek case input: %w", err)
 		}
 
-		caseOutputFile, err := objStorer.Seek(ctx, path.Join(rootDir, caseOutputModel.Name))
+		caseOutputFile, err := objStorer.Seek(ctx, path.Join(rootDir, caseOutputModel.Path))
 		defer closeWhenErr(err, caseOutputFile)
 		if err != nil {
 			return Submission{}, fmt.Errorf("seek case output: %w", err)

@@ -220,7 +220,7 @@ func (StudentSubmissionReader) FindByID(ctx context.Context, tx *gorm.DB, id uui
 	}
 
 	assignmentModel := dbmodel.Assignment{}
-	err = tx.Model(dbmodel.User{}).Where("id = ?", submissionModel.AssignmentID).Take(&assignmentModel).Error
+	err = tx.Where("id = ?", submissionModel.AssignmentID).Take(&assignmentModel).Error
 	if err != nil {
 		return StudentSubmission{}, fmt.Errorf("find assignment: %w", err)
 	}

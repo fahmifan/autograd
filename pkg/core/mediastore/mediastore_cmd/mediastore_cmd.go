@@ -53,8 +53,10 @@ func (m *MediaStoreCmd) InternalSaveMultipart(ctx context.Context, req InternalS
 	defer src.Close()
 
 	ext := filepath.Ext(fileInfo.Filename)
-	fileName := generateUniqueString() + ext
-	dst := path.Join(m.RootDir, fileName)
+	name := generateUniqueString()
+	fileName := name + ext
+	filePath := path.Join(name, fileName)
+	dst := path.Join(m.RootDir, name, fileName)
 
 	err = m.ObjectStorer.Store(ctx, dst, src)
 	if err != nil {
@@ -62,12 +64,13 @@ func (m *MediaStoreCmd) InternalSaveMultipart(ctx context.Context, req InternalS
 		return InternalSaveMultipartResponse{}, err
 	}
 
-	publicURL := fmt.Sprintf("%s/%s", m.MediaServeBaseURL, fileName)
+	publicURL := fmt.Sprintf("%s/%s", m.MediaServeBaseURL, filePath)
 
 	mediaFile, err := mediastore.CreateMediaFile(mediastore.CreateMediaRequest{
 		NewID:     uuid.New(),
 		Now:       time.Now(),
 		FileName:  fileName,
+		FilePath:  filePath,
 		FileType:  req.MediaType,
 		Ext:       mediastore.Extension(ext),
 		PublicURL: publicURL,
@@ -105,8 +108,10 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 	}
 
 	ext := req.Ext
-	fileName := generateUniqueString() + string(ext)
-	dst := path.Join(m.RootDir, fileName)
+	name := generateUniqueString()
+	fileName := name + string(ext)
+	filePath := path.Join(name, fileName)
+	dst := path.Join(m.RootDir, name, fileName)
 
 	err := m.ObjectStorer.Store(ctx, dst, req.Body)
 	if err != nil {
@@ -114,7 +119,7 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 		return InternalSaveMultipartResponse{}, err
 	}
 
-	publicURL := fmt.Sprintf("%s/%s", m.MediaServeBaseURL, fileName)
+	publicURL := fmt.Sprintf("%s/%s", m.MediaServeBaseURL, filePath)
 
 	now := time.Now()
 
@@ -122,6 +127,7 @@ func (m *MediaStoreCmd) InternalSave(ctx context.Context, tx *gorm.DB, req Inter
 		NewID:     uuid.New(),
 		Now:       now,
 		FileName:  fileName,
+		FilePath:  filePath,
 		FileType:  req.MediaType,
 		Ext:       mediastore.Extension(ext),
 		PublicURL: publicURL,

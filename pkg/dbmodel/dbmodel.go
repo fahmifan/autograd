@@ -86,6 +86,7 @@ const (
 type File struct {
 	Base
 	Name string
+	Path string
 	Type FileType
 	Ext  FileExt
 	URL  string

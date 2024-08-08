@@ -9,7 +9,7 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { ActionFunctionArgs, Form, Navigate, redirect } from "react-router-dom";
-import { AutogradServiceClient, getDecodedJWTToken, saveJWTToken } from "../../service";
+import { AutogradCmdClient, getDecodedJWTToken, saveJWTToken } from "../../service";
 
 export function LoginPage() {
 	const decoded = getDecodedJWTToken();
@@ -66,7 +66,7 @@ export async function loginAction({
 	const email = formData.get("email") as string;
 	const password = formData.get("password") as string;
 
-	const res = await AutogradServiceClient.login({
+	const res = await AutogradCmdClient.login({
 		email,
 		password,
 	});

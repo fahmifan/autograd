@@ -85,35 +85,38 @@ func (cmd *GradingCmd) InternalGradeSubmissionTx(
 		submission.Assignment.CaseOutputFile.File.Close()
 	}()
 
-	dir := path.Join(os.TempDir(), cmd.RootDir)
-	err = os.MkdirAll(dir, os.ModePerm)
-	if err != nil {
-		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: create temp dir: %w", err)
-	}
+	// dir := path.Join(os.TempDir(), cmd.RootDir)
+	// err = os.MkdirAll(dir, os.ModePerm)
+	// if err != nil {
+	// 	return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: create temp dir: %w", err)
+	// }
 
-	submissionFilePath := path.Join(dir, submission.SubmissionFile.FileName)
+	submissionFilePath := submission.SubmissionFile.FilePath
 	// store submission file to local disk.
 	// use local scope to defer close the file
-	{
-		file, err := os.Create(submissionFilePath)
-		if err != nil {
-			return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: create temp submission file: %w", err)
-		}
-		defer file.Close()
+	// {
+	// 	file, err := os.Create(submissionFilePath)
+	// 	if err != nil {
+	// 		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: create temp submission file: %w", err)
+	// 	}
+	// 	defer file.Close()
 
-		_, err = io.Copy(file, submission.SubmissionFile.File)
-		if err != nil {
-			return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: copy submission file: %w", err)
-		}
-	}
+	// 	_, err = io.Copy(file, submission.SubmissionFile.File)
+	// 	if err != nil {
+	// 		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: copy submission file: %w", err)
+	// 	}
+	// }
+
+	fileDir, _ := path.Split(path.Join(cmd.RootDir, submissionFilePath))
 
 	compiler := &cpp.CPPCompiler{}
 
-	gradeRes, err := grading.Grade(grading.GradeRequest{
-		Compiler:       compiler,
-		SourceCodePath: grading.SourceCodePath(submissionFilePath),
-		Inputs:         submission.Assignment.CaseInputFile.File,
-		Expecteds:      submission.Assignment.CaseOutputFile.File,
+	gradeRes, err := grading.GradeV2(grading.GradeRequestV2{
+		Compiler:         compiler,
+		RelativeFilename: grading.RelativeFilename(submission.SubmissionFile.FileName),
+		SourceCodeDir:    grading.SourceCodeDir(fileDir),
+		Inputs:           submission.Assignment.CaseInputFile.File,
+		Expecteds:        submission.Assignment.CaseOutputFile.File,
 	})
 	if err != nil {
 		return InternalGradeSubmissionResult{}, fmt.Errorf("InternalGradeSubmissionTx: grade: %w", err)

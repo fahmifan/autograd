@@ -14,6 +14,7 @@ import (
 	"github.com/fahmifan/autograd/pkg/config"
 	"github.com/fahmifan/autograd/pkg/core"
 	"github.com/fahmifan/autograd/pkg/core/auth/auth_cmd"
+	"github.com/fahmifan/autograd/pkg/core/core_service"
 	"github.com/fahmifan/autograd/pkg/core/user_management/user_management_cmd"
 	"github.com/fahmifan/autograd/pkg/dbconn"
 	"github.com/fahmifan/autograd/pkg/fs"
@@ -22,7 +23,6 @@ import (
 	"github.com/fahmifan/autograd/pkg/mailer/smtp"
 	autogradv1 "github.com/fahmifan/autograd/pkg/pb/autograd/v1"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
-	"github.com/fahmifan/autograd/pkg/service"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +42,7 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func mustInitService() *service.Service {
+func mustInitService() *core_service.Service {
 	gormDB := dbconn.MustPostgres()
 	mediaCfg := core.MediaConfig{
 		RootDir:      config.FileUploadPath(),
@@ -62,7 +62,7 @@ func mustInitService() *service.Service {
 
 	debug := config.Debug()
 
-	svc := service.NewService(
+	svc := core_service.NewService(
 		gormDB,
 		sqlDB,
 		config.JWTKey(),

@@ -201,3 +201,48 @@ export const AutogradService = {
   }
 } as const;
 
+/**
+ * @generated from service autograd.v1.AutogradQuery
+ */
+export const AutogradQuery = {
+  typeName: "autograd.v1.AutogradQuery",
+  methods: {
+    /**
+     * @generated from rpc autograd.v1.AutogradQuery.FindAssignment
+     */
+    findAssignment: {
+      name: "FindAssignment",
+      I: FindByIDRequest,
+      O: Assignment,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradQuery.FindAllAssignments
+     */
+    findAllAssignments: {
+      name: "FindAllAssignments",
+      I: FindAllAssignmentsRequest,
+      O: FindAllAssignmentsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradQuery.FindSubmission
+     */
+    findSubmission: {
+      name: "FindSubmission",
+      I: FindByIDRequest,
+      O: Submission,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc autograd.v1.AutogradQuery.FindAllSubmissionForAssignment
+     */
+    findAllSubmissionForAssignment: {
+      name: "FindAllSubmissionForAssignment",
+      I: FindAllSubmissionsForAssignmentRequest,
+      O: FindAllSubmissionsForAssignmentResponse,
+      kind: MethodKind.Unary,
+    },
+  }
+} as const;
+

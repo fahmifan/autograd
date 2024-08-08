@@ -50,19 +50,17 @@ func (c *CPPCompiler) run(srcCodePath grading.SourceCodePath, input io.Reader, o
 
 	cmd := exec.Command(binPath)
 
-	if runtime.GOOS == "darwin" {
+	switch runtime.GOOS {
+	case "darwin":
 		sandboxRulePath := grading.RuleFilePath()
 		cmd = exec.Command("/usr/bin/sandbox-exec", "-f", sandboxRulePath, binPath)
+	case "linux":
+		//
 	}
 
 	buffErr := bytes.NewBuffer(nil)
 
-	buff, err := io.ReadAll(input)
-	if err != nil {
-		return fmt.Errorf("CPPCompiler: readall: %w", err)
-	}
-
-	cmd.Stdin = bytes.NewReader(buff)
+	cmd.Stdin = input
 	cmd.Stdout = output
 	cmd.Stderr = buffErr
 

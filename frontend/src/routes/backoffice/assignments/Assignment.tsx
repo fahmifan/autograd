@@ -1,7 +1,6 @@
 import {
 	ActionIcon,
 	Anchor,
-	Box,
 	Breadcrumbs,
 	Button,
 	Card,
@@ -32,7 +31,7 @@ import "@mdxeditor/editor/style.css";
 import { Editor } from "@monaco-editor/react";
 import { IconExternalLink, IconNote, IconTrash, IconUpload } from "@tabler/icons-react";
 import { forwardRef, useRef, useState } from "react";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import {
 	ActionFunctionArgs,
 	Form,
@@ -45,11 +44,22 @@ import {
 import {
 	Assignment,
 	FindAllAssignmentsResponse,
+	PaginationRequest,
 } from "../../../pb/autograd/v1/autograd_pb";
-import { AutogradRPCClient, AutogradServiceClient } from "../../../service";
+import { AutogradRPCCmdClient, AutogradCmdClient, AutogradQueryClient } from "../../../service";
 
 export function ListAssignments() {
-	const res = useLoaderData() as FindAllAssignmentsResponse;
+	const { data: res } = useQuery({
+		queryKey: ["list_assignments"],
+		queryFn: () => {
+			return AutogradQueryClient.findAllAssignments({
+				paginationRequest: new PaginationRequest({
+					limit: 10,
+					page: 1,
+				})
+			});
+		}
+	});
 	const submit = useSubmit();
 
 	if (!res || res.assignments.length === 0) {
@@ -144,7 +154,7 @@ export function CreateAssignment() {
 	const mutateUploadStdin = useMutation({
 		mutationKey: "uploadStdin",
 		mutationFn: async (file: File) => {
-			const res = await AutogradRPCClient.saveMedia({
+			const res = await AutogradRPCCmdClient.saveMedia({
 				file,
 				mediaType: "assignment_case_input",
 			});
@@ -160,7 +170,7 @@ export function CreateAssignment() {
 	const mutateUploadStdout = useMutation({
 		mutationKey: "uploadStdout",
 		mutationFn: async (file: File) => {
-			const res = await AutogradRPCClient.saveMedia({
+			const res = await AutogradRPCCmdClient.saveMedia({
 				file,
 				mediaType: "assignment_case_output",
 			});
@@ -307,7 +317,7 @@ export function DetailAssignment() {
 	const mutateUploadStdin = useMutation({
 		mutationKey: "uploadStdin",
 		mutationFn: async (file: File) => {
-			const res = await AutogradRPCClient.saveMedia({
+			const res = await AutogradRPCCmdClient.saveMedia({
 				file,
 				mediaType: "assignment_case_input",
 			});
@@ -323,7 +333,7 @@ export function DetailAssignment() {
 	const mutateUploadStdout = useMutation({
 		mutationKey: "uploadStdout",
 		mutationFn: async (file: File) => {
-			const res = await AutogradRPCClient.saveMedia({
+			const res = await AutogradRPCCmdClient.saveMedia({
 				file,
 				mediaType: "assignment_case_output",
 			});
@@ -546,7 +556,7 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
 );
 
 export async function loaderListAssignments(): Promise<FindAllAssignmentsResponse> {
-	return await AutogradServiceClient.findAllAssignments({
+	return await AutogradCmdClient.findAllAssignments({
 		paginationRequest: {
 			limit: 10,
 			page: 1,
@@ -558,7 +568,7 @@ export async function actionListAssignments(arg: ActionFunctionArgs,): Promise<R
 	const formData = await arg.request.formData();
 	const id = formData.get("id") as string;
 
-	const res = await AutogradServiceClient.deleteAssignment({
+	const res = await AutogradCmdClient.deleteAssignment({
 		id,
 	})
 
@@ -580,7 +590,7 @@ export async function actionCreateAssignemnt(
 	const deadlineAt = formData.get("deadline_at") as string;
 	const template = formData.get("template") as string;
 
-	const res = await AutogradServiceClient.createAssignment({
+	const res = await AutogradCmdClient.createAssignment({
 		name,
 		description,
 		caseInputFileId,
@@ -609,7 +619,7 @@ export async function actionDetailAssignment(arg: ActionFunctionArgs): Promise<R
 
 async function doDeleteAssignment(form: FormData): Promise<Response | null> {
 	const id = form.get("id") as string;
-	await AutogradServiceClient.deleteAssignment({
+	await AutogradCmdClient.deleteAssignment({
 		id,
 	});
 	return redirect("/backoffice/assignments");
@@ -624,7 +634,7 @@ async function doUpdateAssignment(form: FormData): Promise<Response | null> {
 	const deadlineAt = form.get("deadline_at") as string;
 	const template = form.get("template") as string;
 
-	const res = await AutogradServiceClient.updateAssignment({
+	const res = await AutogradCmdClient.updateAssignment({
 		id,
 		name,
 		description,
@@ -648,7 +658,7 @@ export async function loadEditAssignment({
 	const url = new URL(request.url);
 	const id = url.searchParams.get("id") as string;
 
-	const res = await AutogradServiceClient.findAssignment({
+	const res = await AutogradCmdClient.findAssignment({
 		id,
 	});
 
