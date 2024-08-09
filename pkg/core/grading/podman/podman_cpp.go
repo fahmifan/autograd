@@ -1,9 +1,9 @@
 package podman
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"os/exec"
 
 	"github.com/fahmifan/autograd/pkg/core/grading"
@@ -23,18 +23,13 @@ func (cr *CPP) Run(arg grading.RunnerArg) (grading.RunResult, error) {
 		"sh", "-c", fmt.Sprintf(`g++ -o /src/app /src/%s && timeout %s /src/app`, arg.ProgramFileName, arg.RunTimeout),
 	}
 
-	buffErr := bytes.NewBuffer(nil)
-
+	stderr := bytes.NewBuffer(nil)
 	stdout := bytes.NewBuffer(nil)
-	cmd := exec.Command("podman", args...)
 
-	buff, err := io.ReadAll(arg.Input)
-	if err != nil {
-		return grading.RunResult{}, fmt.Errorf("read input: %w", err)
-	}
-	cmd.Stdin = bytes.NewBuffer(buff)
+	cmd := exec.Command("podman", args...)
+	cmd.Stdin = bufio.NewReader(arg.Input)
 	cmd.Stdout = stdout
-	cmd.Stderr = buffErr
+	cmd.Stderr = stderr
 
 	if err := cmd.Run(); err != nil {
 		return grading.RunResult{}, fmt.Errorf("run cpp: %w", err)
