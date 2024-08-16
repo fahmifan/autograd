@@ -16,6 +16,7 @@ type Extension string
 type MediaFile struct {
 	ID       uuid.UUID
 	FileName string
+	FilePath string
 	FileType MediaFileType
 	Ext      Extension
 	URL      string
@@ -44,6 +45,7 @@ type CreateMediaRequest struct {
 	NewID     uuid.UUID
 	Now       time.Time
 	FileName  string
+	FilePath  string
 	FileType  MediaFileType
 	Ext       Extension
 	PublicURL string
@@ -61,6 +63,7 @@ func CreateMediaFile(req CreateMediaRequest) (MediaFile, error) {
 	return MediaFile{
 		ID:                req.NewID,
 		FileName:          req.FileName,
+		FilePath:          req.FilePath,
 		Ext:               req.Ext,
 		FileType:          req.FileType,
 		URL:               req.PublicURL,

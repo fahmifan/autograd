@@ -18,11 +18,13 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AutogradServiceName is the fully-qualified name of the AutogradService service.
 	AutogradServiceName = "autograd.v1.AutogradService"
+	// AutogradQueryName is the fully-qualified name of the AutogradQuery service.
+	AutogradQueryName = "autograd.v1.AutogradQuery"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -88,6 +90,47 @@ const (
 	AutogradServiceResubmitStudentSubmissionProcedure = "/autograd.v1.AutogradService/ResubmitStudentSubmission"
 	// AutogradServiceLoginProcedure is the fully-qualified name of the AutogradService's Login RPC.
 	AutogradServiceLoginProcedure = "/autograd.v1.AutogradService/Login"
+	// AutogradQueryFindAssignmentProcedure is the fully-qualified name of the AutogradQuery's
+	// FindAssignment RPC.
+	AutogradQueryFindAssignmentProcedure = "/autograd.v1.AutogradQuery/FindAssignment"
+	// AutogradQueryFindAllAssignmentsProcedure is the fully-qualified name of the AutogradQuery's
+	// FindAllAssignments RPC.
+	AutogradQueryFindAllAssignmentsProcedure = "/autograd.v1.AutogradQuery/FindAllAssignments"
+	// AutogradQueryFindSubmissionProcedure is the fully-qualified name of the AutogradQuery's
+	// FindSubmission RPC.
+	AutogradQueryFindSubmissionProcedure = "/autograd.v1.AutogradQuery/FindSubmission"
+	// AutogradQueryFindAllSubmissionForAssignmentProcedure is the fully-qualified name of the
+	// AutogradQuery's FindAllSubmissionForAssignment RPC.
+	AutogradQueryFindAllSubmissionForAssignmentProcedure = "/autograd.v1.AutogradQuery/FindAllSubmissionForAssignment"
+)
+
+// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
+var (
+	autogradServiceServiceDescriptor                              = v1.File_autograd_v1_autograd_proto.Services().ByName("AutogradService")
+	autogradServicePingMethodDescriptor                           = autogradServiceServiceDescriptor.Methods().ByName("Ping")
+	autogradServiceCreateManagedUserMethodDescriptor              = autogradServiceServiceDescriptor.Methods().ByName("CreateManagedUser")
+	autogradServiceActivateManagedUserMethodDescriptor            = autogradServiceServiceDescriptor.Methods().ByName("ActivateManagedUser")
+	autogradServiceFindAllManagedUsersMethodDescriptor            = autogradServiceServiceDescriptor.Methods().ByName("FindAllManagedUsers")
+	autogradServiceFindAssignmentMethodDescriptor                 = autogradServiceServiceDescriptor.Methods().ByName("FindAssignment")
+	autogradServiceFindAllAssignmentsMethodDescriptor             = autogradServiceServiceDescriptor.Methods().ByName("FindAllAssignments")
+	autogradServiceFindSubmissionMethodDescriptor                 = autogradServiceServiceDescriptor.Methods().ByName("FindSubmission")
+	autogradServiceFindAllSubmissionForAssignmentMethodDescriptor = autogradServiceServiceDescriptor.Methods().ByName("FindAllSubmissionForAssignment")
+	autogradServiceCreateAssignmentMethodDescriptor               = autogradServiceServiceDescriptor.Methods().ByName("CreateAssignment")
+	autogradServiceUpdateAssignmentMethodDescriptor               = autogradServiceServiceDescriptor.Methods().ByName("UpdateAssignment")
+	autogradServiceDeleteAssignmentMethodDescriptor               = autogradServiceServiceDescriptor.Methods().ByName("DeleteAssignment")
+	autogradServiceCreateSubmissionMethodDescriptor               = autogradServiceServiceDescriptor.Methods().ByName("CreateSubmission")
+	autogradServiceUpdateSubmissionMethodDescriptor               = autogradServiceServiceDescriptor.Methods().ByName("UpdateSubmission")
+	autogradServiceDeleteSubmissionMethodDescriptor               = autogradServiceServiceDescriptor.Methods().ByName("DeleteSubmission")
+	autogradServiceFindAllStudentAssignmentsMethodDescriptor      = autogradServiceServiceDescriptor.Methods().ByName("FindAllStudentAssignments")
+	autogradServiceFindStudentAssignmentMethodDescriptor          = autogradServiceServiceDescriptor.Methods().ByName("FindStudentAssignment")
+	autogradServiceSubmitStudentSubmissionMethodDescriptor        = autogradServiceServiceDescriptor.Methods().ByName("SubmitStudentSubmission")
+	autogradServiceResubmitStudentSubmissionMethodDescriptor      = autogradServiceServiceDescriptor.Methods().ByName("ResubmitStudentSubmission")
+	autogradServiceLoginMethodDescriptor                          = autogradServiceServiceDescriptor.Methods().ByName("Login")
+	autogradQueryServiceDescriptor                                = v1.File_autograd_v1_autograd_proto.Services().ByName("AutogradQuery")
+	autogradQueryFindAssignmentMethodDescriptor                   = autogradQueryServiceDescriptor.Methods().ByName("FindAssignment")
+	autogradQueryFindAllAssignmentsMethodDescriptor               = autogradQueryServiceDescriptor.Methods().ByName("FindAllAssignments")
+	autogradQueryFindSubmissionMethodDescriptor                   = autogradQueryServiceDescriptor.Methods().ByName("FindSubmission")
+	autogradQueryFindAllSubmissionForAssignmentMethodDescriptor   = autogradQueryServiceDescriptor.Methods().ByName("FindAllSubmissionForAssignment")
 )
 
 // AutogradServiceClient is a client for the autograd.v1.AutogradService service.
@@ -135,97 +178,116 @@ func NewAutogradServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 		ping: connect.NewClient[v1.Empty, v1.PingResponse](
 			httpClient,
 			baseURL+AutogradServicePingProcedure,
-			opts...,
+			connect.WithSchema(autogradServicePingMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		createManagedUser: connect.NewClient[v1.CreateManagedUserRequest, v1.CreatedResponse](
 			httpClient,
 			baseURL+AutogradServiceCreateManagedUserProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceCreateManagedUserMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		activateManagedUser: connect.NewClient[v1.ActivateManagedUserRequest, v1.Empty](
 			httpClient,
 			baseURL+AutogradServiceActivateManagedUserProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceActivateManagedUserMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findAllManagedUsers: connect.NewClient[v1.FindAllManagedUsersRequest, v1.FindAllManagedUsersResponse](
 			httpClient,
 			baseURL+AutogradServiceFindAllManagedUsersProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindAllManagedUsersMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findAssignment: connect.NewClient[v1.FindByIDRequest, v1.Assignment](
 			httpClient,
 			baseURL+AutogradServiceFindAssignmentProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findAllAssignments: connect.NewClient[v1.FindAllAssignmentsRequest, v1.FindAllAssignmentsResponse](
 			httpClient,
 			baseURL+AutogradServiceFindAllAssignmentsProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindAllAssignmentsMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findSubmission: connect.NewClient[v1.FindByIDRequest, v1.Submission](
 			httpClient,
 			baseURL+AutogradServiceFindSubmissionProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findAllSubmissionForAssignment: connect.NewClient[v1.FindAllSubmissionsForAssignmentRequest, v1.FindAllSubmissionsForAssignmentResponse](
 			httpClient,
 			baseURL+AutogradServiceFindAllSubmissionForAssignmentProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindAllSubmissionForAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		createAssignment: connect.NewClient[v1.CreateAssignmentRequest, v1.CreatedResponse](
 			httpClient,
 			baseURL+AutogradServiceCreateAssignmentProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceCreateAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		updateAssignment: connect.NewClient[v1.UpdateAssignmentRequest, v1.Empty](
 			httpClient,
 			baseURL+AutogradServiceUpdateAssignmentProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceUpdateAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		deleteAssignment: connect.NewClient[v1.DeleteByIDRequest, v1.Empty](
 			httpClient,
 			baseURL+AutogradServiceDeleteAssignmentProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceDeleteAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		createSubmission: connect.NewClient[v1.CreateSubmissionRequest, v1.CreatedResponse](
 			httpClient,
 			baseURL+AutogradServiceCreateSubmissionProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceCreateSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		updateSubmission: connect.NewClient[v1.UpdateSubmissionRequest, v1.Empty](
 			httpClient,
 			baseURL+AutogradServiceUpdateSubmissionProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceUpdateSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		deleteSubmission: connect.NewClient[v1.DeleteByIDRequest, v1.Empty](
 			httpClient,
 			baseURL+AutogradServiceDeleteSubmissionProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceDeleteSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findAllStudentAssignments: connect.NewClient[v1.FindAllStudentAssignmentsRequest, v1.FindAllStudentAssignmentsResponse](
 			httpClient,
 			baseURL+AutogradServiceFindAllStudentAssignmentsProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindAllStudentAssignmentsMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		findStudentAssignment: connect.NewClient[v1.FindByIDRequest, v1.StudentAssignment](
 			httpClient,
 			baseURL+AutogradServiceFindStudentAssignmentProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceFindStudentAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		submitStudentSubmission: connect.NewClient[v1.SubmitStudentSubmissionRequest, v1.CreatedResponse](
 			httpClient,
 			baseURL+AutogradServiceSubmitStudentSubmissionProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceSubmitStudentSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		resubmitStudentSubmission: connect.NewClient[v1.ResubmitStudentSubmissionRequest, v1.Empty](
 			httpClient,
 			baseURL+AutogradServiceResubmitStudentSubmissionProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceResubmitStudentSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		login: connect.NewClient[v1.LoginRequest, v1.LoginResponse](
 			httpClient,
 			baseURL+AutogradServiceLoginProcedure,
-			opts...,
+			connect.WithSchema(autogradServiceLoginMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
@@ -389,97 +451,116 @@ func NewAutogradServiceHandler(svc AutogradServiceHandler, opts ...connect.Handl
 	autogradServicePingHandler := connect.NewUnaryHandler(
 		AutogradServicePingProcedure,
 		svc.Ping,
-		opts...,
+		connect.WithSchema(autogradServicePingMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceCreateManagedUserHandler := connect.NewUnaryHandler(
 		AutogradServiceCreateManagedUserProcedure,
 		svc.CreateManagedUser,
-		opts...,
+		connect.WithSchema(autogradServiceCreateManagedUserMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceActivateManagedUserHandler := connect.NewUnaryHandler(
 		AutogradServiceActivateManagedUserProcedure,
 		svc.ActivateManagedUser,
-		opts...,
+		connect.WithSchema(autogradServiceActivateManagedUserMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindAllManagedUsersHandler := connect.NewUnaryHandler(
 		AutogradServiceFindAllManagedUsersProcedure,
 		svc.FindAllManagedUsers,
-		opts...,
+		connect.WithSchema(autogradServiceFindAllManagedUsersMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindAssignmentHandler := connect.NewUnaryHandler(
 		AutogradServiceFindAssignmentProcedure,
 		svc.FindAssignment,
-		opts...,
+		connect.WithSchema(autogradServiceFindAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindAllAssignmentsHandler := connect.NewUnaryHandler(
 		AutogradServiceFindAllAssignmentsProcedure,
 		svc.FindAllAssignments,
-		opts...,
+		connect.WithSchema(autogradServiceFindAllAssignmentsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceFindSubmissionProcedure,
 		svc.FindSubmission,
-		opts...,
+		connect.WithSchema(autogradServiceFindSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindAllSubmissionForAssignmentHandler := connect.NewUnaryHandler(
 		AutogradServiceFindAllSubmissionForAssignmentProcedure,
 		svc.FindAllSubmissionForAssignment,
-		opts...,
+		connect.WithSchema(autogradServiceFindAllSubmissionForAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceCreateAssignmentHandler := connect.NewUnaryHandler(
 		AutogradServiceCreateAssignmentProcedure,
 		svc.CreateAssignment,
-		opts...,
+		connect.WithSchema(autogradServiceCreateAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceUpdateAssignmentHandler := connect.NewUnaryHandler(
 		AutogradServiceUpdateAssignmentProcedure,
 		svc.UpdateAssignment,
-		opts...,
+		connect.WithSchema(autogradServiceUpdateAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceDeleteAssignmentHandler := connect.NewUnaryHandler(
 		AutogradServiceDeleteAssignmentProcedure,
 		svc.DeleteAssignment,
-		opts...,
+		connect.WithSchema(autogradServiceDeleteAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceCreateSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceCreateSubmissionProcedure,
 		svc.CreateSubmission,
-		opts...,
+		connect.WithSchema(autogradServiceCreateSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceUpdateSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceUpdateSubmissionProcedure,
 		svc.UpdateSubmission,
-		opts...,
+		connect.WithSchema(autogradServiceUpdateSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceDeleteSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceDeleteSubmissionProcedure,
 		svc.DeleteSubmission,
-		opts...,
+		connect.WithSchema(autogradServiceDeleteSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindAllStudentAssignmentsHandler := connect.NewUnaryHandler(
 		AutogradServiceFindAllStudentAssignmentsProcedure,
 		svc.FindAllStudentAssignments,
-		opts...,
+		connect.WithSchema(autogradServiceFindAllStudentAssignmentsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceFindStudentAssignmentHandler := connect.NewUnaryHandler(
 		AutogradServiceFindStudentAssignmentProcedure,
 		svc.FindStudentAssignment,
-		opts...,
+		connect.WithSchema(autogradServiceFindStudentAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceSubmitStudentSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceSubmitStudentSubmissionProcedure,
 		svc.SubmitStudentSubmission,
-		opts...,
+		connect.WithSchema(autogradServiceSubmitStudentSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceResubmitStudentSubmissionHandler := connect.NewUnaryHandler(
 		AutogradServiceResubmitStudentSubmissionProcedure,
 		svc.ResubmitStudentSubmission,
-		opts...,
+		connect.WithSchema(autogradServiceResubmitStudentSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	autogradServiceLoginHandler := connect.NewUnaryHandler(
 		AutogradServiceLoginProcedure,
 		svc.Login,
-		opts...,
+		connect.WithSchema(autogradServiceLoginMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/autograd.v1.AutogradService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -604,4 +685,150 @@ func (UnimplementedAutogradServiceHandler) ResubmitStudentSubmission(context.Con
 
 func (UnimplementedAutogradServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradService.Login is not implemented"))
+}
+
+// AutogradQueryClient is a client for the autograd.v1.AutogradQuery service.
+type AutogradQueryClient interface {
+	FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error)
+	FindAllAssignments(context.Context, *connect.Request[v1.FindAllAssignmentsRequest]) (*connect.Response[v1.FindAllAssignmentsResponse], error)
+	FindSubmission(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error)
+	FindAllSubmissionForAssignment(context.Context, *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error)
+}
+
+// NewAutogradQueryClient constructs a client for the autograd.v1.AutogradQuery service. By default,
+// it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and
+// sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC()
+// or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewAutogradQueryClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AutogradQueryClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	return &autogradQueryClient{
+		findAssignment: connect.NewClient[v1.FindByIDRequest, v1.Assignment](
+			httpClient,
+			baseURL+AutogradQueryFindAssignmentProcedure,
+			connect.WithSchema(autogradQueryFindAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		findAllAssignments: connect.NewClient[v1.FindAllAssignmentsRequest, v1.FindAllAssignmentsResponse](
+			httpClient,
+			baseURL+AutogradQueryFindAllAssignmentsProcedure,
+			connect.WithSchema(autogradQueryFindAllAssignmentsMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		findSubmission: connect.NewClient[v1.FindByIDRequest, v1.Submission](
+			httpClient,
+			baseURL+AutogradQueryFindSubmissionProcedure,
+			connect.WithSchema(autogradQueryFindSubmissionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		findAllSubmissionForAssignment: connect.NewClient[v1.FindAllSubmissionsForAssignmentRequest, v1.FindAllSubmissionsForAssignmentResponse](
+			httpClient,
+			baseURL+AutogradQueryFindAllSubmissionForAssignmentProcedure,
+			connect.WithSchema(autogradQueryFindAllSubmissionForAssignmentMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// autogradQueryClient implements AutogradQueryClient.
+type autogradQueryClient struct {
+	findAssignment                 *connect.Client[v1.FindByIDRequest, v1.Assignment]
+	findAllAssignments             *connect.Client[v1.FindAllAssignmentsRequest, v1.FindAllAssignmentsResponse]
+	findSubmission                 *connect.Client[v1.FindByIDRequest, v1.Submission]
+	findAllSubmissionForAssignment *connect.Client[v1.FindAllSubmissionsForAssignmentRequest, v1.FindAllSubmissionsForAssignmentResponse]
+}
+
+// FindAssignment calls autograd.v1.AutogradQuery.FindAssignment.
+func (c *autogradQueryClient) FindAssignment(ctx context.Context, req *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error) {
+	return c.findAssignment.CallUnary(ctx, req)
+}
+
+// FindAllAssignments calls autograd.v1.AutogradQuery.FindAllAssignments.
+func (c *autogradQueryClient) FindAllAssignments(ctx context.Context, req *connect.Request[v1.FindAllAssignmentsRequest]) (*connect.Response[v1.FindAllAssignmentsResponse], error) {
+	return c.findAllAssignments.CallUnary(ctx, req)
+}
+
+// FindSubmission calls autograd.v1.AutogradQuery.FindSubmission.
+func (c *autogradQueryClient) FindSubmission(ctx context.Context, req *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error) {
+	return c.findSubmission.CallUnary(ctx, req)
+}
+
+// FindAllSubmissionForAssignment calls autograd.v1.AutogradQuery.FindAllSubmissionForAssignment.
+func (c *autogradQueryClient) FindAllSubmissionForAssignment(ctx context.Context, req *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error) {
+	return c.findAllSubmissionForAssignment.CallUnary(ctx, req)
+}
+
+// AutogradQueryHandler is an implementation of the autograd.v1.AutogradQuery service.
+type AutogradQueryHandler interface {
+	FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error)
+	FindAllAssignments(context.Context, *connect.Request[v1.FindAllAssignmentsRequest]) (*connect.Response[v1.FindAllAssignmentsResponse], error)
+	FindSubmission(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error)
+	FindAllSubmissionForAssignment(context.Context, *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error)
+}
+
+// NewAutogradQueryHandler builds an HTTP handler from the service implementation. It returns the
+// path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewAutogradQueryHandler(svc AutogradQueryHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	autogradQueryFindAssignmentHandler := connect.NewUnaryHandler(
+		AutogradQueryFindAssignmentProcedure,
+		svc.FindAssignment,
+		connect.WithSchema(autogradQueryFindAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	autogradQueryFindAllAssignmentsHandler := connect.NewUnaryHandler(
+		AutogradQueryFindAllAssignmentsProcedure,
+		svc.FindAllAssignments,
+		connect.WithSchema(autogradQueryFindAllAssignmentsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	autogradQueryFindSubmissionHandler := connect.NewUnaryHandler(
+		AutogradQueryFindSubmissionProcedure,
+		svc.FindSubmission,
+		connect.WithSchema(autogradQueryFindSubmissionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	autogradQueryFindAllSubmissionForAssignmentHandler := connect.NewUnaryHandler(
+		AutogradQueryFindAllSubmissionForAssignmentProcedure,
+		svc.FindAllSubmissionForAssignment,
+		connect.WithSchema(autogradQueryFindAllSubmissionForAssignmentMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/autograd.v1.AutogradQuery/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case AutogradQueryFindAssignmentProcedure:
+			autogradQueryFindAssignmentHandler.ServeHTTP(w, r)
+		case AutogradQueryFindAllAssignmentsProcedure:
+			autogradQueryFindAllAssignmentsHandler.ServeHTTP(w, r)
+		case AutogradQueryFindSubmissionProcedure:
+			autogradQueryFindSubmissionHandler.ServeHTTP(w, r)
+		case AutogradQueryFindAllSubmissionForAssignmentProcedure:
+			autogradQueryFindAllSubmissionForAssignmentHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedAutogradQueryHandler returns CodeUnimplemented from all methods.
+type UnimplementedAutogradQueryHandler struct{}
+
+func (UnimplementedAutogradQueryHandler) FindAssignment(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Assignment], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradQuery.FindAssignment is not implemented"))
+}
+
+func (UnimplementedAutogradQueryHandler) FindAllAssignments(context.Context, *connect.Request[v1.FindAllAssignmentsRequest]) (*connect.Response[v1.FindAllAssignmentsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradQuery.FindAllAssignments is not implemented"))
+}
+
+func (UnimplementedAutogradQueryHandler) FindSubmission(context.Context, *connect.Request[v1.FindByIDRequest]) (*connect.Response[v1.Submission], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradQuery.FindSubmission is not implemented"))
+}
+
+func (UnimplementedAutogradQueryHandler) FindAllSubmissionForAssignment(context.Context, *connect.Request[v1.FindAllSubmissionsForAssignmentRequest]) (*connect.Response[v1.FindAllSubmissionsForAssignmentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("autograd.v1.AutogradQuery.FindAllSubmissionForAssignment is not implemented"))
 }

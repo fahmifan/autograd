@@ -1,4 +1,4 @@
-package service
+package core_service
 
 import (
 	"context"
@@ -41,6 +41,7 @@ type Service struct {
 }
 
 var _ autogradv1connect.AutogradServiceHandler = &Service{}
+var _ autogradv1connect.AutogradQueryHandler = &Service{}
 
 func NewService(
 	gormDB *gorm.DB,

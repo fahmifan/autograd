@@ -16,6 +16,7 @@ func (MediaFileWriter) Create(ctx context.Context, tx *gorm.DB, mediaFile *Media
 			Metadata: mediaFile.ModelMetadata(),
 		},
 		Name: mediaFile.FileName,
+		Path: mediaFile.FilePath,
 		Type: dbmodel.FileType(mediaFile.FileType),
 		Ext:  dbmodel.FileExt(mediaFile.Ext),
 		URL:  mediaFile.URL,
@@ -35,7 +36,7 @@ func (MediaFileReader) FindByID(ctx context.Context, tx *gorm.DB, id string) (Me
 
 	return MediaFile{
 		ID:       model.ID,
-		FileName: model.Name,
+		FilePath: model.Path,
 		FileType: MediaFileType(model.Type),
 		Ext:      Extension(model.Ext),
 		URL:      model.URL,

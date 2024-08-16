@@ -3,7 +3,7 @@ import { Anchor, Button, Card, Container, Group, PasswordInput, Stack, } from "@
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { Form, redirect, useNavigate } from "react-router-dom";
-import { AutogradServiceClient } from "../../service";
+import { AutogradCmdClient } from "../../service";
 
 export function AccountActivation() {    
     // get url query params
@@ -20,7 +20,7 @@ export function AccountActivation() {
 
 
         try {
-            await AutogradServiceClient.activateManagedUser({
+            await AutogradCmdClient.activateManagedUser({
                 activationToken: activationToken ?? "",
                 userId: userID ?? "",
                 password,

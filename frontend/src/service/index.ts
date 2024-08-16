@@ -1,19 +1,13 @@
 import {
 	Interceptor,
-	PromiseClient,
 	createPromiseClient,
 } from "@bufbuild/connect";
 import { createConnectTransport } from "@bufbuild/connect-web";
-import { ServiceType } from "@bufbuild/protobuf";
-import { useMemo } from "react";
 
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import { AutogradService } from "../pb/autograd/v1/autograd_connect";
+import { AutogradQuery, AutogradService } from "../pb/autograd/v1/autograd_connect";
 import { AutogradRPC } from "./rcp_client";
 
-export function useAutogradClient(): PromiseClient<typeof AutogradService> {
-	return useClient(AutogradService);
-}
 
 let _jwtToken = ''
 export function getJWTToken(): string {
@@ -61,22 +55,27 @@ const csrfInterceptor: Interceptor = (next) => async (req) => {
 
 const host = "http://localhost:8080";
 
-const transport = createConnectTransport({
+const cmdTransport = createConnectTransport({
 	baseUrl: `${host}/grpc`,
 	interceptors: [csrfInterceptor],
 });
 
-function useClient<T extends ServiceType>(service: T): PromiseClient<T> {
-	// We memoize the client, so that we only create one instance per service.
-	return useMemo(() => createPromiseClient(service, transport), [service]);
-}
+const queryTransport = createConnectTransport({
+	baseUrl: `${host}/grpc-query`,
+	interceptors: [csrfInterceptor],
+});
 
-export const AutogradServiceClient = createPromiseClient(
+export const AutogradCmdClient = createPromiseClient(
 	AutogradService,
-	transport,
+	cmdTransport,
 );
 
-export const AutogradRPCClient = new AutogradRPC(
+export const AutogradRPCCmdClient = new AutogradRPC(
 	`${host}/api/v1/rpc`,
 	getJWTToken(),
 );
+
+export const AutogradQueryClient = createPromiseClient(
+	AutogradQuery,
+	queryTransport,
+)

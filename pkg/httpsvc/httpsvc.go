@@ -5,9 +5,10 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/fahmifan/autograd/pkg/core/core_service"
+	service "github.com/fahmifan/autograd/pkg/core/core_service"
 	"github.com/fahmifan/autograd/pkg/logs"
 	"github.com/fahmifan/autograd/pkg/pb/autograd/v1/autogradv1connect"
-	"github.com/fahmifan/autograd/pkg/service"
 	"github.com/labstack/echo-contrib/pprof"
 
 	"github.com/labstack/echo/v4"
@@ -17,15 +18,13 @@ import (
 	_ "net/http/pprof"
 )
 
-// Server ..
 type Server struct {
 	echo    *echo.Echo
 	port    string
-	service *service.Service
+	service *core_service.Service
 	jwtKey  string
 }
 
-// NewServer ..
 func NewServer(port string, opts ...Option) *Server {
 	s := &Server{
 		echo: echo.New(),
@@ -39,7 +38,21 @@ func NewServer(port string, opts ...Option) *Server {
 	return s
 }
 
-// Run server
+type Option func(*Server)
+
+func WithService(s *service.Service) Option {
+	return func(srv *Server) {
+		srv.service = s
+	}
+}
+
+func WithJWTKey(key string) Option {
+	return func(s *Server) {
+		s.jwtKey = key
+	}
+}
+
+// Run runs server
 func (s *Server) Run() {
 	s.routes()
 	s.service.InternalCreateMacSandBoxRules()
@@ -78,13 +91,22 @@ func (s *Server) routes() {
 
 	pprof.Register(s.echo, "/debug/pprof")
 
-	grpHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
+	grpcHandlerName, grpcHandler := autogradv1connect.NewAutogradServiceHandler(
 		s.service,
 	)
-	s.echo.Group("/grpc").Any(
-		grpHandlerName+"*",
-		echo.WrapHandler(grpcHandler),
-		trimPathGroup("/grpc"),
+	registerGrpcHandler(s.echo, "/grpc", grpcHandlerName, grpcHandler)
+
+	queryHandlerName, queryHandler := autogradv1connect.NewAutogradQueryHandler(
+		s.service,
+	)
+	registerGrpcHandler(s.echo, "/grpc-query", queryHandlerName, queryHandler)
+}
+
+func registerGrpcHandler(ec *echo.Echo, groupPath string, name string, handler http.Handler) {
+	ec.Group(groupPath).Any(
+		name+"*",
+		echo.WrapHandler(handler),
+		trimPathGroup(groupPath),
 	)
 }
 

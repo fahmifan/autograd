@@ -13,7 +13,7 @@ import (
 
 func MustPostgres() *gorm.DB {
 	// create gorm postgres connection
-	dsn := "host=localhost user=postgres dbname=autograd port=5432 sslmode=disable"
+	dsn := "host=localhost user=root dbname=autograd port=5432 sslmode=disable password=root"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)

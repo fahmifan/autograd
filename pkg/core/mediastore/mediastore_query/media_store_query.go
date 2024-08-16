@@ -28,7 +28,7 @@ func (query *MediaStoreQuery) InternalFindMediaFile(ctx context.Context, req Int
 		return InternalFindMediaFileResponse{}, err
 	}
 
-	srcPath := path.Join(query.RootDir, mediaFile.FileName)
+	srcPath := path.Join(query.RootDir, mediaFile.FilePath)
 	readCloser, err := query.ObjectStorer.Seek(ctx, srcPath)
 	if err != nil {
 		return InternalFindMediaFileResponse{}, err

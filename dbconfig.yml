@@ -5,5 +5,5 @@
 
 development:
   dialect: postgres
-  datasource: host=localhost user=postgres dbname=autograd port=5432 sslmode=disable
+  datasource: host=localhost user=root dbname=autograd port=5432 sslmode=disable password=root
   dir: db/migrations

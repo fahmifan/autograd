@@ -83,3 +83,7 @@ The `testdata` folder contains the test data for assignemnt & submission
   ```bash
   go run cmd/autograd/main.go admin create --email john@doe.com --name "john doe" --password "supersecret"
   ```
+
+### Configure isolate
+create configuration
+- run `sudo cp ./pkg/bin/isolate/default.conf /usr/local/etc/isolate`
